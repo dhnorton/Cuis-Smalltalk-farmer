@@ -138,13 +138,13 @@ cotaColor
 !AxesMorph methodsFor: 'drawing' stamp: 'jcg 8/30/2003 13:06'!
 drawGridOn: aCanvas 
 	| gridColor right bottom width height lighter darker baseColor |
-	baseColor := self baseColor.
+"	baseColor := self baseColor.
 	lighter := baseColor twiceLighter.
 	darker := baseColor twiceDarker.
 	gridColor := (lighter diff: baseColor) 
-				> (darker diff: baseColor) ifTrue: [lighter] ifFalse: [darker].
+				> (darker diff: baseColor) ifTrue: [lighter] ifFalse: [darker]."
 	""
-	right := self bounds width - margin.
+"	right := self bounds width - margin.
 	width := self bounds width - (margin * 2).
 	bottom := self bounds height - margin.
 	height := self bounds height - (margin * 2).
@@ -161,7 +161,7 @@ drawGridOn: aCanvas
 			aCanvas 
 				line: margin @ y
 				to: right @ y
-				color: gridColor]! !
+				color: gridColor]"! !
 
 !AxesMorph methodsFor: 'drawing' stamp: 'jcg 8/30/2003 12:42'!
 drawOn: aCanvas 
@@ -3395,15 +3395,15 @@ drawAxisOn: aCanvas
 !PlotMorphGrid methodsFor: 'drawing' stamp: 'dhn 6/7/2014 14:54'!
 drawGridOn: aCanvas 
 	| gridColor lighter darker baseColor bounds |
-	baseColor := plot baseColor alpha: 1.
+"	baseColor := plot baseColor alpha: 1.
 	lighter := baseColor twiceLighter.
 	darker := baseColor twiceDarker.
 	gridColor := (lighter diff: baseColor)
 					> (darker diff: baseColor)
 				ifTrue: [lighter]
-				ifFalse: [darker].
+				ifFalse: [darker]."
 	""
-	bounds := plot drawBounds.
+"	bounds := plot drawBounds.
 	(bounds left
 		to: bounds right
 		by: (self bestStep: bounds width))
@@ -3421,7 +3421,7 @@ drawGridOn: aCanvas
 			aCanvas
 				line: bounds left @ y
 				to: bounds right @ y
-				color: gridColor]! !
+				color: gridColor]"! !
 
 !PlotMorphGrid methodsFor: 'drawing' stamp: 'dgd 10/16/2001 14:45'!
 drawOn: aCanvas 
