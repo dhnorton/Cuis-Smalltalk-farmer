@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 6:42:37 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 7:01:37 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 7!
+!provides: 'Farm' 1 8!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -244,7 +244,7 @@ FarmSeason class
 
 !classDefinition: #Field category: #'Farm-Model'!
 Object subclass: #Field
-	instanceVariableNames: 'heading description market'
+	instanceVariableNames: 'heading description label'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -1889,206 +1889,206 @@ cellsForGame
 	
 	^ 7! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 8/29/2017 21:02:18'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 8/30/2017 18:57:23'!
 describeSpaces
 	"Descriptions for the spaces on the board."
 	
 	^ OrderedCollection new
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'CHRISTMAS' with: 'VACATION';
 			description: 'COLLECT $1000 Christmas bonus.
 COLLECT year''s wage of $5000 as you pass.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'January' with: 'Week 1';
 			description: 'PAY 10% interest on Bank Notes on hand');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'January' with: 'Week 2';
 			description: 'Hibernate. Draw Option to Buy');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'January' with: 'Week 3';
 			description: 'Bitter cold spell. PAY $500 if you own cows.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'January' with: 'Week 4';
 			description: 'Beautiful Days!! Double all your hay harvests this year.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'February' with: 'Week 1';
 			description: 'Warm snap. You''re in the field 2 weeks early. COLLECT $1000.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'February' with: 'Week 2';
 			description: 'Stuck in a muddy corral. Draw Farmer''s Fate.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'February' with: 'Week 3';
 			description: 'Ground thaws. Start plowing early Go directly to Spring Planting.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'February' with: 'Week 4';
 			description: 'Rainy day. Draw Option to Buy.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'March' with: 'Week 1';
 			description: 'Becomes obvious your wheat has winter killed. PAY $2000 to replant.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'March' with: 'Week 2';
 			description: 'Start plowing late. PAY $500.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'March' with: 'Week 3';
 			description: 'Hurt your back. Go back to the second week in January.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'March' with: 'Week 4';
 			description: 'Frost forces you to heat fruit. PAY $2000 if you own fruit.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'April' with: 'Week 1';
 			description: 'Done plowing. Take a day off. Draw Option to Buy.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'SPRING' with: 'PLANTING';
 			description: 'Plant corn on time. Double corn yield this year.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'April' with: 'Week 3';
 			description: 'More rain. Field work shut down. PAY $500.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'April' with: 'Week 4';
 			description: 'Equipment breakdown. PAY $1000.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'May' with: 'Week 1';
 			description: 'The whole valley is green. COLLECT $500.');
 		add: (Field new
-			market: 'WINTER';
+			label: 'WINTER';
 			heading: 'May' with: 'Week 2';
 			description: 'Wind storm makes you replant corn. PAY $500.');
 		add: (Field new
-			market: '1ST HAY CUTTING';
+			label: '1ST HAY CUTTING';
 			heading: 'May' with: 'Week 3';
 			description: 'Cut your hay just right. COLLECT $1000 bonus.');
 		add: (Field new
-			market: '1ST HAY CUTTING';
+			label: '1ST HAY CUTTING';
 			heading: 'May' with: 'Week 4';
 			description: 'Memorial Day weekend. Draw Option to Buy.');
 		add: (Field new
-			market: '1ST HAY CUTTING';
+			label: '1ST HAY CUTTING';
 			heading: 'JUNE' with: 'Week 1';
 			description: 'Rain storm ruins unbaled hay. Cut your harvest check in half.');
 		add: (Field new
-			market: '1ST HAY CUTTING';
+			label: '1ST HAY CUTTING';
 			heading: 'June' with: 'Week 2';
 			description: 'Good growing weather. COLLECT $500 bonus.');
 		add: (Field new
-			market: 'CHERRY HARVEST';
+			label: 'CHERRY HARVEST';
 			heading: 'June' with: 'Week 3';
 			description: 'Rain splits your cherries. Cut your harvest check in half.');
 		add: (Field new
-			market: 'CHERRY HARVEST';
+			label: 'CHERRY HARVEST';
 			heading: 'June' with: 'Week 4';
 			description: 'Dust storm. Draw Farmer''s Fate.');
 		add: (Field new
-			market: 'CHERRY HARVEST';
+			label: 'CHERRY HARVEST';
 			heading: 'INDEPENDENCE' with: 'DAY BASH';
 			description: '');
 		add: (Field new
-			market: '2ND HAY CUTTING';
+			label: '2ND HAY CUTTING';
 			heading: 'July' with: 'Week 1';
 			description: 'Good weather for your second cutting of hay. Double hay harvest check.');
 		add: (Field new
-			market: '2ND HAY CUTTING';
+			label: '2ND HAY CUTTING';
 			heading: 'July' with: 'Week 2';
 			description: 'Hot!! Wish you were in the mountains. Draw Option to Buy.');
 		add: (Field new
-			market: '2ND HAY CUTTING';
+			label: '2ND HAY CUTTING';
 			heading: 'July' with: 'Week 3';
 			description: 'It''s a cooker!! 114 degrees in the shade. Wipe your brow and go to Harvest Moon after getting hay check.');
 		add: (Field new
-			market: 'WHEAT HARVEST';
+			label: 'WHEAT HARVEST';
 			heading: 'July' with: 'Week 4';
 			description: '85 degrees. Wheat heads filling out beautifully. Add $50 per acre to your harvest check.');
 		add: (Field new
-			market: 'WHEAT HARVEST';
+			label: 'WHEAT HARVEST';
 			heading: 'August' with: 'Week 1';
 			description: 'You''re right on time and farming like a pro. Go to the fourth week of February. COLLECT your year''s wage of $5000.');
 		add: (Field new
-			market: 'WHEAT HARVEST';
+			label: 'WHEAT HARVEST';
 			heading: 'August' with: 'Week 2';
 			description: 'Storm clouds brewing. COLLECT $1000, if you have a Harvester.');
 		add: (Field new
-			market: 'WHEAT HARVEST';
+			label: 'WHEAT HARVEST';
 			heading: 'August' with: 'Week 3';
 			description: 'Finish wheat harvest with no breakdowns. COLLECT $500.');
 		add: (Field new
-			market: 'WHEAT HARVEST';
+			label: 'WHEAT HARVEST';
 			heading: 'August' with: 'Week 4';
 			description: 'Rain sprouts unharvested wheat. Cut price $50 per acre on harvest check.');
 		add: (Field new
-			market: '3RD HAY CUTTING';
+			label: '3RD HAY CUTTING';
 			heading: 'September' with: 'Week 1';
 			description: 'Tractor owners: bale hay, then go to third week of November COLLECT your $1000 there, then harvest your fruit.');
 		add: (Field new
-			market: '3RD HAY CUTTING';
+			label: '3RD HAY CUTTING';
 			heading: 'September' with: 'Week 2';
 			description: 'Sunny skies at the County Fair. Draw Option to Buy.');
 		add: (Field new
-			market: 'LIVESTOCK SALES';
+			label: 'LIVESTOCK SALES';
 			heading: 'HARVEST' with: 'MOON';
 			description: 'smiles on you. COLLECT $500.');
 		add: (Field new
-			market: 'LIVESTOCK SALES';
+			label: 'LIVESTOCK SALES';
 			heading: 'September' with: 'Week 3';
 			description: 'Market collapses. Cut livestock check in half.');
 		add: (Field new
-			market: 'LIVESTOCK SALES';
+			label: 'LIVESTOCK SALES';
 			heading: 'September' with: 'Week 4';
 			description: 'Codling Moth damage to apples lowers fruit grade. PAY $2000 if you own fruit.');
 		add: (Field new
-			market: 'LIVESTOCK SALES';
+			label: 'LIVESTOCK SALES';
 			heading: 'OCTOBER' with: 'Week 1';
 			description: 'Indian Summer. COLLECT $500.');
 		add: (Field new
-			market: '4TH HAY CUTTING';
+			label: '4TH HAY CUTTING';
 			heading: 'October' with: 'Week 2';
 			description: 'Good Pheasant Hunting. Draw Farmer''s Fate.');
 		add: (Field new
-			market: '4TH HAY CUTTING';
+			label: '4TH HAY CUTTING';
 			heading: 'October' with: 'Week 3';
 			description: 'Park your baler for the winter. Draw Option to Buy.');
 		add: (Field new
-			market: 'APPLE HARVEST';
+			label: 'APPLE HARVEST';
 			heading: 'October' with: 'Week 4';
 			description: 'Annual Deer Hunt. Draw Farmer''s Fate.');
 		add: (Field new
-			market: 'APPLE HARVEST';
+			label: 'APPLE HARVEST';
 			heading: 'November' with: 'Week 1';
 			description: 'Irrigation season over. Draw Option to Buy');
 		add: (Field new
-			market: 'APPLE HARVEST';
+			label: 'APPLE HARVEST';
 			heading: 'November' with: 'Week 2';
 			description: 'Good weather, harvest winding up. COLLECT $500.');
 		add: (Field new
-			market: 'APPLE HARVEST';
+			label: 'APPLE HARVEST';
 			heading: 'November' with: 'Week 3';
 			description: 'Good weather holding. COLLECT $1000.');
 		add: (Field new
-			market: 'CORN HARVEST';
+			label: 'CORN HARVEST';
 			heading: 'November' with: 'Week 4';
 			description: 'Early freeze kills fruit buds. Pay $1000 if you have fruit.');
 		add: (Field new
-			market: 'CORN HARVEST';
+			label: 'CORN HARVEST';
 			heading: 'December' with: 'Week 1';
 			description: 'Cold and dry, perfect Field Corn harvesting. COLLECT $500.');
 		add: (Field new
-			market: 'CORN HARVEST';
+			label: 'CORN HARVEST';
 			heading: 'December' with: 'Week 2';
 			description: 'First snow. Draw Farmer''s Fate.');
 	yourself! !
@@ -2370,7 +2370,7 @@ makeBuyOptionButton
 	^btn
 ! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 13:01:35'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 18:49:08'!
 makeCellsArea
 	"Lay out the area which shows some spaces of the board"
 	| cellArea view mm mt |
@@ -2384,7 +2384,7 @@ makeCellsArea
 	
 	1 to: model class cellsForGame do: [:ix |
 		view _ (CellView newColumn
-			layoutSpec: (LayoutSpec proportionalWidth: 1 / self class cellsForGame);
+			layoutSpec: (LayoutSpec proportionalWidth: 1 / model class cellsForGame);
 			name: #cell).
 		view addMorph: (mt _ (GameCell 
 			textProvider: self
@@ -4312,10 +4312,10 @@ describe
 		nextPutAll: self description;
 		contents	! !
 
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:34:07'!
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:58:29'!
 describeMarket
 	"Answer a string containing the market name"
-	^ market, Character newLine	! !
+	^ label, Character newLine	! !
 
 !Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
 description
@@ -4351,15 +4351,17 @@ heading: string1 with: string2
 		nextPutAll: string2.
 	self heading: str contents! !
 
-!Field methodsFor: 'accessing' stamp: 'dhn 10/21/2014 20:07'!
-market
+!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:54:42'!
+label
+	"Answer the value of label"
 
-	^ market! !
+	^ label! !
 
-!Field methodsFor: 'accessing' stamp: 'dhn 10/21/2014 20:07'!
-market: anObject
+!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:55:38'!
+label: anObject
+	"Set the value of label"
 
-	market := anObject! !
+	label _ anObject! !
 
 !FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:17'!
 assetLabel
