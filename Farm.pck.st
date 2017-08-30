@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 6:35:58 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 6:42:37 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 6!
+!provides: 'Farm' 1 7!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2633,10 +2633,10 @@ setupToken: aPlayer
 	pasteup addMorph: model token.
 	^ model token who: aPlayer! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:35:18'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 18:41:35'!
 showSeasons: associations 
 	"Display the seasons contained in associations"
-	| width set bm txt dx |
+	| width set bm txt |
 			
 	seasonsArea removeAllMorphs.
 	width _ layoutMorph morphWidth / self class cellsForGame.
@@ -2659,10 +2659,6 @@ showSeasons: associations
 				ifTrue: [Color white]
 				ifFalse: [Color black]).
 			txt contents: sea desc.
-			dx _ Construction ironMap.
-			(dx includesKey: sea desc asSymbol)
-				ifTrue: [txt
-						setBalloonText: ('Requires ' , (dx at: sea desc asSymbol) asString)].
 			set add: txt].
 	^ set! !
 
