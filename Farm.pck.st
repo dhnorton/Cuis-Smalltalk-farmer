@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 29 August 2017 at 9:44:57 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 5:47:53 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 4!
+!provides: 'Farm' 1 5!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -316,6 +316,12 @@ StatListFarm class
 !FarmingGame commentStamp: '<historical>' prior: 0!
 Manage the visual effects of the Farming Game.
 
+Start the game from the New morph... window or in a workspace do:
+
+	FarmingGame start.
+
+http://farmgame.com/product/woo-single-2/
+
 !
 
 !Farmer commentStamp: 'dhn 9/5/2011 13:17' prior: 0!
@@ -453,12 +459,12 @@ doAuction
 		)) startUpWithCaption: 'Start an Auction'.
 	ans ifNotNil: [self perform: ans]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 11/23/2014 12:00'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 8/30/2017 17:15:37'!
 doAug1
 	"Move the player to February Week 4 after his landing on August Week 1."
 	self check2Buttons
 		ifTrue: [
-			UserDialogBoxMorph inform: 'You will advance to 4th week in February.' title: 'Farming like a Pro'.
+			GamePopUp inform: 'You will advance to 4th week in February.' title: 'Farming like a Pro'.
 			self disableAll: {'Stats'. 'Auction'. 'Pay Loan'. 'Option'. 'End Turn'}.
 			currentPlayer advanceTo: 58.
 			currentPlayer years: 1 + currentPlayer years.
@@ -471,12 +477,12 @@ doAug1
 				setActionSelectorFor: 'Harvest' to: Farm harvestNormal;
 				setActionSelectorFor: 'Expense' to: Farm expenseNormal]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 11/23/2014 12:00'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 8/30/2017 17:16:01'!
 doJul3
 	"Move the player to Harvest Moon after his landing on July Week 3."
 	self disableAll: {'End Turn'}.
 	self check2Buttons
-		ifTrue: [UserDialogBoxMorph inform: 'You will advance to Harvest Moon.' title: 'Harvest Moon'.
+		ifTrue: [GamePopUp inform: 'You will advance to Harvest Moon.' title: 'Harvest Moon'.
 			currentPlayer advanceTo: 37.
 			currentPlayer ifCows
 				ifTrue: [currentPlayer harvestEnabled
@@ -498,11 +504,11 @@ doOptionAuction
 	self disableAll: {'End Turn'}.
 ! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 11/23/2014 12:00'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 8/30/2017 17:16:16'!
 doSep1
 	"Move the player to November Week 3 after his landing on September Week 1."
 	self check2Buttons
-		ifTrue: [UserDialogBoxMorph inform: 'You will advance to 3rd week in November.' title: '3rd week in November'.
+		ifTrue: [GamePopUp inform: 'You will advance to 3rd week in November.' title: '3rd week in November'.
 			currentPlayer advanceTo: 46;
 				 position: 46.
 			currentPlayer tally: 1000.
@@ -546,13 +552,13 @@ drawExpense
 	^ self drawCard: (self expenses) discard: (self drawnExpenses).
 ! !
 
-!Farm methodsFor: 'fates' stamp: 'dhn 11/23/2014 12:01'!
+!Farm methodsFor: 'fates' stamp: 'dhn 8/30/2017 17:16:44'!
 drawFate
 	"Draw a farmer's fate card, account for it, and place it in the discard pile."
 	| assoc |
 	assoc := self drawCard: self fates discard: self drawnFates.
 	self updatePlayer.
-	UserDialogBoxMorph inform: assoc value title: 'Farmer''s Fate'.
+	GamePopUp inform: assoc value title: 'Farmer''s Fate'.
 	currentPlayer perform: assoc key key withArguments: {assoc key value}.
 	self updatePlayer.
 	self disableAll: {'Fate'}.
@@ -560,7 +566,7 @@ drawFate
 		ifTrue: [self enableAll: {'End Turn'}].
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:10'!
+!Farm methodsFor: 'options' stamp: 'dhn 8/30/2017 17:17:11'!
 drawOptionQuietly: aBoolean 
 	"Answer an option, drawn from those available; resupply as needed."
 	| otb |
@@ -570,12 +576,12 @@ drawOptionQuietly: aBoolean
 				ifFalse: [self availableOptions: self exercisedOptions shuffled.
 					self exercisedOptions: OrderedCollection new].
 			otb := availableOptions removeFirst.
-			UserDialogBoxMorph
+			GamePopUp
 				inform: (Compiler evaluate: otb , ' optionText')
 				title: 'Option']
 		ifFalse: [otb := availableOptions removeFirst.
 			aBoolean
-				ifFalse: [UserDialogBoxMorph
+				ifFalse: [GamePopUp
 						inform: (Compiler evaluate: otb , ' optionText')
 						title: 'Option']].
 	^ otb! !
@@ -804,11 +810,11 @@ initialButtonState
 	self enableAll: {'Option'}.
 	self disableAll: {'End Turn'. 'Expense'. 'Fate'. 'Harvest'}! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/29/2017 21:06:27'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 13:01:07'!
 initialize
 
 	super initialize.
-	cellCount _ FarmingGame cellsForGame.
+	cellCount _ self class cellsForGame.
 	spaces _ self class describeSpaces.
 	availableOptions _ FarmingGame optionsDesc shuffled.
 	fates _ FarmingGame fatesDesc asOrderedCollection shuffled.
@@ -818,7 +824,7 @@ initialize
 	leases _ self setUpLeases.
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:36'!
+!Farm methodsFor: 'options' stamp: 'dhn 8/30/2017 17:17:40'!
 lease: aName for: quantity 
 	"Answer the purchased number of cattle on aName lease; account for the cost." 
 	| down balance who |
@@ -833,7 +839,7 @@ lease: aName for: quantity
 				amount: (Compiler evaluate: aName , ' auctionQuantity').
 			currentPlayer drawnOption: true.
 			leases at: aName put: currentPlayer identity]
-		ifFalse: [UserDialogBoxMorph inform: 'Sorry, but the ' , aName , ' lease is held by ' , who title: 'Lease Taken'].
+		ifFalse: [GamePopUp inform: 'Sorry, but the ' , aName , ' lease is held by ' , who title: 'Lease Taken'].
 	^ quantity! !
 
 !Farm methodsFor: 'accessing' stamp: 'dhn 12/12/2011 21:46'!
@@ -898,12 +904,12 @@ pay: down borrow: balance for: aSymbol amount: qty
 	asset cost: down + balance + asset cost.
 	self updatePlayer! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 11/23/2014 12:01'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 8/30/2017 17:18:03'!
 payExpense
 	"Account for an expense."
 	| assoc |
 	assoc := self drawExpense.
-	UserDialogBoxMorph inform: assoc value title: 'Expense'.
+	GamePopUp inform: assoc value title: 'Expense'.
 	 currentPlayer perform: assoc key key withArguments: {assoc key value}.
 	 currentPlayer expenseCount: 1 +  currentPlayer expenseCount.
 	self updatePlayer.
@@ -984,29 +990,33 @@ rattlesnake: quantity
 	"Lease Rattlesnake Ridge for $quantity."
 	self lease: 'Rattlesnake' for: quantity! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:48'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 17:29:05'!
 removeFromGame
 	"Remove the current player from the game."
 	| old |
-	UserDialogBoxMorph inform:  currentPlayer identity , ' has exceeded the $50,000 debt limit and is out of the game' title: 'YER OUT!!'.
+	GamePopUp inform:  currentPlayer identity , ' has exceeded the $50,000 debt 
+limit and is out of the game'
+	title: 'YER OUT!!'.
 	leases
 		keysAndValuesDo: [:aKey :aValue | aValue =  currentPlayer identity
 				ifTrue: [leases at: aKey put: nil]].
 	old := self outs.
 	old addFirst:  currentPlayer.
 	self outs: old.
-	players
+	(players includes: currentPlayer)
+		ifTrue: [players removeAll: {currentPlayer}.
+			playerIndex _ playerIndex - 1.
+			self 
+				nextPlayer; 
+				triggerEvent: #setupToken: with: currentPlayer;
+				enableAll: {'Move'}].
+"	players
 		do: [:each | (arena submorphs
 				detect: [:s | s externalName = each identity]) delete].
 	token delete.
-	self removeMarkerIDInMarks.
-	(players includes: currentPlayer)
-		ifTrue: [players removeAll: {currentPlayer}.
-			playerIndex := playerIndex - 1.
-			self setupPlayersCash; nextPlayer; setupToken: currentPlayer.
-			self enableAll: {'Move'}].
+	self removeMarkerIDInMarks."
 	1 = players size
-		ifTrue: [UserDialogBoxMorph inform: self players first identity , ' has won the game by default.' title: 'WE HAVE A WINNER!!'.
+		ifTrue: [GamePopUp inform: self players first identity , ' has won the game by default.' title: 'WE HAVE A WINNER!!'.
 			self disableAll: {'Pay Loan'. 'End Turn'. 'Option'. 'Expense'. 'Fate'. 'Harvest'. 'Move'}.
 			self won: true]! !
 
@@ -1062,12 +1072,12 @@ setActionSelectorFor: aButton to: aSymbol
 	btn actionSelector: aSymbol.
 ! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:56'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 17:30:22'!
 setTestMode
 	"Enable changing test mode."
 	|mode ans|
 	mode := Game testMode.
-	ans := UserDialogBoxMorph confirm: 'Change Test Mode (', mode, ')'.
+	ans := GamePopUp confirm: 'Change Test Mode (', mode, ')'.
 	ans ifTrue: [Game testMode: mode not].! !
 
 !Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:58'!
@@ -1226,13 +1236,13 @@ showYourself
 		ifNotNil: [xw comeToFront].
 	^ xw! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 7/12/2013 19:17'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 8/30/2017 17:30:50'!
 space1
 	"Christmas Vacation"
 	self disableAll: {'Move'}.
 	self updatePlayer.
 	 currentPlayer salary.
-	UserDialogBoxMorph inform: 'You will receive a bonus of $1,000.' title: 'Christmas Bonus'.
+	GamePopUp inform: 'You will receive a bonus of $1,000.' title: 'Christmas Bonus'.
 	 currentPlayer tally: 1000.
 	 currentPlayer offFarm: 1000 + self currentPlayer offFarm.
 	self updatePlayer.
@@ -1872,6 +1882,12 @@ assetList
 	"Answer the list of assets in order suitable for auction."
 	^ #('Hay' 'Grain' 'Fruit' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
 
+!Farm class methodsFor: 'setup' stamp: 'dhn 8/30/2017 13:00:07'!
+cellsForGame
+	"Answer the number of board spaces in view at any time"
+	
+	^ 7! !
+
 !Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:02:18'!
 describeSpaces
 	"Descriptions for the spaces on the board."
@@ -2298,7 +2314,7 @@ makeBuyOptionButton
 	^btn
 ! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:37:14'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 13:01:35'!
 makeCellsArea
 	"Lay out the area which shows some spaces of the board"
 	| cellArea view mm mt |
@@ -2310,7 +2326,7 @@ makeCellsArea
 			minorDirectionPadding: #center);
 		name: #'cell area'.
 	
-	1 to: self class cellsForGame do: [:ix |
+	1 to: model class cellsForGame do: [:ix |
 		view _ (CellView newColumn
 			layoutSpec: (LayoutSpec proportionalWidth: 1 / self class cellsForGame);
 			name: #cell).
@@ -2628,12 +2644,6 @@ cellColor
 	"Answer the color for a cell"
 	
 	^ Color r: 1.0 g: 0.93 b: 0.83! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:01:52'!
-cellsForGame
-	"Answer the number of board spaces in view at any time"
-	
-	^ 7! !
 
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 10:30'!
 debtLimit
@@ -3700,15 +3710,15 @@ garnish
 garnish: aBoolean
 	garnish := aBoolean.! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 4/28/2012 08:28'!
+!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 17:31:41'!
 garnishSpiel
-	UserDialogBoxMorph inform: 'The IRS is garnishing your income.' title: 'Loss of Income'.
+	GamePopUp inform: 'The IRS is garnishing your income.' title: 'Loss of Income'.
 ! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2014 19:40'!
+!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 17:31:59'!
 goBackToJan2
 	| delta |
-	UserDialogBoxMorph inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
+	GamePopUp inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
 	self mgr token addMorph: self mgr token arrowLeft.
 	delta := self mgr spaces size - self roll.
 	self mgr moveFrom: position + delta to: 3 + delta by: -1.
@@ -4111,9 +4121,9 @@ reset
 	self assets do: [:ea | ea reset].
 ! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 11/23/2014 12:05'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 8/30/2017 17:32:20'!
 salary
-	UserDialogBoxMorph inform: 'You will receive an annual salary of $5,000.' title: 'Salary'.
+	GamePopUp inform: 'You will receive an annual salary of $5,000.' title: 'Salary'.
 	self tally: 5000;
 		offFarm: 5000 + self offFarm;
 		reset.
@@ -4173,18 +4183,22 @@ truckerStrike: aParm
 	self allocateFruitCost: amt1 + amt2.
 ! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 11/23/2014 12:06'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 8/30/2017 17:41:14'!
 uncleBert: aParm 
-	(UserDialogBoxMorph confirm: 'It will cost $10,000' withCRs title: 'Do you want to inherit?')
+	"Answer whether player wishes to inherit hay"
+	
+	(PopUpMenu 
+		confirm: 'It will cost $10,000
+Do you want to inherit?')
 		ifTrue: [| h |
 			self tally: 10000 negated.
-			h := assets at: #Hay.
+			h _ assets at: #Hay.
 			"inherited hay comes cheaper"
 			h cost: 10000 + h cost.
 			h quantity: 10 + h quantity].
 ! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 18:03'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 8/30/2017 17:43:39'!
 updateAsset: anAsset with: aRoll 
 	| what amt yield tale fac rat normal |
 	yield := 0.
@@ -4203,9 +4217,9 @@ updateAsset: anAsset with: aRoll
 							what gross: yield + what gross.
 							what quality: aRoll + what quality.
 							what count: 1 + what count.
-							tale := 'Crop quality ' , aRoll , ' for ' , ('$' , yield asInteger asStringWithCommas) , '. Factor ' , fac , '. Rate ' , rat , '.
-Normally $' , normal asStringWithCommas , '.'.
-							UserDialogBoxMorph inform: tale title: anAsset , ' quantity ' , amt]]]
+							tale := 'Crop quality ' , aRoll , ' for ' , ('$' , yield asInteger printStringWithCommas) , '. Factor ' , fac , '. Rate ' , rat , '.
+Normally $' , normal printStringWithCommas , '.'.
+							GamePopUp inform: tale title: anAsset , ' quantity ' , amt]]]
 		ifFalse: ["#Livestock"
 			self garnish
 				ifTrue: [self garnishSpiel]
