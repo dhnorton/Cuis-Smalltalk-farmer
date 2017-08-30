@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 29 August 2017 at 6:59:14 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 29 August 2017 at 8:17:18 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 0!
+!provides: 'Farm' 1 1!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -313,30 +313,9 @@ StatListFarm class
 	instanceVariableNames: ''!
 
 
-!FarmingGame commentStamp: 'dhn 9/5/2011 09:32' prior: 0!
+!FarmingGame commentStamp: '<historical>' prior: 0!
 Manage the visual effects of the Farming Game.
 
-Instance Variables
-	board:		<Object>
-	fates:		<Object>
-	options:		<Object>
-	players:		<Object>
-	seasons:		<Object>
-
-board
-	- xxxxx
-
-fates
-	- xxxxx
-
-options
-	- xxxxx
-
-players
-	- xxxxx
-
-seasons
-	- xxxxx
 !
 
 !Farmer commentStamp: 'dhn 9/5/2011 13:17' prior: 0!
@@ -2649,40 +2628,22 @@ startButtonSet: aMorph
 	sub addMorph: self makeSettingsButton.
 	sub addMorph: self makeAddPlayerButton! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 22:03'!
-addApplication
-	Smalltalk addToStartUpList: FarmingGame.
-! !
-
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:39'!
 boardColor
 	"Answer the color of the board itself"
 	^Color yellow alpha: 0.5! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:40'!
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:01:13'!
 cellColor
-	"Answer the color of the board spaces for the Farming Game"
-	^Color palePeach! !
+	"Answer the color for a cell"
+	
+	^ Color r: 1.0 g: 0.93 b: 0.83! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:40'!
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:01:52'!
 cellsForGame
-	"Answer the number of board spaces for the Farming Game"
-	^7! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 22:03'!
-clearApplication
-	Smalltalk removeFromStartUpList: FarmingGame.
-! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 21:06'!
-closeAllOpenWindowsMessage
-	^'Do you really want to close all windows?' translated! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 21:06'!
-closeAllWindows
-	"LaserGame closeAllWindows"
-	(SystemWindow windowsIn: World satisfying: [:w | w model canDiscardEdits])
-		do: [:w | w delete]! !
+	"Answer the number of board spaces in view at any time"
+	
+	^ 7! !
 
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 10:30'!
 debtLimit
@@ -2693,20 +2654,6 @@ debtLimit
 defaultGoal
 	"Answer the default winning net asset goal"
 	^ 250000.
-! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 21:07'!
-disableFeatures
-	Preferences disable: #warnIfNoSourcesFile.
-	Preferences disable: #warnIfNoChangesFile.
-	Preferences disable: #cmdDotEnabled.
-	Preferences enable: #eToyFriendly.
-	Preferences enable: #noviceMode.
-	Preferences compileHardCodedPref: #cmdGesturesEnabled enable: false.
-	Preferences compileHardCodedPref: #cmdKeysInText enable: false.
-	HaloMorph compileSilently: 'addCircleHandles' classified: 'disable'.
-	
-
 ! !
 
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 12/8/2011 10:58'!
@@ -2830,17 +2777,6 @@ COLLECT $2,000 from each player who has none.'.
 RECEIVE a 50% bonus in your Livestock Harvest check each of the next two years.'.
 	}.! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 21:04'!
-fullWorld
-	FullWorld isNil ifTrue: [self fullWorld: false].
-	^FullWorld! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 21:03'!
-fullWorld: aBoolean
-	"LaserGame fullWorld: false"
-	FullWorld := aBoolean
-! !
-
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 16:55'!
 goal
 	"Answer the winning net asset goal"
@@ -2851,33 +2787,22 @@ goal
 		ifFalse: [^ normal]	"Answer the winning net asset goal"
 ! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 21:52'!
-howTo
-	^'Copy the following into a Workspace:
+!FarmingGame class methodsFor: 'documentation' stamp: 'dhn 8/29/2017 20:00:09'!
+how
+	"
+	FarmingGame start.
+	"! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:14:03'!
+includeInNewMorphMenu
+	"Instantiate from the menu"
 	
-FarmingGame
-	fullWorld: false;
-	new
-		
-Select and execute it.' translated
-! !
+	^ true! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 21:03'!
-launchFullWorld
-	"LaserGame launchFullWorld"
-	| morph |
-	self fullWorld: true.
-	morph := self new.
-	morph openInWorld.
-	^morph! !
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:12:41'!
+labelAreaHeight
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 21:02'!
-launchStandard
-	"LaserGame launchStandard"
-	| morph |
-	self fullWorld: false.
-	morph := self new.
-	morph openInHand! !
+	^ 50! !
 
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 09:09'!
 optionsDesc
@@ -2894,42 +2819,6 @@ optionsDesc
 		 add: 'Cascade' withOccurrences: 3;
 		 add: 'Toppenish' withOccurrences: 3;
 		 yourself ! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 21:09'!
-prepareApplication
-	"LaserGame prepareApplication"
-	(self confirm: self prepareApplicationWarningMessage) ifTrue: [
-		(SelectionMenu confirm: self closeAllOpenWindowsMessage) ifFalse: [^ self].
-		self closeAllWindows.
-		self launchFullWorld.
-		self disableFeatures.
-		self addApplication.
-		SmalltalkImage current saveAs.
-		]
-! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 22:06'!
-prepareApplicationWarningMessage
-	^'Really make a stand-alone image?
-	Any existing Laser Game morphs should be closed.
-A new one will be re-created by this process.
-Important developer tools will be disabled.
-The image should be saved as a new name as the final step of this process.' translated
-! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 21:10'!
-purgeAndAnswerSoleInstance
-	"LaserGame purgeAndAnswerSoleInstance"
-	| coll result |
-	coll := self allInstances.
-	coll size > 1 ifTrue: [2 to: coll size do: [:index |
-			| morph |
-			morph := coll at: index.
-			morph delete]].
-	result := coll isEmpty
-		ifTrue: [nil]
-		ifFalse: [coll first].
-	^result! !
 
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 14:55'!
 season
@@ -2986,13 +2875,45 @@ season
 			color: Color yellow; range: 47 @ 49);
 		yourself! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 1/19/2012 15:43'!
-startUp
-	| soleInstance |
-	soleInstance := self purgeAndAnswerSoleInstance.
-	soleInstance isNil ifTrue: [soleInstance := self launchFullWorld].
-	soleInstance newGame.
-	! !
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:11:50'!
+start
+	"Start the Farming Game"
+	| win world |
+	
+	win _ self new.
+	win 
+		widgetsColor: win windowColor; "standard color for the window frame"
+		color:  (Color r: 0.986 g: 0.986 b: 0.986); "background color"
+		model: Farm new;
+		buildMorphicWindow;
+		setLabel: 'A Board Game'.
+		
+	win board
+		addMorph: win makeTitleArea;
+		addMorph: win makeNumbersArea;
+		addMorph: win makeOthersArea.
+		
+	win gameTitle
+		contents: 'Farming';
+		color: Color lightBrown.
+	win model buttons: win makeButtonArea.
+	win board
+		addMorph: win makeSeasonsArea;
+		addMorph: win makeCellsArea.
+	win model positionBoardTo: 1.
+	win startButtonSet.
+	win showSeasons: (win model parseSeasonsAt: 1).
+	
+	"Now do open it"
+	world _ Processor activeProcess animatedUI.
+	win morphExtent: (world morphExtent * (0.99@0.8)).
+	world addMorph: win position: 0@60.
+	win someSubmorphPositionOrExtentChanged.
+
+	win model token: win model setUpToken.
+	
+	^ win
+! !
 
 !FarmAsset methodsFor: 'as yet unclassified' stamp: 'dhn 9/23/2014 13:18'!
 assetValue
