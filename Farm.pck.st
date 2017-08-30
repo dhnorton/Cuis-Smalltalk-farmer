@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 5:47:53 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 6:35:58 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 5!
+!provides: 'Farm' 1 6!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1056,11 +1056,12 @@ reportProgress
 		plot addRelation: relation.].
 ! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:53'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:31:59'!
 seasonAt: aPosition
 	"Answer the season at aPosition."
 	| y |
-	y := FarmingGame season select: [:a | a range x <= aPosition].
+	
+	y _ self class season select: [:a | a range x <= aPosition].
 	^ y last ! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:54'!
@@ -1888,7 +1889,7 @@ cellsForGame
 	
 	^ 7! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:02:18'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 8/29/2017 21:02:18'!
 describeSpaces
 	"Descriptions for the spaces on the board."
 	
@@ -2158,6 +2159,61 @@ harvestSep1
 paymentIncrement
 	"Answer the payment increment for displaying loan payment choices"
 	^ 1000! !
+
+!Farm class methodsFor: 'setup' stamp: 'dhn 8/30/2017 18:29:36'!
+season
+	"Answer a collection of Seasons in order of their starting board positions."
+	^ OrderedCollection new
+		add: (FarmSeason new
+			desc: 'WINTER';
+			enabled: true;
+			color: Color black; range: 1 @ 19; textColor: true);
+		addLast: (FarmSeason new
+			desc: '1ST HAY CUTTING';
+			assetName: 'Hay';
+			enabled: true;
+			color: Color green; range: 20 @ 23);
+		addLast: (FarmSeason new
+			desc: 'CHERRY HARVEST';
+			assetName: 'Cherries';
+			enabled: true;
+			color: Color red; range: 24 @ 26);
+		addLast: (FarmSeason new
+			desc: '2ND HAY CUTTING';
+			assetName: 'Hay';
+			enabled: true;
+			color: Color green; range: 27 @ 29);
+		addLast: (FarmSeason new
+			desc: 'WHEAT HARVEST';
+			assetName: 'Wheat';
+			enabled: true;
+			color: Color yellow; range: 30 @ 34);
+		addLast: (FarmSeason new
+			desc: '3RD HAY CUTTING';
+			assetName: 'Hay';
+			enabled: true;
+			color: Color green; range: 35 @ 36);
+		addLast: (FarmSeason new
+			desc: 'LIVESTOCK SALES';
+			assetName: 'Livestock';
+			enabled: true;
+			color: Color brown; range: 37 @ 40; textColor: true);
+		addLast: (FarmSeason new
+			desc: '4TH HAY CUTTING';
+			assetName: 'Hay';
+			enabled: true;
+			color: Color green; range: 41 @ 42);
+		addLast: (FarmSeason new
+			desc: 'APPLE HARVEST';
+			assetName: 'Apples';
+			enabled: true;
+			color: Color red; range: 43 @ 46);
+		addLast: (FarmSeason new
+			desc: 'CORN HARVEST';
+			assetName: 'Corn';
+			enabled: true;
+			color: Color yellow; range: 47 @ 49);
+		yourself! !
 
 !Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 13:25'!
 statusList
@@ -2819,61 +2875,6 @@ optionsDesc
 		 add: 'Cascade' withOccurrences: 3;
 		 add: 'Toppenish' withOccurrences: 3;
 		 yourself ! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 14:55'!
-season
-	"Answer a collection of Seasons in order of their starting board positions."
-	^ OrderedCollection new
-		add: (FarmSeason new
-			desc: 'WINTER';
-			enabled: true;
-			color: Color black; range: 1 @ 19; textColor: true);
-		addLast: (FarmSeason new
-			desc: '1ST HAY CUTTING';
-			assetName: 'Hay';
-			enabled: true;
-			color: Color green; range: 20 @ 23);
-		addLast: (FarmSeason new
-			desc: 'CHERRY HARVEST';
-			assetName: 'Cherries';
-			enabled: true;
-			color: Color red; range: 24 @ 26);
-		addLast: (FarmSeason new
-			desc: '2ND HAY CUTTING';
-			assetName: 'Hay';
-			enabled: true;
-			color: Color green; range: 27 @ 29);
-		addLast: (FarmSeason new
-			desc: 'WHEAT HARVEST';
-			assetName: 'Wheat';
-			enabled: true;
-			color: Color yellow; range: 30 @ 34);
-		addLast: (FarmSeason new
-			desc: '3RD HAY CUTTING';
-			assetName: 'Hay';
-			enabled: true;
-			color: Color green; range: 35 @ 36);
-		addLast: (FarmSeason new
-			desc: 'LIVESTOCK SALES';
-			assetName: 'Livestock';
-			enabled: true;
-			color: Color brown; range: 37 @ 40; textColor: true);
-		addLast: (FarmSeason new
-			desc: '4TH HAY CUTTING';
-			assetName: 'Hay';
-			enabled: true;
-			color: Color green; range: 41 @ 42);
-		addLast: (FarmSeason new
-			desc: 'APPLE HARVEST';
-			assetName: 'Apples';
-			enabled: true;
-			color: Color red; range: 43 @ 46);
-		addLast: (FarmSeason new
-			desc: 'CORN HARVEST';
-			assetName: 'Corn';
-			enabled: true;
-			color: Color yellow; range: 47 @ 49);
-		yourself! !
 
 !FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:11:50'!
 start
@@ -3921,14 +3922,14 @@ ifHarvester: anAmount
 ifTractor
 	^ 0 < (assets at: #Tractor) quantity! !
 
-!Farmer methodsFor: 'initialize-release' stamp: 'dhn 11/30/2014 14:58'!
+!Farmer methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 18:30:27'!
 initialize
 	FarmerTest isNil
 		ifFalse: [identity := FarmerTest].
 	cash := 5000.
 	debt := 5000 negated.
 	assets := self setUpAssets.
-	harvests := FarmingGame season copy.
+	harvests := Farm season copy.
 	options := OrderedCollection new.
 	history := Array new: 180! !
 
