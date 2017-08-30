@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 21 August 2017 at 1:29:00 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 29 August 2017 at 9:44:54 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 154!
+!provides: 'Game' 1 155!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
