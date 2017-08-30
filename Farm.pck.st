@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 29 August 2017 at 8:41:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 29 August 2017 at 8:50:41 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 2!
+!provides: 'Farm' 1 3!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2175,6 +2175,11 @@ buildMorphicWindow
 	model when: #showToken send: #showToken to: self.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
 ! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
+describe
+
+	^ ''! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
 getPlayers
