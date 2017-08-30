@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 29 August 2017 at 8:17:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 29 August 2017 at 8:41:18 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 1!
+!provides: 'Farm' 1 2!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -24,7 +24,7 @@ FarmToken class
 
 !classDefinition: #FarmingGame category: #'Farm-Graphics'!
 GameBoard subclass: #FarmingGame
-	instanceVariableNames: 'seasons namesCache'
+	instanceVariableNames: 'seasons namesCache numbersArea othersArea seasonsArea'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
@@ -2155,51 +2155,71 @@ waiting
 	die
 		ifNotNil: [die delete]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 11/3/2014 14:24'!
-initialize
-	| bns assoc |
-	super initialize.
-	handler := Farm new.
-	handler boardMgr: self.
-	self handler arena: board.
-	board addMorph: (bns := self setupButtonsPanel) fullFrame: (LayoutFrame
-				fractions: (0 @ 0.2 corner: 1 @ 0.2)
-				offsets: (0 @ 50 negated corner: 5 @ 0)).
-	self handler buttons: bns.
-	board addMorph: self setupTitle 
-			fullFrame: (LayoutFrame
-              		fractions: (0 @ 0.1 corner: 1 @ 0.1) 
-				offsets: (0@50 negated corner: 0@0)).
-	board addMorph: self setupNumbers 
-			fullFrame: (LayoutFrame
-	             	fractions: (0 @ 0.8 corner: 1 @ 0.8) 
-				offsets: (0@50 negated corner: 0@0)).
-	self cells: (self setupCells: board).
-	self setupMarkerAreas: self cells.
-	self handler cellsAt: 1.
-	self handler path: (self setupPath: board).
-	board addMorph: self setupPath 
-			fullFrame: (LayoutFrame new 
-				topFraction: 0.6;
-				bottomFraction: 0.7;
-				leftFraction: 0.0;
-				rightFraction: 1.0).
-	assoc := self handler parseSeasonsAt: 1. 
-	self startButtonSet: board.
-	self showSeasons: assoc.
-	self initializeNamesCache.
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:26:29'!
+buildMorphicWindow
+
+	pasteup _ PasteUpMorph new
+		name: #pasteup;
+		color: Color transparent.
+		
+	layoutMorph addMorph: pasteup layoutSpec: LayoutSpec useAll.
+	board _ LayoutMorph newColumn name: #board.
+	board color:  (Color r: 0.986 g: 0.986 b: 0.986).
+	pasteup addMorph: board.
+	model world: pasteup.
+	
+	model when: #quitGame send: #delete to: self.
+	model when: #itemChange send: #displayNumbers to: self.
+	model when: #titleChange send: #titleChange: to: self with: #player.
+	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
+	model when: #showToken send: #showToken to: self.
+	model when: #showSeasons: send: #showSeasons: to: self with: #index.
 ! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 3/24/2012 11:07'!
-initializeNamesCache
-	self
-		namesCache: (OrderedCollection
-				with: PlayersList entryField
-				with: PlayersList entryField
-				with: PlayersList entryField
-				with: PlayersList entryField
-				with: PlayersList entryField
-				with: PlayersList entryField)! !
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
+getPlayers
+	"Get the names of two to six players"
+	| x y cnt clrs |
+
+	model disableAll: {'Players'. 'Tour'}.
+	clrs _ Token colors shuffled.
+	cnt _ 0.
+	x _ FillInTheBlankMorph request: 'First player''s name?' initialAnswer: ''.
+	x 
+		ifEmpty: [
+			model enableAll: {'Players'. 'Tour'}.
+			^ nil]
+		ifNotEmpty: [
+			cnt _ cnt + 1.
+			model setupPlayer: x color: (clrs at: cnt)].
+	
+	[cnt < 6] whileTrue: [
+		y _ FillInTheBlankMorph request: 'Next player''s name?' initialAnswer: ''.
+		y
+			ifEmpty: [
+				cnt > 1 
+					ifTrue: [self startGame]
+					ifFalse: [
+						model players: OrderedCollection new.
+						model enableAll: {'Players'. 'Tour'}].
+				^ nil]
+			ifNotEmpty: [
+				cnt _ cnt + 1.
+				model setupPlayer: y color: (clrs at: cnt)]].
+		
+	self startGame
+! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:28:09'!
+initialize
+
+	super initialize! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:38:25'!
+layoutSubmorphs
+
+    super layoutSubmorphs.
+    self board morphExtent: self board owner morphExtent! !
 
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 10:50'!
 makeAddPlayerButton
@@ -2231,12 +2251,71 @@ makeButton: label action: actionSymbol state: stateSymbol
 		balloonFont: GameBoard gameFont.
 	^ btn! !
 
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:29:09'!
+makeButtonArea
+	"Lay out the area for buttons"
+	
+	buttonArea _ (LayoutMorph newRow separation: 5)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	buttonArea
+			color: Color transparent;
+			name: #buttons;
+			padding: #center.
+			
+	board addMorph: buttonArea.
+	
+	^ buttonArea
+		! !
+
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 1/21/2012 16:53'!
 makeBuyOptionButton
 	| btn |
 	btn := self makeButton: 'Option' action: #showOpts state: nil.
 	btn setBalloonText: 'See what options you have and make purchases during WINTER.' maxLineLength: 30.
 	^btn
+! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:37:14'!
+makeCellsArea
+	"Lay out the area which shows some spaces of the board"
+	| cellArea view mm mt |
+	
+	cellArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 1.0
+			minorDirectionPadding: #center);
+		name: #'cell area'.
+	
+	1 to: self class cellsForGame do: [:ix |
+		view _ (CellView newColumn
+			layoutSpec: (LayoutSpec proportionalWidth: 1 / self class cellsForGame);
+			name: #cell).
+		view addMorph: (mt _ (GameCell 
+			textProvider: self
+			textGetter: #describe)
+				layoutSpec: (LayoutSpec proportionalWidth: 1.0);
+				color: self class cellColor;
+				borderWidth: 1;
+				name: 'cell text').
+		view addMorph: (mm _ (LayoutMorph newRow separation: 4)
+			layoutSpec: (LayoutSpec 
+				proportionalWidth: 1.0
+				fixedHeight: 20
+				minorDirectionPadding: #center);
+			color: self class cellColor;
+			padding: #center;
+			name: #marks).
+		view 
+			marksPane: mm;
+			textPane: mt.
+		model cells add: view].
+		
+	^ cellArea addAllMorphs: model cells reversed
+		
 ! !
 
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:03'!
@@ -2271,6 +2350,37 @@ makeMoveButton
 	^btn
 ! !
 
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:31:59'!
+makeNumbersArea
+	"Lay out the area for player cash on hand"
+	
+	numbersArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	numbersArea
+			color: Color transparent;
+			name: #numbers;
+			padding: #center.
+			
+	^ numbersArea addMorph: ((StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 22))
+		! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:32:44'!
+makeOthersArea
+	"Lay out the area for player cash on hand"
+	
+	othersArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	^ othersArea
+		color: Color transparent;
+		name: #others;
+		padding: #center! !
+
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:04'!
 makePayExpenseButton
 	| btn |
@@ -2295,6 +2405,19 @@ makeQuitGameButton
 	btn color: (Color orange alpha: 0.9).
 	^btn
 ! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:33:14'!
+makeSeasonsArea
+	"Lay out the area for seasons"
+	
+	seasonsArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.08
+			minorDirectionPadding: #center).
+	^ seasonsArea
+			color: Color lightGreen;
+			name: #seasons! !
 
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 18:32'!
 makeSettingsButton
@@ -2333,6 +2456,23 @@ namesCache: anObject
 	"Set the value of namesCache"
 
 	namesCache := anObject! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:34:04'!
+playButtonSet
+	"Answer the buttons used to play the game"
+
+	buttonArea 
+		removeAllMorphs;
+		addMorph: self makeShowStatsButton;
+		addMorph: self makePayLoanButton;
+		addMorph: self makeAuctionButton;
+		addMorph: self makePurchasesButton;
+		addMorph: self makeHistoryButton;
+		addMorph: self makeEndTurnButton;
+		addMorph: self makeDoJobButton;
+		addMorph: (model moveButton: self makeMoveButton);
+		addMorph: self makeQuitGameButton.
+! !
 
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 11/2/2014 20:58'!
 playButtonSet: aMorph 
@@ -2385,236 +2525,66 @@ seasons: anObject
 
 	seasons := anObject! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 11/2/2014 20:30'!
-setupBoard
-	self name: self class name;
-		openInWorld;
-		color: Farm boardColor;
-		extent: (World width)@(World height * 0.8);
-		sticky: true;
-		layoutPolicy: ProportionalLayout new;
-		addMorph: (PasteUpMorph new 
-			color: Color transparent;
-			extent: self extent)
-! !
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:36:41'!
+setupToken: aPlayer
+	"Place the player's token on the board"
+	| w h |
+	
+	w _ owner morphExtent x * 0.13.
+	h _ w * 0.5.
+	model token id contents: aPlayer identity.
+	model token doubled contents: aPlayer doubledString.
+	model token 
+		color: aPlayer color;
+		morphExtent: w@h;
+		morphPosition: owner morphExtent * (0.006@0.72).
+	pasteup addMorph: model token.
+	^ model token who: aPlayer! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 11/11/2014 20:24'!
-setupButtonsPanel
-	"Set up panel to contain buttons"
-	^ (RectangleMorph new 
-		borderWidth: 0;
-		color: Color transparent;
-		name: 'buttons';
-		layoutPolicy: TableLayout new;
-		listDirection: #leftToRight;
-		listCentering: #center;
-	 	wrapCentering: #center;
-	 	layoutInset: 4 @ 0;
-		cellInset: 12@5;
-		wrapCentering: #center;
-		beSticky;
-	 	wrapDirection: #leftToRight)! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 11/2/2014 20:22'!
-setupButtonsPanel: aBoard 
-	| panel |
-	panel := RectangleMorph new borderWidth: 0;
-				 color: Color transparent;
-				 name: 'buttons';
-				 layoutPolicy: TableLayout new.
-	panel listDirection: #leftToRight;
-		 listCentering: #center;
-		 wrapCentering: #center;
-		 layoutInset: 4 @ 0;
-		cellInset: 12@5;
-		wrapCentering: #center;
-		 wrapDirection: #leftToRight.
-	self
-		addMorph: panel
-		fullFrame: (LayoutFrame
-				fractions: (0 @ 0.2 corner: 1 @ 0.2)
-				offsets: (0 @ 50 negated corner: 5 @ 0)).
-	^ panel! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 11/18/2014 20:39'!
-setupCells: aBoard 
-	| set bm txt |
-	set := OrderedCollection new.
-	1
-		to: self class cellsForGame
-		do: [:k | 
-			| j |
-			j := k - 1.
-			bm := Morph new.
-			aBoard addMorph: bm fullFrame: (LayoutFrame new topFraction: 0.27;
-					 bottomFraction: 0.7;
-					 leftFraction: j / 7;
-					 rightFraction: k / 7).
-			bm color: self class cellColor;
-				beSticky;
-				name: 'cell'.
-			bm 	extension locked: true.
-			txt := TextMorph new.
-			bm
-				addMorph: txt
-				fullFrame: (LayoutFrame
-						fractions: (0 @ 0 corner: 1 @ 0.5)
-						offsets: nil).
-			txt fillsOwner: true;
-				 borderWidth: 1.
-			set add: txt].
-	^ set! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 7/6/2013 12:57'!
-setupMarkerAreas: theCells 
-	| area |
-	theCells
-		do: [:each | 
-			area := MarkerArea new.
-			each owner addMorph: area.
-			area winitialize]! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 11/2/2014 21:04'!
-setupMorphs: aBoard
-	self handler buttons: (self setupButtonsPanel: aBoard). 
-	self setupTitle: aBoard. 
-	self setupNumbers: aBoard. 
-	self cells: (self setupCells: aBoard). 
-	self setupMarkerAreas: self cells.
-	self handler cellsAt: 1.
-	self handler path: (self setupPath: aBoard).
-	self startButtonSet: aBoard.
-	self pasteUp: (self findA: PasteUpMorph).
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 11/3/2014 10:54'!
-setupNumbers
-	"Answer the initial display numbers"
-	^ TTSampleStringMorph new 
-		font: TTFontDescription default;
-		color: Color white;
-		name: 'numbers';
-		string: '____'.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 12/3/2011 11:16'!
-setupNumbers: aBoard
-	|title|
-	title := TTSampleStringMorph new font: TTFontDescription default..
-	aBoard
-		addMorph: title
-		fullFrame: (
-			LayoutFrame
-             	fractions: (0 @ 0.8 corner: 1 @ 0.8) 
-			offsets: (0@50 negated corner: 0@0)
-		).
-	title color: Color white;
-		name: 'numbers';
-		string: '____'.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 11/3/2014 11:35'!
-setupPath
-	"Set up the path for tokens"
-	^ BorderedMorph new 
-		beTransparent; 
-		extent: 0 @ 0; 
-		borderWidth: 0; 
-		layoutInset: 0; 
-		cellInset: 0; fenceEnabled; 
-		layoutPolicy: ProportionalLayout new; 
-		listCentering: #topLeft; 
-		cellPositioning: #center; 
-		hResizing: #spaceFill; 
-		vResizing: #shrinkWrap; 
-		name: 'path'.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 12/31/2011 10:10'!
-setupPath: aBoard 
-	| via |
-	via := BorderedMorph new 
-		beTransparent; 
-		extent: 0 @ 0; 
-		borderWidth: 0; 
-		layoutInset: 0; 
-		cellInset: 0; fenceEnabled; 
-		layoutPolicy: ProportionalLayout new; 
-		listCentering: #topLeft; 
-		cellPositioning: #center; 
-		hResizing: #spaceFill; 
-		vResizing: #shrinkWrap; 
-		name: 'path'.
-	aBoard addMorph: via fullFrame: (LayoutFrame new topFraction: 0.6;
-			 bottomFraction: 0.7;
-			 leftFraction: 0.0;
-			 rightFraction: 1.0).
-	^ via! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 11/3/2014 10:48'!
-setupTitle
-	"Answer the title of the game"
-	^ TTSampleStringMorph new 
-		font: TTFontDescription default;
-		color: Color white;
-		name: 'title';
-		string: 'Farming Game'.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 11/3/2014 10:03'!
-setupTitle: aBoard
-	|title|
-	title := TTSampleStringMorph new font: TTFontDescription default..
-	(self findA: PasteUpMorph)
-		addMorph: title
-		fullFrame: (
-			LayoutFrame
-              	fractions: (0 @ 0.1 corner: 1 @ 0.1) 
-			offsets: (0@50 negated corner: 0@0)
-		).
-	title color: Color white;
-		name: 'title';
-		string: 'Farming Game'.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 2/26/2012 17:20'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:35:18'!
 showSeasons: associations 
-	| set d pt bm txt |
-	set := OrderedCollection new.
-	d := self cells size.
-	associations
-		do: [:k | 
-			| first last sea txtcolor |
-			pt := k key.
-			first := pt x - 1.
-			last := pt y.
-			bm := Morph new.
-			bm name: 'season'.
-			self board addMorph: bm fullFrame: (LayoutFrame new topFraction: 0.23;
-					 bottomFraction: 0.27;
-					 leftFraction: first / d;
-					 rightFraction: last / d).
-			sea := k value.
-			bm
-				color: sea color.
-			txt := TextMorph new
-						beAllFont: ((TextStyle default fontOfSize: 14)
-								emphasized: 1).
-			bm
-				addMorph: txt
-				fullFrame: (LayoutFrame
-						fractions: (0.4 @ 0 corner: 0.6 @ 1)
-						offsets: nil).
-			sea textColor ifTrue: [txtcolor := Color white]
-				ifFalse: [txtcolor := Color black].
-			txt fillsOwner: true;
-				 color: txtcolor;
-				 contents: sea desc;
-				 centered;
-				 borderWidth: 0.
+	"Display the seasons contained in associations"
+	| width set bm txt dx |
+			
+	seasonsArea removeAllMorphs.
+	width _ layoutMorph morphWidth / self class cellsForGame.
+	set _ OrderedCollection new.
+	associations do: [:k | 	| first last sea |
+			first _ k key x - 1.
+			last _ k key y.
+			bm _ LayoutMorph newRow
+				padding: #center;
+				name: #season.
+			seasonsArea addMorph: bm
+				layoutSpec: (LayoutSpec proportionalWidth: width * (last - first) proportionalHeight: 1.0).
+			sea _ k value.
+			bm color: sea color.
+			txt _ StringMorph new
+				emphasis: 1;  "emphasis: bold=1"
+				font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+			bm addMorph: txt..
+			txt color: (sea textColor
+				ifTrue: [Color white]
+				ifFalse: [Color black]).
+			txt contents: sea desc.
+			dx _ Construction ironMap.
+			(dx includesKey: sea desc asSymbol)
+				ifTrue: [txt
+						setBalloonText: ('Requires ' , (dx at: sea desc asSymbol) asString)].
 			set add: txt].
-	self rmSeasons.
 	^ set! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:35:45'!
+startButtonSet
+	"Answer the buttons used to start the game"
+
+	buttonArea 
+		removeAllMorphs;
+		addMorph: self makeAddPlayerButton;
+		addMorph: self makeSettingsButton;
+		addMorph: self makeTourButton;
+		addMorph: self makeQuitGameButton.
+! !
 
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 18:30'!
 startButtonSet: aMorph 
