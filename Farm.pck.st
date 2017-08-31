@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 8:51:48 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 11:50:26 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 9!
+!provides: 'Farm' 1 10!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1091,7 +1091,7 @@ setUpLeases
 		add: 'Toppenish' -> nil;
 		 yourself ! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 20:40:00'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 11:47:43'!
 setUpSpaces
 	"Initialize the board spaces"
 	| col |
@@ -1099,7 +1099,7 @@ setUpSpaces
 	col _ OrderedCollection new.
 	1 to: self class describeSpaces size do: [:ix |
 		col add: (BoardSpace new
-			label: (self class describeSpaces at: ix) label;
+			label: (self class describeSpaces at: ix);
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
@@ -1896,208 +1896,251 @@ cellsForGame
 	
 	^ 7! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 8/30/2017 18:57:23'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 8/31/2017 11:46:57'!
 describeSpaces
 	"Descriptions for the spaces on the board."
 	
 	^ OrderedCollection new
-		add: (Field new
-			label: 'WINTER';
-			heading: 'CHRISTMAS' with: 'VACATION';
-			description: 'COLLECT $1000 Christmas bonus.
-COLLECT year''s wage of $5000 as you pass.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'January' with: 'Week 1';
-			description: 'PAY 10% interest on Bank Notes on hand');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'January' with: 'Week 2';
-			description: 'Hibernate. Draw Option to Buy');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'January' with: 'Week 3';
-			description: 'Bitter cold spell. PAY $500 if you own cows.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'January' with: 'Week 4';
-			description: 'Beautiful Days!! Double all your hay harvests this year.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'February' with: 'Week 1';
-			description: 'Warm snap. You''re in the field 2 weeks early. COLLECT $1000.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'February' with: 'Week 2';
-			description: 'Stuck in a muddy corral. Draw Farmer''s Fate.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'February' with: 'Week 3';
-			description: 'Ground thaws. Start plowing early Go directly to Spring Planting.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'February' with: 'Week 4';
-			description: 'Rainy day. Draw Option to Buy.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'March' with: 'Week 1';
-			description: 'Becomes obvious your wheat has winter killed. PAY $2000 to replant.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'March' with: 'Week 2';
-			description: 'Start plowing late. PAY $500.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'March' with: 'Week 3';
-			description: 'Hurt your back. Go back to the second week in January.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'March' with: 'Week 4';
-			description: 'Frost forces you to heat fruit. PAY $2000 if you own fruit.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'April' with: 'Week 1';
-			description: 'Done plowing. Take a day off. Draw Option to Buy.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'SPRING' with: 'PLANTING';
-			description: 'Plant corn on time. Double corn yield this year.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'April' with: 'Week 3';
-			description: 'More rain. Field work shut down. PAY $500.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'April' with: 'Week 4';
-			description: 'Equipment breakdown. PAY $1000.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'May' with: 'Week 1';
-			description: 'The whole valley is green. COLLECT $500.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'May' with: 'Week 2';
-			description: 'Wind storm makes you replant corn. PAY $500.');
-		add: (Field new
-			label: '1ST HAY CUTTING';
-			heading: 'May' with: 'Week 3';
-			description: 'Cut your hay just right. COLLECT $1000 bonus.');
-		add: (Field new
-			label: '1ST HAY CUTTING';
-			heading: 'May' with: 'Week 4';
-			description: 'Memorial Day weekend. Draw Option to Buy.');
-		add: (Field new
-			label: '1ST HAY CUTTING';
-			heading: 'JUNE' with: 'Week 1';
-			description: 'Rain storm ruins unbaled hay. Cut your harvest check in half.');
-		add: (Field new
-			label: '1ST HAY CUTTING';
-			heading: 'June' with: 'Week 2';
-			description: 'Good growing weather. COLLECT $500 bonus.');
-		add: (Field new
-			label: 'CHERRY HARVEST';
-			heading: 'June' with: 'Week 3';
-			description: 'Rain splits your cherries. Cut your harvest check in half.');
-		add: (Field new
-			label: 'CHERRY HARVEST';
-			heading: 'June' with: 'Week 4';
-			description: 'Dust storm. Draw Farmer''s Fate.');
-		add: (Field new
-			label: 'CHERRY HARVEST';
-			heading: 'INDEPENDENCE' with: 'DAY BASH';
-			description: '');
-		add: (Field new
-			label: '2ND HAY CUTTING';
-			heading: 'July' with: 'Week 1';
-			description: 'Good weather for your second cutting of hay. Double hay harvest check.');
-		add: (Field new
-			label: '2ND HAY CUTTING';
-			heading: 'July' with: 'Week 2';
-			description: 'Hot!! Wish you were in the mountains. Draw Option to Buy.');
-		add: (Field new
-			label: '2ND HAY CUTTING';
-			heading: 'July' with: 'Week 3';
-			description: 'It''s a cooker!! 114 degrees in the shade. Wipe your brow and go to Harvest Moon after getting hay check.');
-		add: (Field new
-			label: 'WHEAT HARVEST';
-			heading: 'July' with: 'Week 4';
-			description: '85 degrees. Wheat heads filling out beautifully. Add $50 per acre to your harvest check.');
-		add: (Field new
-			label: 'WHEAT HARVEST';
-			heading: 'August' with: 'Week 1';
-			description: 'You''re right on time and farming like a pro. Go to the fourth week of February. COLLECT your year''s wage of $5000.');
-		add: (Field new
-			label: 'WHEAT HARVEST';
-			heading: 'August' with: 'Week 2';
-			description: 'Storm clouds brewing. COLLECT $1000, if you have a Harvester.');
-		add: (Field new
-			label: 'WHEAT HARVEST';
-			heading: 'August' with: 'Week 3';
-			description: 'Finish wheat harvest with no breakdowns. COLLECT $500.');
-		add: (Field new
-			label: 'WHEAT HARVEST';
-			heading: 'August' with: 'Week 4';
-			description: 'Rain sprouts unharvested wheat. Cut price $50 per acre on harvest check.');
-		add: (Field new
-			label: '3RD HAY CUTTING';
-			heading: 'September' with: 'Week 1';
-			description: 'Tractor owners: bale hay, then go to third week of November COLLECT your $1000 there, then harvest your fruit.');
-		add: (Field new
-			label: '3RD HAY CUTTING';
-			heading: 'September' with: 'Week 2';
-			description: 'Sunny skies at the County Fair. Draw Option to Buy.');
-		add: (Field new
-			label: 'LIVESTOCK SALES';
-			heading: 'HARVEST' with: 'MOON';
-			description: 'smiles on you. COLLECT $500.');
-		add: (Field new
-			label: 'LIVESTOCK SALES';
-			heading: 'September' with: 'Week 3';
-			description: 'Market collapses. Cut livestock check in half.');
-		add: (Field new
-			label: 'LIVESTOCK SALES';
-			heading: 'September' with: 'Week 4';
-			description: 'Codling Moth damage to apples lowers fruit grade. PAY $2000 if you own fruit.');
-		add: (Field new
-			label: 'LIVESTOCK SALES';
-			heading: 'OCTOBER' with: 'Week 1';
-			description: 'Indian Summer. COLLECT $500.');
-		add: (Field new
-			label: '4TH HAY CUTTING';
-			heading: 'October' with: 'Week 2';
-			description: 'Good Pheasant Hunting. Draw Farmer''s Fate.');
-		add: (Field new
-			label: '4TH HAY CUTTING';
-			heading: 'October' with: 'Week 3';
-			description: 'Park your baler for the winter. Draw Option to Buy.');
-		add: (Field new
-			label: 'APPLE HARVEST';
-			heading: 'October' with: 'Week 4';
-			description: 'Annual Deer Hunt. Draw Farmer''s Fate.');
-		add: (Field new
-			label: 'APPLE HARVEST';
-			heading: 'November' with: 'Week 1';
-			description: 'Irrigation season over. Draw Option to Buy');
-		add: (Field new
-			label: 'APPLE HARVEST';
-			heading: 'November' with: 'Week 2';
-			description: 'Good weather, harvest winding up. COLLECT $500.');
-		add: (Field new
-			label: 'APPLE HARVEST';
-			heading: 'November' with: 'Week 3';
-			description: 'Good weather holding. COLLECT $1000.');
-		add: (Field new
-			label: 'CORN HARVEST';
-			heading: 'November' with: 'Week 4';
-			description: 'Early freeze kills fruit buds. Pay $1000 if you have fruit.');
-		add: (Field new
-			label: 'CORN HARVEST';
-			heading: 'December' with: 'Week 1';
-			description: 'Cold and dry, perfect Field Corn harvesting. COLLECT $500.');
-		add: (Field new
-			label: 'CORN HARVEST';
-			heading: 'December' with: 'Week 2';
-			description: 'First snow. Draw Farmer''s Fate.');
+		add: 'CHRISTMAS
+VACATION
+
+COLLECT $1000 Christmas bonus.
+
+COLLECT year''s wage of $5000 as you pass.';
+
+		add: 'January
+Week 1
+
+PAY 10% interest on Bank Notes on hand';
+
+		add: 'January
+Week 2
+
+Hibernate. Draw Option to Buy';
+
+		add: 'January
+Week 3
+
+Bitter cold spell. PAY $500 if you own cows.';
+
+		add: 'January
+Week 4
+
+Beautiful Days!! Double all your hay harvests this year.';
+
+		add: 'February
+Week 1
+
+Warm snap. You''re in the field 2 weeks early. COLLECT $1000.';
+
+		add: 'February
+Week 2
+
+Stuck in a muddy corral. Draw Farmer''s Fate.';
+
+		add: 'February
+Week 3
+
+Ground thaws. Start plowing early Go directly to Spring Planting.';
+
+		add: 'February
+Week 4
+
+Rainy day. Draw Option to Buy.';
+
+		add: 'March
+Week 1
+
+Becomes obvious your wheat has winter killed. PAY $2000 to replant.';
+
+		add: 'March
+Week 2
+
+Start plowing late. PAY $500.';
+
+		add: 'March
+Week 3
+
+Hurt your back. Go back to the second week in January.';
+
+		add: 'March
+Week 4
+
+Frost forces you to heat fruit. PAY $2000 if you own fruit.';
+
+		add: 'April
+Week 1
+
+Done plowing. Take a day off. Draw Option to Buy.';
+
+		add: 'SPRING PLANTING
+
+Plant corn on time. Double corn yield this year.';
+
+		add: 'April
+Week 3
+
+More rain. Field work shut down. PAY $500.';
+
+		add: 'April
+Week 4
+
+Equipment breakdown. PAY $1000.';
+
+		add: 'May
+Week 1
+
+The whole valley is green. COLLECT $500.';
+
+		add: 'May
+Week 2
+
+Wind storm makes you replant corn. PAY $500.';
+
+		add: 'May
+Week 3
+
+Cut your hay just right. COLLECT $1000 bonus.';
+
+		add: 'May
+Week 4
+
+Memorial Day weekend. Draw Option to Buy.';
+
+		add: 'JUNE
+Week 1
+
+Rain storm ruins unbaled hay. Cut your harvest check in half.';
+
+		add: 'June
+Week 2
+
+Good growing weather. COLLECT $500 bonus.';
+
+		add: 'June
+Week 3
+
+Rain splits your cherries. Cut your harvest check in half.';
+
+		add: 'June
+Week 4
+
+Dust storm. Draw Farmer''s Fate.';
+
+		add: 'INDEPENDENCE
+DAY BASH';
+
+		add: 'July
+Week 1
+
+Good weather for your second cutting of hay. Double hay harvest check.';
+
+		add: 'July
+Week 2
+
+Hot!! Wish you were in the mountains. Draw Option to Buy.';
+
+		add: 'July
+		Week 3
+
+It''s a cooker!! 114 degrees in the shade. Wipe your brow and go to Harvest Moon after getting hay check.';
+
+		add: 'July
+Week 4
+
+85 degrees. Wheat heads filling out beautifully. Add $50 per acre to your harvest check.';
+
+		add: 'August
+Week 1
+
+You''re right on time and farming like a pro. Go to the fourth week of February. COLLECT your year''s wage of $5000.';
+
+		add: 'August
+Week 2
+
+Storm clouds brewing. COLLECT $1000, if you have a Harvester.';
+
+		add: 'August
+Week 3
+
+Finish wheat harvest with no breakdowns. COLLECT $500.';
+
+		add: 'August
+Week 4
+
+Rain sprouts unharvested wheat. Cut price $50 per acre on harvest check.';
+
+		add: 'September
+Week 1
+
+Tractor owners: bale hay, then go to third week of November COLLECT your $1000 there, then harvest your fruit.';
+
+		add: 'September
+Week 2
+
+Sunny skies at the County Fair. Draw Option to Buy.';
+
+		add: 'HARVEST MOON
+smiles on you. COLLECT $500.';
+
+		add: 'September
+Week 3
+
+Market collapses. Cut livestock check in half.';
+
+		add: 'September
+Week 4
+Codling Moth damage to apples lowers fruit grade. PAY $2000 if you own fruit.';
+
+		add: 'OCTOBER
+Week 1
+
+Indian Summer. COLLECT $500.';
+
+		add: 'October
+Week 2
+
+Good Pheasant Hunting. Draw Farmer''s Fate.';
+
+		add: 'October
+Week 3
+
+Park your baler for the winter. Draw Option to Buy.';
+
+		add: 'October
+Week 4
+
+Annual Deer Hunt. Draw Farmer''s Fate.';
+
+		add: 'November
+Week 1
+
+Irrigation season over. Draw Option to Buy';
+
+		add: 'November
+Week 2
+
+Good weather, harvest winding up. COLLECT $500.';
+
+		add: 'November
+Week 3
+
+Good weather holding. COLLECT $1000.';
+
+		add: 'November
+Week 4
+
+Early freeze kills fruit buds. Pay $1000 if you have fruit.';
+
+		add: 'December
+Week 1
+
+Cold and dry, perfect Field Corn harvesting. COLLECT $500.';
+
+		add: 'December
+Week 2
+
+First snow. Draw Farmer''s Fate.';
 	yourself! !
 
 !Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/19/2011 16:59'!
@@ -2167,14 +2210,12 @@ paymentIncrement
 	"Answer the payment increment for displaying loan payment choices"
 	^ 1000! !
 
-!Farm class methodsFor: 'setup' stamp: 'dhn 8/30/2017 18:29:36'!
+!Farm class methodsFor: 'setup' stamp: 'dhn 8/31/2017 10:58:45'!
 season
 	"Answer a collection of Seasons in order of their starting board positions."
+	
 	^ OrderedCollection new
-		add: (FarmSeason new
-			desc: 'WINTER';
-			enabled: true;
-			color: Color black; range: 1 @ 19; textColor: true);
+		add: (FarmSeason new desc: 'WINTER'; color: Color black; range: 1 @ 19; textColor: true);
 		addLast: (FarmSeason new
 			desc: '1ST HAY CUTTING';
 			assetName: 'Hay';
