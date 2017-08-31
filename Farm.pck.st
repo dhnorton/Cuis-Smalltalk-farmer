@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 5:00:21 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 5:25:04 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 19!
+!provides: 'Farm' 1 20!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer'
+	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer windowCount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -628,18 +628,36 @@ enableOption
 		ifTrue: [self disableAll: {'Option'}]
 		ifFalse: [self enableAll: {'Option'}]! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/23/2014 12:01'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/31/2017 17:16:55'!
 endTurn
-	| pl |
-	pl := self currentPlayer.
-	pl debt < FarmingGame debtLimit
-		ifTrue: [self removeFromGame].
-	pl netAssets >= self goal
-		ifTrue: [self won
-				ifFalse: [self declareWinner]].
-	pl history at: pl turns put: pl turns @ pl netAssets.
-	self deleteAllWindows.
-	super endTurn! !
+	"End a player's turn"
+	
+	(spaces atWrap: currentPlayer position) markAddFor: currentPlayer.
+"	self addMarkerIDInMarks; removeAllMarkersInCells."
+	self enableAll: {'Auction'}.
+	currentPlayer cash < 0
+		ifTrue: [self disableAll: {'Move'}.
+			currentPlayer outOfAssets
+				ifTrue: [self removeFromGame]
+				ifFalse: [
+					self declareBroke: currentPlayer identity.
+					self disableAll: {'End Turn'}]]
+		ifFalse: [
+			currentPlayer debt < currentPlayer playerDebtLimit value
+				ifTrue: [
+					self declareOver: currentPlayer identity.
+					self disableAll: {'End Turn'}]
+				ifFalse: [currentPlayer netAssets >= self goal
+						ifTrue: [won
+								ifFalse: [self declareWinner]].
+					self disableAll: {'Harvest'}.
+					self triggerEvent: #deleteOpenWindows.
+					windowCount _ 0.
+					self nextPlayer.
+					self won
+						ifTrue: [self wonButtonsState]
+						ifFalse: [self enableAll: {'Move'. 'Stats'}.
+							self disableAll: {'End Turn'}]]]! !
 
 !Farm methodsFor: 'options' stamp: 'dhn 10/16/2011 12:59'!
 exercisedOptions
@@ -2560,11 +2578,11 @@ makeAddPlayerButton
 		setBalloonText: 'Use this button to enter names of two to six players;
 entering an empty name or cancel will start the game'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:07:03'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:19:59'!
 makeAuctionButton
 	"Answer the 'Auction' button"
 
-	^ (GameButtonMorph label: 'Auction' action: #doAuction state: true model: self)
+	^ (GameButtonMorph label: 'Auction' action: #doAuction state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Auction options and equipment'! !
 
@@ -2587,11 +2605,11 @@ makeButtonArea
 	^ buttonArea
 		! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:17:50'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:09'!
 makeBuyOptionButton
 	"Answer the 'Option' button"
 
-	^ (GameButtonMorph label: 'Option' action: #showOpts state: true model: self)
+	^ (GameButtonMorph label: 'Option' action: #showOpts state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'See what options you have and make purchases during WINTER.'! !
 
@@ -2635,27 +2653,27 @@ makeCellsArea
 		
 ! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:25:54'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:16'!
 makeDrawFateButton
 	"Answer the 'Fate' button"
 
-	^ (GameButtonMorph label: 'Fate' action: #drawFate state: true model: self)
+	^ (GameButtonMorph label: 'Fate' action: #drawFate state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Determine your Farmer''s Fate.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:19:19'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:18:05'!
 makeEndTurnButton
 	"Answer the 'End Turn' button"
 
-	^ (GameButtonMorph label: 'End Turn' action: #endTurn state: true model: self)
+	^ (GameButtonMorph label: 'End Turn' action: #endTurn state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:28:43'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:29'!
 makeHarvestButton
 	"Answer the 'Harvest' button"
 
-	^ (GameButtonMorph label: 'Harvest' action: #harvest state: true model: self)
+	^ (GameButtonMorph label: 'Harvest' action: #harvest state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Harvest the crop for the season indicated above the space.'! !
 
@@ -2698,27 +2716,27 @@ makeOthersArea
 		name: #others;
 		padding: #center! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:22:43'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:41'!
 makePayExpenseButton
 	"Answer the 'Expense' button"
 
-	^ (GameButtonMorph label: 'Expense' action: #payExpense state: true model: self)
+	^ (GameButtonMorph label: 'Expense' action: #payExpense state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Pay the farming expenses which are owed.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:51:04'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:49'!
 makePayLoanButton
 	"Answer the 'Pay Loan' button"
 
-	^ (GameButtonMorph label: 'Pay Loan' action: #payLoan state: true model: self)
+	^ (GameButtonMorph label: 'Pay Loan' action: #payLoan state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Transfer cash to pay off some debt.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:35:44'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:22:04'!
 makeQuitGameButton
 	"Answer the 'Quit' button"
 	
-	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: self)
+	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
 		setBalloonText: 'Completely ends the game. Nothing is saved.';
 		color: (Color orange alpha: 0.9)! !
@@ -2744,11 +2762,11 @@ makeSettingsButton
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Change some of the game parameters'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:40:26'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:21:14'!
 makeShowStatsButton
 	"Answer the 'Stats' button"
 
-	^ (GameButtonMorph label: 'Stats' action: #doStats state: true model: self)
+	^ (GameButtonMorph label: 'Stats' action: #doStats state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
 
@@ -4196,16 +4214,17 @@ ifHarvester: anAmount
 ifTractor
 	^ 0 < (assets at: #Tractor) quantity! !
 
-!Farmer methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 18:30:27'!
+!Farmer methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 17:23:55'!
 initialize
+
 	FarmerTest isNil
-		ifFalse: [identity := FarmerTest].
-	cash := 5000.
-	debt := 5000 negated.
-	assets := self setUpAssets.
-	harvests := Farm season copy.
-	options := OrderedCollection new.
-	history := Array new: 180! !
+		ifFalse: [identity _ FarmerTest].
+	cash _ 5000.
+	debt _ 5000 negated.
+	assets _ self setUpAssets.
+	harvests _ Farm season copy.
+	options _ OrderedCollection new.
+	history _ OrderedCollection with: self netAssets! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 11/23/2014 12:02'!
 interest: aRate
