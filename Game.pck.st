@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 21 August 2017 at 1:29:00 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 4:22:29 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 154!
+!provides: 'Game' 1 155!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -316,6 +316,12 @@ currentPlayer
 currentPlayer: anObject
 	currentPlayer := anObject! !
 
+!Game methodsFor: 'initialize' stamp: 'dhn 8/31/2017 16:10:39'!
+describeSpaces
+	"Descriptions for the spaces on the board."
+
+	self subclassResponsibility ! !
+
 !Game methodsFor: 'operating' stamp: 'dhn 8/4/2016 18:47:37'!
 disableAll: aCollection
 	"Disable each button named in aCollection"
@@ -394,11 +400,12 @@ initialButtonState
 	"Establish the button state at the start of the game"
 	self subclassResponsibility! !
 
-!Game methodsFor: 'initialize' stamp: 'dhn 2/16/2017 09:36:09'!
+!Game methodsFor: 'initialize' stamp: 'dhn 8/31/2017 16:08:04'!
 initialize
 
 	players _ OrderedCollection new.
-	cells _ OrderedCollection new! !
+	cells _ OrderedCollection new.
+	spaceFreq _ Histogram ofSize: self class describeSpaces size! !
 
 !Game methodsFor: 'initialize' stamp: 'dhn 7/11/2013 14:53'!
 markerSize
