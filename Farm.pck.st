@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 12:59:19 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 2:52:08 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 14!
+!provides: 'Farm' 1 15!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow'
+	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -867,6 +867,12 @@ livestock: quantity
 		amount: CattleOnFarm auctionQuantity.
 	currentPlayer drawnOption: true.
 	^ quantity! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 8/31/2017 14:33:52'!
+moveButton: anObject
+	"Set the value of moveButton"
+	
+	^ moveButton _ anObject! !
 
 !Farm methodsFor: 'accessing' stamp: 'dhn 12/12/2011 21:46'!
 optionsWindow
@@ -1840,6 +1846,27 @@ space9
 	self updateAllWindows.
 	self enableAll: {'Option'. 'End Turn'}! !
 
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 13:00:50'!
+testGoal
+	"Answer the value of TestGoal"
+	| g x |
+	
+	TestMode ifTrue: [
+		TestGoal 
+			ifNil: [g _ goal asString]
+			ifNotNil: [g _ TestGoal asString].
+		x _ (FillInTheBlankMorph request: 'Test Goal?' initialAnswer: g).
+		x ~= '' 
+			ifTrue:  [self testGoal: x asNumber]
+			ifFalse: [self testGoal: self goal].
+		^ TestGoal]! !
+
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 13:01:27'!
+testGoal: anObject
+	"Set the value of TestGoal"
+	
+	TestGoal _ anObject! !
+
 !Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 19:47:18'!
 testMode
 	"Answer the value of testMode"
@@ -2407,7 +2434,7 @@ layoutSubmorphs
     super layoutSubmorphs.
     self board morphExtent: self board owner morphExtent! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:45:03'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:18:22'!
 makeAddPlayerButton
 	"Answer the 'Players' button"
 
@@ -2416,27 +2443,13 @@ makeAddPlayerButton
 		setBalloonText: 'Use this button to enter names of two to six players;
 entering an empty name or cancel will start the game'! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 14:32'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:07:03'!
 makeAuctionButton
-	| btn |
-	btn := self
-				makeButton: 'Auction'
-				action: #doAuction
-				state: nil.
-	btn setBalloonText: 'Auction options and equipment' maxLineLength: 20.
-	^ btn! !
+	"Answer the 'Auction' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 5/17/2014 21:30'!
-makeButton: label action: actionSymbol state: stateSymbol 
-	| btn |
-	btn := GameButtonMorph new label: label;
-				 extent: 100 @ 40.
-	btn target: self handler;
-		 name: label;
-		 useRoundedCorners;
-		 actionSelector: actionSymbol;
-		balloonFont: GameBoard gameFont.
-	^ btn! !
+	^ (GameButtonMorph label: 'Auction' action: #doAuction state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Auction options and equipment'! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:29:09'!
 makeButtonArea
@@ -2457,13 +2470,13 @@ makeButtonArea
 	^ buttonArea
 		! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 1/21/2012 16:53'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:17:50'!
 makeBuyOptionButton
-	| btn |
-	btn := self makeButton: 'Option' action: #showOpts state: nil.
-	btn setBalloonText: 'See what options you have and make purchases during WINTER.' maxLineLength: 30.
-	^btn
-! !
+	"Answer the 'Option' button"
+
+	^ (GameButtonMorph label: 'Option' action: #showOpts state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'See what options you have and make purchases during WINTER.'! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 18:49:08'!
 makeCellsArea
@@ -2505,37 +2518,37 @@ makeCellsArea
 		
 ! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:03'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:25:54'!
 makeDrawFateButton
-	| btn |
-	btn := self makeButton: 'Fate' action: #drawFate state: nil.
-	btn setBalloonText: 'Determine your Farmer''s Fate.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'Fate' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:47'!
+	^ (GameButtonMorph label: 'Fate' action: #drawFate state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Determine your Farmer''s Fate.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:19:19'!
 makeEndTurnButton
-	| btn |
-	btn := self makeButton: 'End Turn' action: #endTurn state: nil.
-	btn setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'End Turn' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:00'!
+	^ (GameButtonMorph label: 'End Turn' action: #endTurn state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:28:43'!
 makeHarvestButton
-	| btn |
-	btn := self makeButton: 'Harvest' action: #harvest state: nil.
-	btn setBalloonText: 'Harvest the crop for the season indicated above the space.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'Harvest' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 12/7/2011 13:01'!
+	^ (GameButtonMorph label: 'Harvest' action: #harvest state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Harvest the crop for the season indicated above the space.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:35:05'!
 makeMoveButton
-	| btn |
-	btn := self makeButton: 'Move' action: #move state: nil.
-	btn setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'Move' button"
+
+	^ (GameButtonMorph label: 'Move' action: #move state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.'! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:31:59'!
 makeNumbersArea
@@ -2568,23 +2581,23 @@ makeOthersArea
 		name: #others;
 		padding: #center! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:04'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:22:43'!
 makePayExpenseButton
-	| btn |
-	btn := self makeButton: 'Expense' action: #payExpense state: nil.
-	btn setBalloonText: 'Pay the farming expenses which are owed.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'Expense' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/29/2011 11:36'!
+	^ (GameButtonMorph label: 'Expense' action: #payExpense state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Pay the farming expenses which are owed.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:51:04'!
 makePayLoanButton
-	| btn |
-	btn := self makeButton: 'Pay Loan' action: #payLoan state: nil.
-	btn setBalloonText: 'Transfer some cash to pay off some debt.' maxLineLength: 20.
-	^btn
-! !
+	"Answer the 'Pay Loan' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:47:09'!
+	^ (GameButtonMorph label: 'Pay Loan' action: #payLoan state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Transfer cash to pay off some debt.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:35:44'!
 makeQuitGameButton
 	"Answer the 'Quit' button"
 	
@@ -2606,7 +2619,7 @@ makeSeasonsArea
 			color: Color lightGreen;
 			name: #seasons! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:45:49'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:38:47'!
 makeSettingsButton
 	"Answer the 'Settings' button"
 	
@@ -2614,15 +2627,15 @@ makeSettingsButton
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Change some of the game parameters'! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/3/2014 16:40'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:40:26'!
 makeShowStatsButton
-	| btn |
-	btn := self makeButton: 'Stats' action: #doStats state: nil.
-	btn setBalloonText: 'Show statistics which have been accumulated during the game.' maxLineLength: 35.
-	^btn
-! !
+	"Answer the 'Stats' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:46:25'!
+	^ (GameButtonMorph label: 'Stats' action: #doStats state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:40:43'!
 makeTourButton
 	"Answer the 'Tour' button"
 	
@@ -2642,48 +2655,22 @@ namesCache: anObject
 
 	namesCache := anObject! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:34:04'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:34:48'!
 playButtonSet
 	"Answer the buttons used to play the game"
 
 	buttonArea 
 		removeAllMorphs;
 		addMorph: self makeShowStatsButton;
-		addMorph: self makePayLoanButton;
 		addMorph: self makeAuctionButton;
-		addMorph: self makePurchasesButton;
-		addMorph: self makeHistoryButton;
+		addMorph: self makePayLoanButton;
+		addMorph: self makeBuyOptionButton;
 		addMorph: self makeEndTurnButton;
-		addMorph: self makeDoJobButton;
+		addMorph: self makePayExpenseButton;
+		addMorph: self makeDrawFateButton;
+		addMorph: self makeHarvestButton;
 		addMorph: (model moveButton: self makeMoveButton);
-		addMorph: self makeQuitGameButton.
-! !
-
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 11/2/2014 20:58'!
-playButtonSet: aMorph 
-	| sub |
-	sub := aMorph submorphs
-		detect: [:p | 'buttons' = p externalName]
-		ifNone: [self halt].
-	self rmButtons: sub.
-	sub addAllMorphs: (OrderedCollection new
-		add: self makeShowStatsButton;
-		add: self makeAuctionButton;
-		add: self makePayLoanButton;
-		add: self makeBuyOptionButton;
-		add: self makeEndTurnButton;
-		add: self makePayExpenseButton;
-		add: self makeDrawFateButton;
-		add: self makeHarvestButton;
-		add: self makeMoveButton;
-		add: self makeQuitGameButton;
-		yourself).
-! !
-
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/16/2011 13:14'!
-quitGameExitSqueakCheck
-	"Use the Preferences cmdDotEnabled as an indicator that we are run-time or not."
-	Preferences cmdDotEnabled ifFalse: [Smalltalk quitPrimitive]! !
+		addMorph: self makeQuitGameButton! !
 
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2011 21:40'!
 rmButtons: aMorph
@@ -2766,18 +2753,6 @@ startButtonSet
 		addMorph: self makeTourButton;
 		addMorph: self makeQuitGameButton.
 ! !
-
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 18:30'!
-startButtonSet: aMorph 
-	| sub |
-	sub := aMorph submorphs
-				detect: [:ea | 'buttons' = ea externalName]
-				ifNone: [^ nil].
-	self rmButtons: sub.
-	sub addMorph: self makeQuitGameButton.
-	sub addMorph: self makeTourButton.
-	sub addMorph: self makeSettingsButton.
-	sub addMorph: self makeAddPlayerButton! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 12:58:40'!
 startGame
