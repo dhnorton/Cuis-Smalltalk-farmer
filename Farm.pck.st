@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 12:51:40 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 12:59:19 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 13!
+!provides: 'Farm' 1 14!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2778,6 +2778,23 @@ startButtonSet: aMorph
 	sub addMorph: self makeTourButton.
 	sub addMorph: self makeSettingsButton.
 	sub addMorph: self makeAddPlayerButton! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 12:58:40'!
+startGame
+	"Change the buttons and start the game"
+	
+	self playButtonSet.
+	model players do: [:ea | 
+		ea 
+			when: #displayInvoice 
+			send: #displayInvoice:title: 
+			to: self 
+			withArguments: #(#invoice #heading)].
+	model playerIndex: 0. "retain players in order of entry"
+	model 
+		testGoal;
+		nextPlayer.
+	model initialButtonState! !
 
 !FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
 tourAt: anInterval 
