@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 2:52:08 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 3:16:12 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 15!
+!provides: 'Farm' 1 16!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -14,7 +14,7 @@ Farm class
 
 !classDefinition: #FarmToken category: #'Farm-Graphics'!
 Token subclass: #FarmToken
-	instanceVariableNames: ''
+	instanceVariableNames: 'doubled'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
@@ -312,6 +312,9 @@ ProtoObject subclass: #StatListFarm
 StatListFarm class
 	instanceVariableNames: ''!
 
+
+!FarmToken commentStamp: '<historical>' prior: 0!
+The game piece for a farmer - a player in the Farming Game.!
 
 !FarmingGame commentStamp: '<historical>' prior: 0!
 Manage the visual effects of the Farming Game.
@@ -1109,12 +1112,12 @@ setUpSpaces
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 12:30:05'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 15:15:04'!
 setUpToken
 	"Answer a token, used throughout the game, for the current player."
 	| tok |
 	
-	tok _ Token newFor: self.
+	tok _ FarmToken newFor: self.
 	tok openInWorld: world.
 	tok morphExtent: world morphExtent * (0.090@0.080).
 	tok morphPosition: tok posAdjust.
@@ -1952,6 +1955,12 @@ cellsForGame
 	
 	^ 7! !
 
+!Farm class methodsFor: 'operation' stamp: 'dhn 8/31/2017 15:00:11'!
+defaultGoal
+	"Answer the default winning net asset goal"
+	
+	^ 250000! !
+
 !Farm class methodsFor: 'operation' stamp: 'dhn 8/31/2017 11:46:57'!
 describeSpaces
 	"Descriptions for the spaces on the board."
@@ -2324,13 +2333,58 @@ statusList
 	"Answer the list of assets in order suitable for status"
 	^ #('Hay' 'Corn' 'Wheat' 'Apples' 'Cherries' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
 
-!FarmToken methodsFor: 'as yet unclassified' stamp: 'dhn 5/17/2014 21:38'!
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:10:40'!
 initialize
+
 	super initialize.
-	self cellPositioning: #leftCenter.
-	self setBalloonText: 'A token representing the player. When the Move button is clicked, a die is "rolled" then the token moves that number of spaces.' maxLineLength: 30.
-	self balloonFont: GameBoard gameFont.
-! !
+	
+	labelArea _ LayoutMorph newColumn 
+		layoutSpec: LayoutSpec useAll;
+		color: Color transparent;
+		name: 'label area';
+		separation: 1;
+		padding: #center.
+	labelArea
+		addMorph: self makeIdArea;
+		addMorph: self makeDoubledArea.
+
+	self addMorphFront: labelArea! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:13:17'!
+makeDoubledArea
+	"Lay out the area for the arrow"
+	| area |
+	
+	area _ LayoutMorph newRow
+		color: Color transparent;
+		name: #doubled;
+		padding: #center.
+	
+	doubled _ (StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
+		
+	area addMorph: doubled.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0)! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:11:56'!
+makeIdArea
+	"Lay out the area for the arrow"
+	| area |
+	
+	area _ LayoutMorph newRow
+		color: Color transparent;
+		name: #id;
+		padding: #center.
+	
+	id _ (StringMorph contents: 'Player') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
+		
+	area addMorph: id.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0)! !
 
 !FarmToken methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2013 20:26'!
 waiting
@@ -2371,6 +2425,41 @@ buildMorphicWindow
 describe
 
 	^ ''! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 14:57:10'!
+displayNumbers
+	"Display cash, debt, and goal progress"
+	| c d net otherLead pluralForm others |
+
+	c _ '$', model currentPlayer cash truncated printStringWithCommas.
+	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
+	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
+	numbersArea submorphs first 
+		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+		color: model currentPlayer color.
+	pluralForm _ model players size = 2
+		ifTrue: ['Player''s']
+		ifFalse: ['Players'''].
+	otherLead _ (StringMorph contents: (String streamContents: [:string |
+		string
+			nextPutAll: 'Other ';
+			nextPutAll: pluralForm;
+			nextPutAll: ' Cash: '])).
+	otherLead
+		emphasis: AbstractFont boldCode;
+		color: Color lightBrown;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+	othersArea 
+		removeAllMorphs;
+		addMorph: otherLead.
+	others _ model players select: [:a | a ~= model currentPlayer].
+	others do: [:ea | | x |
+		x _ ' $', ea cash truncated printStringWithCommas.
+		othersArea addMorph: ((StringMorph contents: x) 
+			emphasis: AbstractFont boldCode;
+			color: ea color;
+			setBalloonText: 'cash held by ', ea identity;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
 
 !FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:38:51'!
 doTour
@@ -2770,6 +2859,45 @@ startGame
 		testGoal;
 		nextPlayer.
 	model initialButtonState! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 15:04:10'!
+titleChange: aPlayer
+	"Change the title, showing player data in color"
+	"Display cash, debt, and goal progress"
+	| c d net otherLead pluralForm others |
+	
+	gameTitle contents: aPlayer identity , '''s turn.'.
+	gameTitle color: aPlayer color.
+	
+	c _ '$', model currentPlayer cash truncated printStringWithCommas.
+	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
+	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
+	numbersArea submorphs first 
+		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+		color: model currentPlayer color.
+	pluralForm _ model players size = 2
+		ifTrue: ['Player''s']
+		ifFalse: ['Players'''].
+	otherLead _ (StringMorph contents: (String streamContents: [:string |
+		string
+			nextPutAll: 'Other ';
+			nextPutAll: pluralForm;
+			nextPutAll: ' Cash: '])).
+	otherLead
+		emphasis: AbstractFont boldCode;
+		color: Color lightBrown;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+	othersArea 
+		removeAllMorphs;
+		addMorph: otherLead.
+	others _ model players select: [:a | a ~= model currentPlayer].
+	others do: [:ea | | x |
+		x _ ' $', ea cash truncated printStringWithCommas.
+		othersArea addMorph: ((StringMorph contents: x) 
+			emphasis: AbstractFont boldCode;
+			color: ea color;
+			setBalloonText: 'cash held by ', ea identity;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
 
 !FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
 tourAt: anInterval 
