@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 8:51:48 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 5:25:04 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 9!
+!provides: 'Farm' 1 20!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow'
+	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer windowCount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -14,7 +14,7 @@ Farm class
 
 !classDefinition: #FarmToken category: #'Farm-Graphics'!
 Token subclass: #FarmToken
-	instanceVariableNames: ''
+	instanceVariableNames: 'doubled'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
@@ -224,7 +224,7 @@ Toppenish class
 
 !classDefinition: #Farmer category: #'Farm-Model'!
 Gamer subclass: #Farmer
-	instanceVariableNames: 'offFarm options drawnOption garnish emergencies harvests'
+	instanceVariableNames: 'offFarm options drawnOption garnish emergencies harvests markets'
 	classVariableNames: 'FarmerTest'
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -313,6 +313,9 @@ StatListFarm class
 	instanceVariableNames: ''!
 
 
+!FarmToken commentStamp: '<historical>' prior: 0!
+The game piece for a farmer - a player in the Farming Game.!
+
 !FarmingGame commentStamp: '<historical>' prior: 0!
 Manage the visual effects of the Farming Game.
 
@@ -324,10 +327,8 @@ http://farmgame.com/product/woo-single-2/
 
 !
 
-!Farmer commentStamp: 'dhn 9/5/2011 13:17' prior: 0!
+!Farmer commentStamp: '<historical>' prior: 0!
 A player in the Farming Game.
-
-Instance Variables
 !
 
 !Field commentStamp: '<historical>' prior: 0!
@@ -627,18 +628,36 @@ enableOption
 		ifTrue: [self disableAll: {'Option'}]
 		ifFalse: [self enableAll: {'Option'}]! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/23/2014 12:01'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/31/2017 17:16:55'!
 endTurn
-	| pl |
-	pl := self currentPlayer.
-	pl debt < FarmingGame debtLimit
-		ifTrue: [self removeFromGame].
-	pl netAssets >= self goal
-		ifTrue: [self won
-				ifFalse: [self declareWinner]].
-	pl history at: pl turns put: pl turns @ pl netAssets.
-	self deleteAllWindows.
-	super endTurn! !
+	"End a player's turn"
+	
+	(spaces atWrap: currentPlayer position) markAddFor: currentPlayer.
+"	self addMarkerIDInMarks; removeAllMarkersInCells."
+	self enableAll: {'Auction'}.
+	currentPlayer cash < 0
+		ifTrue: [self disableAll: {'Move'}.
+			currentPlayer outOfAssets
+				ifTrue: [self removeFromGame]
+				ifFalse: [
+					self declareBroke: currentPlayer identity.
+					self disableAll: {'End Turn'}]]
+		ifFalse: [
+			currentPlayer debt < currentPlayer playerDebtLimit value
+				ifTrue: [
+					self declareOver: currentPlayer identity.
+					self disableAll: {'End Turn'}]
+				ifFalse: [currentPlayer netAssets >= self goal
+						ifTrue: [won
+								ifFalse: [self declareWinner]].
+					self disableAll: {'Harvest'}.
+					self triggerEvent: #deleteOpenWindows.
+					windowCount _ 0.
+					self nextPlayer.
+					self won
+						ifTrue: [self wonButtonsState]
+						ifFalse: [self enableAll: {'Move'. 'Stats'}.
+							self disableAll: {'End Turn'}]]]! !
 
 !Farm methodsFor: 'options' stamp: 'dhn 10/16/2011 12:59'!
 exercisedOptions
@@ -868,6 +887,12 @@ livestock: quantity
 	currentPlayer drawnOption: true.
 	^ quantity! !
 
+!Farm methodsFor: 'accessing' stamp: 'dhn 8/31/2017 14:33:52'!
+moveButton: anObject
+	"Set the value of moveButton"
+	
+	^ moveButton _ anObject! !
+
 !Farm methodsFor: 'accessing' stamp: 'dhn 12/12/2011 21:46'!
 optionsWindow
 	"Answer the value of optionsWindow"
@@ -1091,7 +1116,7 @@ setUpLeases
 		add: 'Toppenish' -> nil;
 		 yourself ! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 20:40:00'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 11:47:43'!
 setUpSpaces
 	"Initialize the board spaces"
 	| col |
@@ -1099,9 +1124,38 @@ setUpSpaces
 	col _ OrderedCollection new.
 	1 to: self class describeSpaces size do: [:ix |
 		col add: (BoardSpace new
-			label: (self class describeSpaces at: ix) label;
+			label: (self class describeSpaces at: ix);
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
+
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 15:15:04'!
+setUpToken
+	"Answer a token, used throughout the game, for the current player."
+	| tok |
+	
+	tok _ FarmToken newFor: self.
+	tok openInWorld: world.
+	tok morphExtent: world morphExtent * (0.090@0.080).
+	tok morphPosition: tok posAdjust.
+	tokenPos _ tok morphPosition.
+	tok delete. 	"not needed until next player"
+	^ tok! !
+
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 12:49:51'!
+setupPlayer: aName color: aColor
+	"Establish a player named aName and colored aColor"
+	| pl |
+	
+	self players add: (pl _ Farmer new
+		color: aColor;
+		marker: (EllipseMorph new
+			setBalloonText: 'marker for ', aName;
+			color: aColor;
+			morphExtent: 18@10);
+		mgr: self;
+		identity: aName).
+	currentPlayer _ pl.
+	self availableOptions do: [:opt | pl options addLast: opt]! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:59'!
 setupToken: aPlayer
@@ -1811,6 +1865,27 @@ space9
 	self updateAllWindows.
 	self enableAll: {'Option'. 'End Turn'}! !
 
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 13:00:50'!
+testGoal
+	"Answer the value of TestGoal"
+	| g x |
+	
+	TestMode ifTrue: [
+		TestGoal 
+			ifNil: [g _ goal asString]
+			ifNotNil: [g _ TestGoal asString].
+		x _ (FillInTheBlankMorph request: 'Test Goal?' initialAnswer: g).
+		x ~= '' 
+			ifTrue:  [self testGoal: x asNumber]
+			ifFalse: [self testGoal: self goal].
+		^ TestGoal]! !
+
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 13:01:27'!
+testGoal: anObject
+	"Set the value of TestGoal"
+	
+	TestGoal _ anObject! !
+
 !Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 19:47:18'!
 testMode
 	"Answer the value of testMode"
@@ -1850,6 +1925,17 @@ updateEverybodyIn: aWindow
 	"Bring window showing all players up to date"
 		((aWindow findA: PasteUpMorph) findA: TextMorph)
 			newContents: self reportAllPlayers! !
+
+!Farm methodsFor: 'operating' stamp: 'dhn 8/31/2017 16:59:12'!
+updateHistory
+	"Change player's history"
+	
+	latestPlayer = playerIndex 
+		ifTrue: [currentPlayer updateHistory]
+		ifFalse: [
+			latestPlayer _ playerIndex.
+			currentPlayer appendHistory].
+	self triggerEvent: #itemChange! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 15:57'!
 updatePlayer
@@ -1896,208 +1982,257 @@ cellsForGame
 	
 	^ 7! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 8/30/2017 18:57:23'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 8/31/2017 15:00:11'!
+defaultGoal
+	"Answer the default winning net asset goal"
+	
+	^ 250000! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 8/31/2017 11:46:57'!
 describeSpaces
 	"Descriptions for the spaces on the board."
 	
 	^ OrderedCollection new
-		add: (Field new
-			label: 'WINTER';
-			heading: 'CHRISTMAS' with: 'VACATION';
-			description: 'COLLECT $1000 Christmas bonus.
-COLLECT year''s wage of $5000 as you pass.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'January' with: 'Week 1';
-			description: 'PAY 10% interest on Bank Notes on hand');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'January' with: 'Week 2';
-			description: 'Hibernate. Draw Option to Buy');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'January' with: 'Week 3';
-			description: 'Bitter cold spell. PAY $500 if you own cows.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'January' with: 'Week 4';
-			description: 'Beautiful Days!! Double all your hay harvests this year.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'February' with: 'Week 1';
-			description: 'Warm snap. You''re in the field 2 weeks early. COLLECT $1000.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'February' with: 'Week 2';
-			description: 'Stuck in a muddy corral. Draw Farmer''s Fate.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'February' with: 'Week 3';
-			description: 'Ground thaws. Start plowing early Go directly to Spring Planting.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'February' with: 'Week 4';
-			description: 'Rainy day. Draw Option to Buy.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'March' with: 'Week 1';
-			description: 'Becomes obvious your wheat has winter killed. PAY $2000 to replant.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'March' with: 'Week 2';
-			description: 'Start plowing late. PAY $500.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'March' with: 'Week 3';
-			description: 'Hurt your back. Go back to the second week in January.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'March' with: 'Week 4';
-			description: 'Frost forces you to heat fruit. PAY $2000 if you own fruit.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'April' with: 'Week 1';
-			description: 'Done plowing. Take a day off. Draw Option to Buy.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'SPRING' with: 'PLANTING';
-			description: 'Plant corn on time. Double corn yield this year.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'April' with: 'Week 3';
-			description: 'More rain. Field work shut down. PAY $500.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'April' with: 'Week 4';
-			description: 'Equipment breakdown. PAY $1000.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'May' with: 'Week 1';
-			description: 'The whole valley is green. COLLECT $500.');
-		add: (Field new
-			label: 'WINTER';
-			heading: 'May' with: 'Week 2';
-			description: 'Wind storm makes you replant corn. PAY $500.');
-		add: (Field new
-			label: '1ST HAY CUTTING';
-			heading: 'May' with: 'Week 3';
-			description: 'Cut your hay just right. COLLECT $1000 bonus.');
-		add: (Field new
-			label: '1ST HAY CUTTING';
-			heading: 'May' with: 'Week 4';
-			description: 'Memorial Day weekend. Draw Option to Buy.');
-		add: (Field new
-			label: '1ST HAY CUTTING';
-			heading: 'JUNE' with: 'Week 1';
-			description: 'Rain storm ruins unbaled hay. Cut your harvest check in half.');
-		add: (Field new
-			label: '1ST HAY CUTTING';
-			heading: 'June' with: 'Week 2';
-			description: 'Good growing weather. COLLECT $500 bonus.');
-		add: (Field new
-			label: 'CHERRY HARVEST';
-			heading: 'June' with: 'Week 3';
-			description: 'Rain splits your cherries. Cut your harvest check in half.');
-		add: (Field new
-			label: 'CHERRY HARVEST';
-			heading: 'June' with: 'Week 4';
-			description: 'Dust storm. Draw Farmer''s Fate.');
-		add: (Field new
-			label: 'CHERRY HARVEST';
-			heading: 'INDEPENDENCE' with: 'DAY BASH';
-			description: '');
-		add: (Field new
-			label: '2ND HAY CUTTING';
-			heading: 'July' with: 'Week 1';
-			description: 'Good weather for your second cutting of hay. Double hay harvest check.');
-		add: (Field new
-			label: '2ND HAY CUTTING';
-			heading: 'July' with: 'Week 2';
-			description: 'Hot!! Wish you were in the mountains. Draw Option to Buy.');
-		add: (Field new
-			label: '2ND HAY CUTTING';
-			heading: 'July' with: 'Week 3';
-			description: 'It''s a cooker!! 114 degrees in the shade. Wipe your brow and go to Harvest Moon after getting hay check.');
-		add: (Field new
-			label: 'WHEAT HARVEST';
-			heading: 'July' with: 'Week 4';
-			description: '85 degrees. Wheat heads filling out beautifully. Add $50 per acre to your harvest check.');
-		add: (Field new
-			label: 'WHEAT HARVEST';
-			heading: 'August' with: 'Week 1';
-			description: 'You''re right on time and farming like a pro. Go to the fourth week of February. COLLECT your year''s wage of $5000.');
-		add: (Field new
-			label: 'WHEAT HARVEST';
-			heading: 'August' with: 'Week 2';
-			description: 'Storm clouds brewing. COLLECT $1000, if you have a Harvester.');
-		add: (Field new
-			label: 'WHEAT HARVEST';
-			heading: 'August' with: 'Week 3';
-			description: 'Finish wheat harvest with no breakdowns. COLLECT $500.');
-		add: (Field new
-			label: 'WHEAT HARVEST';
-			heading: 'August' with: 'Week 4';
-			description: 'Rain sprouts unharvested wheat. Cut price $50 per acre on harvest check.');
-		add: (Field new
-			label: '3RD HAY CUTTING';
-			heading: 'September' with: 'Week 1';
-			description: 'Tractor owners: bale hay, then go to third week of November COLLECT your $1000 there, then harvest your fruit.');
-		add: (Field new
-			label: '3RD HAY CUTTING';
-			heading: 'September' with: 'Week 2';
-			description: 'Sunny skies at the County Fair. Draw Option to Buy.');
-		add: (Field new
-			label: 'LIVESTOCK SALES';
-			heading: 'HARVEST' with: 'MOON';
-			description: 'smiles on you. COLLECT $500.');
-		add: (Field new
-			label: 'LIVESTOCK SALES';
-			heading: 'September' with: 'Week 3';
-			description: 'Market collapses. Cut livestock check in half.');
-		add: (Field new
-			label: 'LIVESTOCK SALES';
-			heading: 'September' with: 'Week 4';
-			description: 'Codling Moth damage to apples lowers fruit grade. PAY $2000 if you own fruit.');
-		add: (Field new
-			label: 'LIVESTOCK SALES';
-			heading: 'OCTOBER' with: 'Week 1';
-			description: 'Indian Summer. COLLECT $500.');
-		add: (Field new
-			label: '4TH HAY CUTTING';
-			heading: 'October' with: 'Week 2';
-			description: 'Good Pheasant Hunting. Draw Farmer''s Fate.');
-		add: (Field new
-			label: '4TH HAY CUTTING';
-			heading: 'October' with: 'Week 3';
-			description: 'Park your baler for the winter. Draw Option to Buy.');
-		add: (Field new
-			label: 'APPLE HARVEST';
-			heading: 'October' with: 'Week 4';
-			description: 'Annual Deer Hunt. Draw Farmer''s Fate.');
-		add: (Field new
-			label: 'APPLE HARVEST';
-			heading: 'November' with: 'Week 1';
-			description: 'Irrigation season over. Draw Option to Buy');
-		add: (Field new
-			label: 'APPLE HARVEST';
-			heading: 'November' with: 'Week 2';
-			description: 'Good weather, harvest winding up. COLLECT $500.');
-		add: (Field new
-			label: 'APPLE HARVEST';
-			heading: 'November' with: 'Week 3';
-			description: 'Good weather holding. COLLECT $1000.');
-		add: (Field new
-			label: 'CORN HARVEST';
-			heading: 'November' with: 'Week 4';
-			description: 'Early freeze kills fruit buds. Pay $1000 if you have fruit.');
-		add: (Field new
-			label: 'CORN HARVEST';
-			heading: 'December' with: 'Week 1';
-			description: 'Cold and dry, perfect Field Corn harvesting. COLLECT $500.');
-		add: (Field new
-			label: 'CORN HARVEST';
-			heading: 'December' with: 'Week 2';
-			description: 'First snow. Draw Farmer''s Fate.');
+		add: 'CHRISTMAS
+VACATION
+
+COLLECT $1000 Christmas bonus.
+
+COLLECT year''s wage of $5000 as you pass.';
+
+		add: 'January
+Week 1
+
+PAY 10% interest on Bank Notes on hand';
+
+		add: 'January
+Week 2
+
+Hibernate. Draw Option to Buy';
+
+		add: 'January
+Week 3
+
+Bitter cold spell. PAY $500 if you own cows.';
+
+		add: 'January
+Week 4
+
+Beautiful Days!! Double all your hay harvests this year.';
+
+		add: 'February
+Week 1
+
+Warm snap. You''re in the field 2 weeks early. COLLECT $1000.';
+
+		add: 'February
+Week 2
+
+Stuck in a muddy corral. Draw Farmer''s Fate.';
+
+		add: 'February
+Week 3
+
+Ground thaws. Start plowing early Go directly to Spring Planting.';
+
+		add: 'February
+Week 4
+
+Rainy day. Draw Option to Buy.';
+
+		add: 'March
+Week 1
+
+Becomes obvious your wheat has winter killed. PAY $2000 to replant.';
+
+		add: 'March
+Week 2
+
+Start plowing late. PAY $500.';
+
+		add: 'March
+Week 3
+
+Hurt your back. Go back to the second week in January.';
+
+		add: 'March
+Week 4
+
+Frost forces you to heat fruit. PAY $2000 if you own fruit.';
+
+		add: 'April
+Week 1
+
+Done plowing. Take a day off. Draw Option to Buy.';
+
+		add: 'SPRING PLANTING
+
+Plant corn on time. Double corn yield this year.';
+
+		add: 'April
+Week 3
+
+More rain. Field work shut down. PAY $500.';
+
+		add: 'April
+Week 4
+
+Equipment breakdown. PAY $1000.';
+
+		add: 'May
+Week 1
+
+The whole valley is green. COLLECT $500.';
+
+		add: 'May
+Week 2
+
+Wind storm makes you replant corn. PAY $500.';
+
+		add: 'May
+Week 3
+
+Cut your hay just right. COLLECT $1000 bonus.';
+
+		add: 'May
+Week 4
+
+Memorial Day weekend. Draw Option to Buy.';
+
+		add: 'JUNE
+Week 1
+
+Rain storm ruins unbaled hay. Cut your harvest check in half.';
+
+		add: 'June
+Week 2
+
+Good growing weather. COLLECT $500 bonus.';
+
+		add: 'June
+Week 3
+
+Rain splits your cherries. Cut your harvest check in half.';
+
+		add: 'June
+Week 4
+
+Dust storm. Draw Farmer''s Fate.';
+
+		add: 'INDEPENDENCE
+DAY BASH';
+
+		add: 'July
+Week 1
+
+Good weather for your second cutting of hay. Double hay harvest check.';
+
+		add: 'July
+Week 2
+
+Hot!! Wish you were in the mountains. Draw Option to Buy.';
+
+		add: 'July
+		Week 3
+
+It''s a cooker!! 114 degrees in the shade. Wipe your brow and go to Harvest Moon after getting hay check.';
+
+		add: 'July
+Week 4
+
+85 degrees. Wheat heads filling out beautifully. Add $50 per acre to your harvest check.';
+
+		add: 'August
+Week 1
+
+You''re right on time and farming like a pro. Go to the fourth week of February. COLLECT your year''s wage of $5000.';
+
+		add: 'August
+Week 2
+
+Storm clouds brewing. COLLECT $1000, if you have a Harvester.';
+
+		add: 'August
+Week 3
+
+Finish wheat harvest with no breakdowns. COLLECT $500.';
+
+		add: 'August
+Week 4
+
+Rain sprouts unharvested wheat. Cut price $50 per acre on harvest check.';
+
+		add: 'September
+Week 1
+
+Tractor owners: bale hay, then go to third week of November COLLECT your $1000 there, then harvest your fruit.';
+
+		add: 'September
+Week 2
+
+Sunny skies at the County Fair. Draw Option to Buy.';
+
+		add: 'HARVEST MOON
+smiles on you. COLLECT $500.';
+
+		add: 'September
+Week 3
+
+Market collapses. Cut livestock check in half.';
+
+		add: 'September
+Week 4
+Codling Moth damage to apples lowers fruit grade. PAY $2000 if you own fruit.';
+
+		add: 'OCTOBER
+Week 1
+
+Indian Summer. COLLECT $500.';
+
+		add: 'October
+Week 2
+
+Good Pheasant Hunting. Draw Farmer''s Fate.';
+
+		add: 'October
+Week 3
+
+Park your baler for the winter. Draw Option to Buy.';
+
+		add: 'October
+Week 4
+
+Annual Deer Hunt. Draw Farmer''s Fate.';
+
+		add: 'November
+Week 1
+
+Irrigation season over. Draw Option to Buy';
+
+		add: 'November
+Week 2
+
+Good weather, harvest winding up. COLLECT $500.';
+
+		add: 'November
+Week 3
+
+Good weather holding. COLLECT $1000.';
+
+		add: 'November
+Week 4
+
+Early freeze kills fruit buds. Pay $1000 if you have fruit.';
+
+		add: 'December
+Week 1
+
+Cold and dry, perfect Field Corn harvesting. COLLECT $500.';
+
+		add: 'December
+Week 2
+
+First snow. Draw Farmer''s Fate.';
 	yourself! !
 
 !Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/19/2011 16:59'!
@@ -2167,14 +2302,12 @@ paymentIncrement
 	"Answer the payment increment for displaying loan payment choices"
 	^ 1000! !
 
-!Farm class methodsFor: 'setup' stamp: 'dhn 8/30/2017 18:29:36'!
+!Farm class methodsFor: 'setup' stamp: 'dhn 8/31/2017 10:58:45'!
 season
 	"Answer a collection of Seasons in order of their starting board positions."
+	
 	^ OrderedCollection new
-		add: (FarmSeason new
-			desc: 'WINTER';
-			enabled: true;
-			color: Color black; range: 1 @ 19; textColor: true);
+		add: (FarmSeason new desc: 'WINTER'; color: Color black; range: 1 @ 19; textColor: true);
 		addLast: (FarmSeason new
 			desc: '1ST HAY CUTTING';
 			assetName: 'Hay';
@@ -2227,13 +2360,77 @@ statusList
 	"Answer the list of assets in order suitable for status"
 	^ #('Hay' 'Corn' 'Wheat' 'Apples' 'Cherries' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
 
-!FarmToken methodsFor: 'as yet unclassified' stamp: 'dhn 5/17/2014 21:38'!
+!FarmToken methodsFor: 'accessing' stamp: 'dhn 8/31/2017 15:21:13'!
+doubled
+	"Answer the value of doubled"
+
+	^ doubled! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:10:40'!
 initialize
+
 	super initialize.
-	self cellPositioning: #leftCenter.
-	self setBalloonText: 'A token representing the player. When the Move button is clicked, a die is "rolled" then the token moves that number of spaces.' maxLineLength: 30.
-	self balloonFont: GameBoard gameFont.
-! !
+	
+	labelArea _ LayoutMorph newColumn 
+		layoutSpec: LayoutSpec useAll;
+		color: Color transparent;
+		name: 'label area';
+		separation: 1;
+		padding: #center.
+	labelArea
+		addMorph: self makeIdArea;
+		addMorph: self makeDoubledArea.
+
+	self addMorphFront: labelArea! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:13:17'!
+makeDoubledArea
+	"Lay out the area for the arrow"
+	| area |
+	
+	area _ LayoutMorph newRow
+		color: Color transparent;
+		name: #doubled;
+		padding: #center.
+	
+	doubled _ (StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
+		
+	area addMorph: doubled.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0)! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:11:56'!
+makeIdArea
+	"Lay out the area for the arrow"
+	| area |
+	
+	area _ LayoutMorph newRow
+		color: Color transparent;
+		name: #id;
+		padding: #center.
+	
+	id _ (StringMorph contents: 'Player') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
+		
+	area addMorph: id.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0)! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 8/31/2017 16:00:31'!
+moved
+	"Perform the results of the move"
+	| pl |
+	
+	pl _ self who.
+	doubled contents: who doubledString.
+	pl harvestEnabled 
+		ifTrue: [model enableAll: {'Harvest'}]
+		ifFalse: [
+			model updateHistory.
+			model enableAll: {'End Turn'}]! !
 
 !FarmToken methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2013 20:26'!
 waiting
@@ -2274,6 +2471,58 @@ buildMorphicWindow
 describe
 
 	^ ''! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 14:57:10'!
+displayNumbers
+	"Display cash, debt, and goal progress"
+	| c d net otherLead pluralForm others |
+
+	c _ '$', model currentPlayer cash truncated printStringWithCommas.
+	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
+	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
+	numbersArea submorphs first 
+		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+		color: model currentPlayer color.
+	pluralForm _ model players size = 2
+		ifTrue: ['Player''s']
+		ifFalse: ['Players'''].
+	otherLead _ (StringMorph contents: (String streamContents: [:string |
+		string
+			nextPutAll: 'Other ';
+			nextPutAll: pluralForm;
+			nextPutAll: ' Cash: '])).
+	otherLead
+		emphasis: AbstractFont boldCode;
+		color: Color lightBrown;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+	othersArea 
+		removeAllMorphs;
+		addMorph: otherLead.
+	others _ model players select: [:a | a ~= model currentPlayer].
+	others do: [:ea | | x |
+		x _ ' $', ea cash truncated printStringWithCommas.
+		othersArea addMorph: ((StringMorph contents: x) 
+			emphasis: AbstractFont boldCode;
+			color: ea color;
+			setBalloonText: 'cash held by ', ea identity;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:38:51'!
+doTour
+	"Start the tour of the board"
+	| choice resp |
+	
+	model disableAll: {'Players'. 'Tour'}.
+	choice _ (PopUpMenu labelArray: #('Automatic' 'Interactive')) startUpWithCaption: nil.
+	choice = 1 ifTrue: [self tourAt: 500].
+	choice = 2 ifTrue: [
+		resp _ '1'.
+		[resp ~= ''] whileTrue: [
+			resp _ FillInTheBlankMorph request: 'Board starting where?' initialAnswer: resp.
+			(resp notEmpty and: [resp asNumber > 0]) ifTrue: [
+				self showSeasons: (model parseSeasonsAt: resp asNumber).
+				self model cellsAt: resp asNumber]]].
+	model enableAll: {'Players'. 'Tour'}! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
 getPlayers
@@ -2320,7 +2569,7 @@ layoutSubmorphs
     super layoutSubmorphs.
     self board morphExtent: self board owner morphExtent! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:45:03'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:18:22'!
 makeAddPlayerButton
 	"Answer the 'Players' button"
 
@@ -2329,27 +2578,13 @@ makeAddPlayerButton
 		setBalloonText: 'Use this button to enter names of two to six players;
 entering an empty name or cancel will start the game'! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 14:32'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:19:59'!
 makeAuctionButton
-	| btn |
-	btn := self
-				makeButton: 'Auction'
-				action: #doAuction
-				state: nil.
-	btn setBalloonText: 'Auction options and equipment' maxLineLength: 20.
-	^ btn! !
+	"Answer the 'Auction' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 5/17/2014 21:30'!
-makeButton: label action: actionSymbol state: stateSymbol 
-	| btn |
-	btn := GameButtonMorph new label: label;
-				 extent: 100 @ 40.
-	btn target: self handler;
-		 name: label;
-		 useRoundedCorners;
-		 actionSelector: actionSymbol;
-		balloonFont: GameBoard gameFont.
-	^ btn! !
+	^ (GameButtonMorph label: 'Auction' action: #doAuction state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Auction options and equipment'! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:29:09'!
 makeButtonArea
@@ -2370,13 +2605,13 @@ makeButtonArea
 	^ buttonArea
 		! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 1/21/2012 16:53'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:09'!
 makeBuyOptionButton
-	| btn |
-	btn := self makeButton: 'Option' action: #showOpts state: nil.
-	btn setBalloonText: 'See what options you have and make purchases during WINTER.' maxLineLength: 30.
-	^btn
-! !
+	"Answer the 'Option' button"
+
+	^ (GameButtonMorph label: 'Option' action: #showOpts state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'See what options you have and make purchases during WINTER.'! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 18:49:08'!
 makeCellsArea
@@ -2418,37 +2653,37 @@ makeCellsArea
 		
 ! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:03'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:16'!
 makeDrawFateButton
-	| btn |
-	btn := self makeButton: 'Fate' action: #drawFate state: nil.
-	btn setBalloonText: 'Determine your Farmer''s Fate.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'Fate' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:47'!
+	^ (GameButtonMorph label: 'Fate' action: #drawFate state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Determine your Farmer''s Fate.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:18:05'!
 makeEndTurnButton
-	| btn |
-	btn := self makeButton: 'End Turn' action: #endTurn state: nil.
-	btn setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'End Turn' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:00'!
+	^ (GameButtonMorph label: 'End Turn' action: #endTurn state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:29'!
 makeHarvestButton
-	| btn |
-	btn := self makeButton: 'Harvest' action: #harvest state: nil.
-	btn setBalloonText: 'Harvest the crop for the season indicated above the space.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'Harvest' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 12/7/2011 13:01'!
+	^ (GameButtonMorph label: 'Harvest' action: #harvest state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Harvest the crop for the season indicated above the space.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:44:40'!
 makeMoveButton
-	| btn |
-	btn := self makeButton: 'Move' action: #move state: nil.
-	btn setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'Move' button"
+
+	^ (GameButtonMorph label: 'Move' action: #move state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.'! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:31:59'!
 makeNumbersArea
@@ -2481,27 +2716,27 @@ makeOthersArea
 		name: #others;
 		padding: #center! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:04'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:41'!
 makePayExpenseButton
-	| btn |
-	btn := self makeButton: 'Expense' action: #payExpense state: nil.
-	btn setBalloonText: 'Pay the farming expenses which are owed.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'Expense' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/29/2011 11:36'!
+	^ (GameButtonMorph label: 'Expense' action: #payExpense state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Pay the farming expenses which are owed.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:49'!
 makePayLoanButton
-	| btn |
-	btn := self makeButton: 'Pay Loan' action: #payLoan state: nil.
-	btn setBalloonText: 'Transfer some cash to pay off some debt.' maxLineLength: 20.
-	^btn
-! !
+	"Answer the 'Pay Loan' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:47:09'!
+	^ (GameButtonMorph label: 'Pay Loan' action: #payLoan state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Transfer cash to pay off some debt.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:22:04'!
 makeQuitGameButton
 	"Answer the 'Quit' button"
 	
-	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: self)
+	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
 		setBalloonText: 'Completely ends the game. Nothing is saved.';
 		color: (Color orange alpha: 0.9)! !
@@ -2519,7 +2754,7 @@ makeSeasonsArea
 			color: Color lightGreen;
 			name: #seasons! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:45:49'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:38:47'!
 makeSettingsButton
 	"Answer the 'Settings' button"
 	
@@ -2527,15 +2762,15 @@ makeSettingsButton
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Change some of the game parameters'! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/3/2014 16:40'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:21:14'!
 makeShowStatsButton
-	| btn |
-	btn := self makeButton: 'Stats' action: #doStats state: nil.
-	btn setBalloonText: 'Show statistics which have been accumulated during the game.' maxLineLength: 35.
-	^btn
-! !
+	"Answer the 'Stats' button"
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:46:25'!
+	^ (GameButtonMorph label: 'Stats' action: #doStats state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:40:43'!
 makeTourButton
 	"Answer the 'Tour' button"
 	
@@ -2555,48 +2790,22 @@ namesCache: anObject
 
 	namesCache := anObject! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:34:04'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:34:48'!
 playButtonSet
 	"Answer the buttons used to play the game"
 
 	buttonArea 
 		removeAllMorphs;
 		addMorph: self makeShowStatsButton;
-		addMorph: self makePayLoanButton;
 		addMorph: self makeAuctionButton;
-		addMorph: self makePurchasesButton;
-		addMorph: self makeHistoryButton;
+		addMorph: self makePayLoanButton;
+		addMorph: self makeBuyOptionButton;
 		addMorph: self makeEndTurnButton;
-		addMorph: self makeDoJobButton;
+		addMorph: self makePayExpenseButton;
+		addMorph: self makeDrawFateButton;
+		addMorph: self makeHarvestButton;
 		addMorph: (model moveButton: self makeMoveButton);
-		addMorph: self makeQuitGameButton.
-! !
-
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 11/2/2014 20:58'!
-playButtonSet: aMorph 
-	| sub |
-	sub := aMorph submorphs
-		detect: [:p | 'buttons' = p externalName]
-		ifNone: [self halt].
-	self rmButtons: sub.
-	sub addAllMorphs: (OrderedCollection new
-		add: self makeShowStatsButton;
-		add: self makeAuctionButton;
-		add: self makePayLoanButton;
-		add: self makeBuyOptionButton;
-		add: self makeEndTurnButton;
-		add: self makePayExpenseButton;
-		add: self makeDrawFateButton;
-		add: self makeHarvestButton;
-		add: self makeMoveButton;
-		add: self makeQuitGameButton;
-		yourself).
-! !
-
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/16/2011 13:14'!
-quitGameExitSqueakCheck
-	"Use the Preferences cmdDotEnabled as an indicator that we are run-time or not."
-	Preferences cmdDotEnabled ifFalse: [Smalltalk quitPrimitive]! !
+		addMorph: self makeQuitGameButton! !
 
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2011 21:40'!
 rmButtons: aMorph
@@ -2680,17 +2889,77 @@ startButtonSet
 		addMorph: self makeQuitGameButton.
 ! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 18:30'!
-startButtonSet: aMorph 
-	| sub |
-	sub := aMorph submorphs
-				detect: [:ea | 'buttons' = ea externalName]
-				ifNone: [^ nil].
-	self rmButtons: sub.
-	sub addMorph: self makeQuitGameButton.
-	sub addMorph: self makeTourButton.
-	sub addMorph: self makeSettingsButton.
-	sub addMorph: self makeAddPlayerButton! !
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 12:58:40'!
+startGame
+	"Change the buttons and start the game"
+	
+	self playButtonSet.
+	model players do: [:ea | 
+		ea 
+			when: #displayInvoice 
+			send: #displayInvoice:title: 
+			to: self 
+			withArguments: #(#invoice #heading)].
+	model playerIndex: 0. "retain players in order of entry"
+	model 
+		testGoal;
+		nextPlayer.
+	model initialButtonState! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 15:04:10'!
+titleChange: aPlayer
+	"Change the title, showing player data in color"
+	"Display cash, debt, and goal progress"
+	| c d net otherLead pluralForm others |
+	
+	gameTitle contents: aPlayer identity , '''s turn.'.
+	gameTitle color: aPlayer color.
+	
+	c _ '$', model currentPlayer cash truncated printStringWithCommas.
+	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
+	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
+	numbersArea submorphs first 
+		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+		color: model currentPlayer color.
+	pluralForm _ model players size = 2
+		ifTrue: ['Player''s']
+		ifFalse: ['Players'''].
+	otherLead _ (StringMorph contents: (String streamContents: [:string |
+		string
+			nextPutAll: 'Other ';
+			nextPutAll: pluralForm;
+			nextPutAll: ' Cash: '])).
+	otherLead
+		emphasis: AbstractFont boldCode;
+		color: Color lightBrown;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+	othersArea 
+		removeAllMorphs;
+		addMorph: otherLead.
+	others _ model players select: [:a | a ~= model currentPlayer].
+	others do: [:ea | | x |
+		x _ ' $', ea cash truncated printStringWithCommas.
+		othersArea addMorph: ((StringMorph contents: x) 
+			emphasis: AbstractFont boldCode;
+			color: ea color;
+			setBalloonText: 'cash held by ', ea identity;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
+tourAt: anInterval 
+	"Take a tour of the board."
+	| limit i |
+	
+	limit _ model class describeSpaces size + 2.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		i < limit 
+			ifTrue: [model positionBoardTo: i]
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep]].
+	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"! !
 
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:39'!
 boardColor
@@ -3478,6 +3747,12 @@ allocateTractorLease: anAmount
 			machine gross: machine gross + (anAmount // col size).
 			pl tally: anAmount // col size]! !
 
+!Farmer methodsFor: 'accessing' stamp: 'dhn 8/31/2017 16:59:05'!
+appendHistory
+	"Add to the end of history"
+	
+	history addLast: self netAssets! !
+
 !Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/17/2014 20:39'!
 auctionable
 	"Answer a list of owned assets and quantities"
@@ -3608,6 +3883,16 @@ doubleHay
 doubleHay: anObject 
 	(assets at: #Hay)
 		factor: 2 * (assets at: #Hay) factor! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 8/31/2017 15:32:48'!
+doubledString
+	"Answer the string signifying whether the market is doubled for the receiver"
+	| mkt |
+	
+	mkt _ (mgr seasonAt: self position) desc asSymbol.
+	markets
+		ifNil: [^ '']
+		ifNotNil: [^ (markets at: mkt ifAbsent: [^ '']) > 1 ifTrue: ['(doubled)'] ifFalse:['']]! !
 
 !Farmer methodsFor: 'fate-related' stamp: 'dhn 10/6/2011 20:31'!
 drawExpense: anObject
@@ -3767,27 +4052,32 @@ harvest: anAsset
 	yield := self updateAsset: anAsset with: var.
 	^ yield! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 16:56'!
+!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 8/31/2017 16:53:02'!
 harvestEnabled
-	"Answer true if player has not previosly harvested this season and
-	owns the asset."
+	"Answer true if player has not previosly harvested this season and 	owns the asset."
 	| season asset caseA caseB sum |
-	season := self mgr seasonAt: self position.
-	caseA := (harvests detect: [:ea | ea desc = season desc] ifNone: [self halt]) enabled.
-	caseB := true.
+	
+	season _ self mgr seasonAt: self position.
+	
+	caseA _ season desc = 'WINTER'
+		ifTrue: [^ false]
+		ifFalse: [(harvests detect: [:ea | ea desc = season desc] ifNone: [self halt]) enabled].
+		
+	caseB _ true.
 	season assetName
 		ifNotNil: [:name | 
-			asset := assets
+			asset _ assets
 						at: name
 						ifAbsent: [
 							assets values
 								select: [:ea | ea class inheritsFrom: (Smalltalk at: name asSymbol)]].
 			(asset class inheritsFrom: Collection)
-				ifTrue: [sum := 0.
+				ifTrue: [sum _ 0.
 					asset
-						do: [:ea | sum := sum + ea quantity].
-					caseB := 0 < sum]
-				ifFalse: [caseB := 0 < asset quantity]].
+						do: [:ea | sum _ sum + ea quantity].
+					caseB _ 0 < sum]
+				ifFalse: [caseB _ 0 < asset quantity]].
+			
 	^ caseA and: caseB! !
 
 !Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 16:58'!
@@ -3924,16 +4214,17 @@ ifHarvester: anAmount
 ifTractor
 	^ 0 < (assets at: #Tractor) quantity! !
 
-!Farmer methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 18:30:27'!
+!Farmer methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 17:23:55'!
 initialize
+
 	FarmerTest isNil
-		ifFalse: [identity := FarmerTest].
-	cash := 5000.
-	debt := 5000 negated.
-	assets := self setUpAssets.
-	harvests := Farm season copy.
-	options := OrderedCollection new.
-	history := Array new: 180! !
+		ifFalse: [identity _ FarmerTest].
+	cash _ 5000.
+	debt _ 5000 negated.
+	assets _ self setUpAssets.
+	harvests _ Farm season copy.
+	options _ OrderedCollection new.
+	history _ OrderedCollection with: self netAssets! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 11/23/2014 12:02'!
 interest: aRate
@@ -4266,6 +4557,12 @@ updateCattleAsset: aRoll
 				ifNone: [].
 	har actionSelector: Farm harvestNormal.
 	^ ttl! !
+
+!Farmer methodsFor: 'accessing' stamp: 'dhn 8/31/2017 16:57:40'!
+updateHistory
+	"Change current history"
+	
+	history at: history size put: self netAssets! !
 
 !Farmer methodsFor: 'fate-related' stamp: 'dhn 11/23/2014 12:06'!
 wheatWeeds: aParm 
