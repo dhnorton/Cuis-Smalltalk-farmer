@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 3:34:47 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 4:14:03 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 17!
+!provides: 'Farm' 1 18!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2390,6 +2390,19 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
+!FarmToken methodsFor: 'operations' stamp: 'dhn 8/31/2017 16:00:31'!
+moved
+	"Perform the results of the move"
+	| pl |
+	
+	pl _ self who.
+	doubled contents: who doubledString.
+	pl harvestEnabled 
+		ifTrue: [model enableAll: {'Harvest'}]
+		ifFalse: [
+			model updateHistory.
+			model enableAll: {'End Turn'}]! !
+
 !FarmToken methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2013 20:26'!
 waiting
 	"Sit idle; do nothing."
@@ -2635,11 +2648,11 @@ makeHarvestButton
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Harvest the crop for the season indicated above the space.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:35:05'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:44:40'!
 makeMoveButton
 	"Answer the 'Move' button"
 
-	^ (GameButtonMorph label: 'Move' action: #move state: true model: self)
+	^ (GameButtonMorph label: 'Move' action: #move state: true model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.'! !
 
