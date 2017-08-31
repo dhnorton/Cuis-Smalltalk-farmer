@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 7:01:37 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 30 August 2017 at 8:51:48 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 8!
+!provides: 'Farm' 1 9!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -810,12 +810,12 @@ initialButtonState
 	self enableAll: {'Option'}.
 	self disableAll: {'End Turn'. 'Expense'. 'Fate'. 'Harvest'}! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 13:01:07'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 20:20:22'!
 initialize
 
 	super initialize.
 	cellCount _ self class cellsForGame.
-	spaces _ self class describeSpaces.
+	spaces _ self setUpSpaces.
 	availableOptions _ FarmingGame optionsDesc shuffled.
 	fates _ FarmingGame fatesDesc asOrderedCollection shuffled.
 	drawnFates _ OrderedCollection new.
@@ -1091,7 +1091,7 @@ setUpLeases
 		add: 'Toppenish' -> nil;
 		 yourself ! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/29/2017 21:00:52'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 20:40:00'!
 setUpSpaces
 	"Initialize the board spaces"
 	| col |
@@ -1099,7 +1099,7 @@ setUpSpaces
 	col _ OrderedCollection new.
 	1 to: self class describeSpaces size do: [:ix |
 		col add: (BoardSpace new
-			label: (self class describeSpaces at: ix);
+			label: (self class describeSpaces at: ix) label;
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
@@ -1811,6 +1811,13 @@ space9
 	self updateAllWindows.
 	self enableAll: {'Option'. 'End Turn'}! !
 
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 19:47:18'!
+testMode
+	"Answer the value of testMode"
+	
+	TestMode ifNil: [TestMode _ false].
+	^ TestMode! !
+
 !Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 22:06'!
 toppenish: quantity 
 	"Lease Toppenish Ridge for $quantity."
@@ -2313,13 +2320,14 @@ layoutSubmorphs
     super layoutSubmorphs.
     self board morphExtent: self board owner morphExtent! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 10:50'!
+!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:45:03'!
 makeAddPlayerButton
-	| btn |
-	btn := self makeButton: 'Players' action: #getNames state: nil.
-	btn setBalloonText: 'Asks the names of players. Use this button to add at least two players, then press Start.' maxLineLength: 30.
-	^btn
-! !
+	"Answer the 'Players' button"
+
+	^ (GameButtonMorph label: 'Players' action: #getPlayers state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Use this button to enter names of two to six players;
+entering an empty name or cancel will start the game'! !
 
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 14:32'!
 makeAuctionButton
@@ -2489,14 +2497,14 @@ makePayLoanButton
 	^btn
 ! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2011 22:27'!
+!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:47:09'!
 makeQuitGameButton
-	| btn |
-	btn := self makeButton: 'Quit' action: #quitGame state: nil.
-	btn setBalloonText: 'Completely ends the game. Nothing is saved.' maxLineLength: 20.
-	btn color: (Color orange alpha: 0.9).
-	^btn
-! !
+	"Answer the 'Quit' button"
+	
+	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		setBalloonText: 'Completely ends the game. Nothing is saved.';
+		color: (Color orange alpha: 0.9)! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:33:14'!
 makeSeasonsArea
@@ -2511,15 +2519,13 @@ makeSeasonsArea
 			color: Color lightGreen;
 			name: #seasons! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 18:32'!
+!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:45:49'!
 makeSettingsButton
-	| btn |
-	btn := self
-				makeButton: 'Settings'
-				action: #doSettings
-				state: nil.
-	btn setBalloonText: 'Change some of the game parameters' maxLineLength: 20.
-	^ btn! !
+	"Answer the 'Settings' button"
+	
+	^ (GameButtonMorph label: 'Settings' action: #doSettings state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Change some of the game parameters'! !
 
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/3/2014 16:40'!
 makeShowStatsButton
@@ -2529,13 +2535,13 @@ makeShowStatsButton
 	^btn
 ! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2011 16:12'!
+!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 20:46:25'!
 makeTourButton
-	| btn |
-	btn := self makeButton: 'Tour' action: #doTour state: nil.
-	btn setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.' maxLineLength: 25.
-	^btn
-! !
+	"Answer the 'Tour' button"
+	
+	^ (GameButtonMorph label: 'Tour' action: #doTour state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
 
 !FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
 namesCache
@@ -2633,13 +2639,13 @@ setupToken: aPlayer
 	pasteup addMorph: model token.
 	^ model token who: aPlayer! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 18:41:35'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 20:41:28'!
 showSeasons: associations 
 	"Display the seasons contained in associations"
 	| width set bm txt |
 			
 	seasonsArea removeAllMorphs.
-	width _ layoutMorph morphWidth / self class cellsForGame.
+	width _ layoutMorph morphWidth / model class cellsForGame.
 	set _ OrderedCollection new.
 	associations do: [:k | 	| first last sea |
 			first _ k key x - 1.
