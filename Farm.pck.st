@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 12:33:27 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 12:44:06 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 11!
+!provides: 'Farm' 1 12!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2329,6 +2329,23 @@ describe
 
 	^ ''! !
 
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:38:51'!
+doTour
+	"Start the tour of the board"
+	| choice resp |
+	
+	model disableAll: {'Players'. 'Tour'}.
+	choice _ (PopUpMenu labelArray: #('Automatic' 'Interactive')) startUpWithCaption: nil.
+	choice = 1 ifTrue: [self tourAt: 500].
+	choice = 2 ifTrue: [
+		resp _ '1'.
+		[resp ~= ''] whileTrue: [
+			resp _ FillInTheBlankMorph request: 'Board starting where?' initialAnswer: resp.
+			(resp notEmpty and: [resp asNumber > 0]) ifTrue: [
+				self showSeasons: (model parseSeasonsAt: resp asNumber).
+				self model cellsAt: resp asNumber]]].
+	model enableAll: {'Players'. 'Tour'}! !
+
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
 getPlayers
 	"Get the names of two to six players"
@@ -2745,6 +2762,22 @@ startButtonSet: aMorph
 	sub addMorph: self makeTourButton.
 	sub addMorph: self makeSettingsButton.
 	sub addMorph: self makeAddPlayerButton! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
+tourAt: anInterval 
+	"Take a tour of the board."
+	| limit i |
+	
+	limit _ model class describeSpaces size + 2.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		i < limit 
+			ifTrue: [model positionBoardTo: i]
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep]].
+	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"! !
 
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:39'!
 boardColor
