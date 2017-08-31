@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 4:14:03 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 5:00:21 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 18!
+!provides: 'Farm' 1 19!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton'
+	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -1908,6 +1908,17 @@ updateEverybodyIn: aWindow
 		((aWindow findA: PasteUpMorph) findA: TextMorph)
 			newContents: self reportAllPlayers! !
 
+!Farm methodsFor: 'operating' stamp: 'dhn 8/31/2017 16:59:12'!
+updateHistory
+	"Change player's history"
+	
+	latestPlayer = playerIndex 
+		ifTrue: [currentPlayer updateHistory]
+		ifFalse: [
+			latestPlayer _ playerIndex.
+			currentPlayer appendHistory].
+	self triggerEvent: #itemChange! !
+
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 15:57'!
 updatePlayer
 	"Make the screen show the latest numbers."
@@ -3718,6 +3729,12 @@ allocateTractorLease: anAmount
 			machine gross: machine gross + (anAmount // col size).
 			pl tally: anAmount // col size]! !
 
+!Farmer methodsFor: 'accessing' stamp: 'dhn 8/31/2017 16:59:05'!
+appendHistory
+	"Add to the end of history"
+	
+	history addLast: self netAssets! !
+
 !Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/17/2014 20:39'!
 auctionable
 	"Answer a list of owned assets and quantities"
@@ -4017,27 +4034,32 @@ harvest: anAsset
 	yield := self updateAsset: anAsset with: var.
 	^ yield! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 16:56'!
+!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 8/31/2017 16:53:02'!
 harvestEnabled
-	"Answer true if player has not previosly harvested this season and
-	owns the asset."
+	"Answer true if player has not previosly harvested this season and 	owns the asset."
 	| season asset caseA caseB sum |
-	season := self mgr seasonAt: self position.
-	caseA := (harvests detect: [:ea | ea desc = season desc] ifNone: [self halt]) enabled.
-	caseB := true.
+	
+	season _ self mgr seasonAt: self position.
+	
+	caseA _ season desc = 'WINTER'
+		ifTrue: [^ false]
+		ifFalse: [(harvests detect: [:ea | ea desc = season desc] ifNone: [self halt]) enabled].
+		
+	caseB _ true.
 	season assetName
 		ifNotNil: [:name | 
-			asset := assets
+			asset _ assets
 						at: name
 						ifAbsent: [
 							assets values
 								select: [:ea | ea class inheritsFrom: (Smalltalk at: name asSymbol)]].
 			(asset class inheritsFrom: Collection)
-				ifTrue: [sum := 0.
+				ifTrue: [sum _ 0.
 					asset
-						do: [:ea | sum := sum + ea quantity].
-					caseB := 0 < sum]
-				ifFalse: [caseB := 0 < asset quantity]].
+						do: [:ea | sum _ sum + ea quantity].
+					caseB _ 0 < sum]
+				ifFalse: [caseB _ 0 < asset quantity]].
+			
 	^ caseA and: caseB! !
 
 !Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 16:58'!
@@ -4516,6 +4538,12 @@ updateCattleAsset: aRoll
 				ifNone: [].
 	har actionSelector: Farm harvestNormal.
 	^ ttl! !
+
+!Farmer methodsFor: 'accessing' stamp: 'dhn 8/31/2017 16:57:40'!
+updateHistory
+	"Change current history"
+	
+	history at: history size put: self netAssets! !
 
 !Farmer methodsFor: 'fate-related' stamp: 'dhn 11/23/2014 12:06'!
 wheatWeeds: aParm 
