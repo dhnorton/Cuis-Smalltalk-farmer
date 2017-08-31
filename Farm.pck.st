@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 3:16:12 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 3:34:47 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 16!
+!provides: 'Farm' 1 17!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -224,7 +224,7 @@ Toppenish class
 
 !classDefinition: #Farmer category: #'Farm-Model'!
 Gamer subclass: #Farmer
-	instanceVariableNames: 'offFarm options drawnOption garnish emergencies harvests'
+	instanceVariableNames: 'offFarm options drawnOption garnish emergencies harvests markets'
 	classVariableNames: 'FarmerTest'
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -327,10 +327,8 @@ http://farmgame.com/product/woo-single-2/
 
 !
 
-!Farmer commentStamp: 'dhn 9/5/2011 13:17' prior: 0!
+!Farmer commentStamp: '<historical>' prior: 0!
 A player in the Farming Game.
-
-Instance Variables
 !
 
 !Field commentStamp: '<historical>' prior: 0!
@@ -2333,6 +2331,12 @@ statusList
 	"Answer the list of assets in order suitable for status"
 	^ #('Hay' 'Corn' 'Wheat' 'Apples' 'Cherries' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
 
+!FarmToken methodsFor: 'accessing' stamp: 'dhn 8/31/2017 15:21:13'!
+doubled
+	"Answer the value of doubled"
+
+	^ doubled! !
+
 !FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:10:40'!
 initialize
 
@@ -3831,6 +3835,16 @@ doubleHay
 doubleHay: anObject 
 	(assets at: #Hay)
 		factor: 2 * (assets at: #Hay) factor! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 8/31/2017 15:32:48'!
+doubledString
+	"Answer the string signifying whether the market is doubled for the receiver"
+	| mkt |
+	
+	mkt _ (mgr seasonAt: self position) desc asSymbol.
+	markets
+		ifNil: [^ '']
+		ifNotNil: [^ (markets at: mkt ifAbsent: [^ '']) > 1 ifTrue: ['(doubled)'] ifFalse:['']]! !
 
 !Farmer methodsFor: 'fate-related' stamp: 'dhn 10/6/2011 20:31'!
 drawExpense: anObject
