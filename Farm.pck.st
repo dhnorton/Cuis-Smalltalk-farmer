@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 5:25:04 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 6:00:58 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 20!
+!provides: 'Farm' 1 21!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2732,11 +2732,11 @@ makePayLoanButton
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Transfer cash to pay off some debt.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:22:04'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:59:32'!
 makeQuitGameButton
 	"Answer the 'Quit' button"
 	
-	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: model)
+	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: self)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
 		setBalloonText: 'Completely ends the game. Nothing is saved.';
 		color: (Color orange alpha: 0.9)! !
@@ -2806,6 +2806,12 @@ playButtonSet
 		addMorph: self makeHarvestButton;
 		addMorph: (model moveButton: self makeMoveButton);
 		addMorph: self makeQuitGameButton! !
+
+!FarmingGame methodsFor: 'termination' stamp: 'dhn 8/31/2017 17:58:24'!
+quitGame
+
+	(self confirm: 'Are you sure you want to quit ', FarmingGame asString, '?')
+		ifTrue: [model quitGame]! !
 
 !FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2011 21:40'!
 rmButtons: aMorph
