@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 8:56:09 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 1:22:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 22!
+!provides: 'Farm' 1 23!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -224,7 +224,7 @@ Toppenish class
 
 !classDefinition: #Farmer category: #'Farm-Model'!
 Gamer subclass: #Farmer
-	instanceVariableNames: 'offFarm options drawnOption garnish emergencies harvests markets'
+	instanceVariableNames: 'offFarm options drawnOption garnish emergencies harvests markets spaceEffect'
 	classVariableNames: 'FarmerTest'
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -533,6 +533,13 @@ doSettings
 		)) startUp.
 	ans ifNotNil: [self perform: ans]! !
 
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/1/2017 12:05:15'!
+doSpace
+	"Determine if player can do the job"
+	
+	self halt.
+	currentPlayer spaceEffect: self whatSpaceSays! !
+
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:02'!
 doStats
 	"Display the Stats button menu."
@@ -829,7 +836,7 @@ initialButtonState
 	self enableAll: {'Option'}.
 	self disableAll: {'End Turn'. 'Expense'. 'Fate'. 'Harvest'}! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 20:20:22'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/1/2017 12:25:40'!
 initialize
 
 	super initialize.
@@ -841,6 +848,7 @@ initialize
 	expenses _ FarmingGame expenseDesc asOrderedCollection shuffled.
 	drawnExpenses _ OrderedCollection new.
 	leases _ self setUpLeases.
+	won _ false
 ! !
 
 !Farm methodsFor: 'options' stamp: 'dhn 8/30/2017 17:17:40'!
@@ -1393,16 +1401,17 @@ space19
 	self updatePlayer.
 	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 7/12/2013 19:22'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:17:12'!
 space2
 	"Jan week 1"
+	
 	self disableAll: {'Move'}.
 	currentPlayer interest: 0.1.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	currentPlayer passedGo
 		ifTrue: [currentPlayer salary].
-	self updatePlayer.
-	self queryWin: self won! !
+	self triggerEvent: #itemChange.
+	self queryWin: won! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/27/2013 09:44'!
 space20
@@ -1521,17 +1530,18 @@ space29
 	self updateAllWindows.
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/17/2014 17:33'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:18:52'!
 space3
 	"Jan week 2"
+	
 	self disableAll: {'Move'}.
-	self updatePlayer.
 	currentPlayer passedGo
 		ifTrue: [currentPlayer salary].
+	self triggerEvent: #itemChange.
 	currentPlayer
 		addOption: (self drawOptionQuietly: false).
-	self updateAllWindows.
-	self queryWin: self won! !
+	self triggerEvent: #itemChange.
+	self queryWin: won! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/23/2014 14:06'!
 space30
@@ -1666,17 +1676,16 @@ space39
 
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/23/2014 14:39'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:20:04'!
 space4
 	"Jan week 3"
 	self disableAll: {'Move'}.
 	currentPlayer ifCows: 500.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	currentPlayer passedGo
 		ifTrue: [currentPlayer salary].
 	self enableAll: {'End Turn'}.
-	self updateAllWindows.
-! !
+	self triggerEvent: #itemChange! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:07'!
 space40
@@ -1813,36 +1822,36 @@ space49
 	self updateAllWindows.
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:09'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:20:55'!
 space5
 	"Jan week 4"
+	
 	self disableAll: {'Move'}.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	currentPlayer passedGo
 		ifTrue: [currentPlayer salary].
 	currentPlayer doubleHay.
 	self enableAll: {'End Turn'}.
-	self updateAllWindows.
-! !
+	self triggerEvent: #itemChange! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:09'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:21:54'!
 space6
 	"Feb week 1"
 	self disableAll: {'Move'}.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	currentPlayer tally: 1000.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	currentPlayer passedGo
 		ifTrue: [currentPlayer salary].
-	self queryWin: self won.
-	self updateAllWindows.
-! !
+	self triggerEvent: #itemChange.
+	self queryWin: won! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 1/20/2012 19:57'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:22:15'!
 space7
 	"Feb week 2"
+	
 	self disableAll: {'Move'}.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	self enableAll: {'Fate'}! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:09'!
@@ -1963,6 +1972,12 @@ updateProgressIn: aWindow
 	pl history at: pl turns put: pl turns @ pl netAssets.
 	aWindow model reportProgress.
 ! !
+
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 09:04:36'!
+whatSpaceSays
+	"Perform the method associated with the space where the player is"
+
+	^ self perform: ((spaces atWrap: self currentPlayer position) routine)! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 22:10'!
 wonButtonsState
@@ -2419,19 +2434,19 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/1/2017 08:49:47'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/1/2017 11:52:27'!
 moved
 	"Perform the results of the move"
 	| pl |
 	
 	pl _ self who.
 	doubled contents: who doubledString.
+	model doSpace.
 	pl harvestEnabled 
 		ifTrue: [model enableAll: {'Harvest'}]
 		ifFalse: [
 			model updateHistory.
-			model enableAll: {'End Turn'}].
-	model doSpace! !
+			model enableAll: {'End Turn'}]! !
 
 !FarmToken methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2013 20:26'!
 waiting
@@ -3492,11 +3507,11 @@ initialize
 	super initialize.
 	description := 'Harvester'! !
 
-!Harvester class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:51'!
+!Harvester class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 12:27:44'!
 optionText
 	^ 'EQUIPMENT SALE
 old but useable HARVESTER
-Total $', self optionCost asStringWithCommas! !
+Total $', self optionCost printStringWithCommas! !
 
 !Tractor methodsFor: 'initialize-release' stamp: 'dhn 1/18/2014 11:50'!
 initialize
@@ -3566,12 +3581,12 @@ auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 10! !
 
-!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:51'!
+!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 12:23:48'!
 optionText
 	^ 'LIVESTOCK AUCTION
 10 pregnant cows
 at $500 each
-Total $', self optionCost asStringWithCommas! !
+Total $', self optionCost printStringWithCommas! !
 
 !Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/18/2011 13:45'!
 price
@@ -4474,6 +4489,19 @@ setUpAssets
 !Farmer methodsFor: 'fate-related' stamp: 'dhn 11/23/2014 12:05'!
 slaughterCows: aParm
 	(assets at: #CattleOnFarm) quantity: 0.
+! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 09:44:03'!
+spaceEffect
+	"Answer the value of spaceEffect"
+
+	^ spaceEffect! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 09:09:32'!
+spaceEffect: anObject
+	"Set the value of spaceEffect"
+	
+	spaceEffect _ anObject
 ! !
 
 !Farmer methodsFor: 'fate-related' stamp: 'dhn 11/23/2014 12:06'!
