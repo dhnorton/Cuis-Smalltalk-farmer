@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 6:00:58 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 8:56:09 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 21!
+!provides: 'Farm' 1 22!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2419,7 +2419,7 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 8/31/2017 16:00:31'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/1/2017 08:49:47'!
 moved
 	"Perform the results of the move"
 	| pl |
@@ -2430,7 +2430,8 @@ moved
 		ifTrue: [model enableAll: {'Harvest'}]
 		ifFalse: [
 			model updateHistory.
-			model enableAll: {'End Turn'}]! !
+			model enableAll: {'End Turn'}].
+	model doSpace! !
 
 !FarmToken methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2013 20:26'!
 waiting
