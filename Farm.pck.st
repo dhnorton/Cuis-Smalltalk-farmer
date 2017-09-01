@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 1:22:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 1:49:36 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 23!
+!provides: 'Farm' 1 24!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -399,18 +399,18 @@ check2Buttons
 	^btn allSatisfy: [:a | a target isNil]
 ! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:33'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:30:44'!
 check3Buttons
 	"Answer true if the Harvest, Fate, and Expense buttons are disabled."
 	|btn har exp fat|
-	har := buttons submorphs detect: [:n | n externalName = 'Harvest'] 
+	har := buttons submorphs detect: [:n | n label = 'Harvest'] 
 		ifNone: [nil].
-	exp := buttons submorphs detect: [:n | n externalName = 'Expense'] 
+	exp := buttons submorphs detect: [:n | n label = 'Expense'] 
 		ifNone: [nil].
-	fat := buttons submorphs detect: [:n | n externalName = 'Fate'] 
+	fat := buttons submorphs detect: [:n | n label = 'Fate'] 
 		ifNone: [nil].
 	btn := Array with: har with: exp with: fat.
-	^ btn allSatisfy: [:a | a target isNil]
+	^ btn allSatisfy: [:a | a actionSelector isNil]
 ! !
 
 !Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 20:34'!
@@ -533,11 +533,10 @@ doSettings
 		)) startUp.
 	ans ifNotNil: [self perform: ans]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/1/2017 12:05:15'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/1/2017 13:43:33'!
 doSpace
-	"Determine if player can do the job"
+	"Do what the space says"
 	
-	self halt.
 	currentPlayer spaceEffect: self whatSpaceSays! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:02'!
@@ -966,7 +965,7 @@ payLoan
 	self arena addMorph: window.
 ! !
 
-!Farm methodsFor: 'loan' stamp: 'dhn 11/17/2014 13:59'!
+!Farm methodsFor: 'loan' stamp: 'dhn 9/1/2017 13:37:11'!
 paymentChoices
 	"Answer a collection of payment amounts for choosing."
 	| list |
@@ -974,7 +973,7 @@ paymentChoices
 	1000
 		to: 50000 by: 1000
 		do: [:n | 
-			list addLast: '$' , n asStringWithCommas].
+			list addLast: '$' , n printStringWithCommas].
 	^ list
 ! !
 
@@ -1053,7 +1052,7 @@ limit and is out of the game'
 			self disableAll: {'Pay Loan'. 'End Turn'. 'Option'. 'Expense'. 'Fate'. 'Harvest'. 'Move'}.
 			self won: true]! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:28:51'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:37:18'!
 reportAllPlayers
 	| str |
 	str := String new writeStream.
@@ -1062,7 +1061,7 @@ reportAllPlayers
 			nextPutAll: pl identity, ':'; newLine;
 			nextPutAll: pl years asString; 
 			nextPutAll: ' years as a farmer'; newLine; 
-			nextPutAll: '$' , (pl netAssets roundTo: 1) asStringWithCommas; 
+			nextPutAll: '$' , (pl netAssets roundTo: 1) printStringWithCommas; 
 			nextPutAll: ' net assets'; newLine;
 			 nextPutAll: pl options size asString;
 			 nextPutAll: ' options held'; newLine.
@@ -1846,11 +1845,11 @@ space6
 	self triggerEvent: #itemChange.
 	self queryWin: won! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:22:15'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 13:25:00'!
 space7
 	"Feb week 2"
 	
-	self disableAll: {'Move'}.
+	self disableAll: {'Move'. 'End Turn'}.
 	self triggerEvent: #itemChange.
 	self enableAll: {'Fate'}! !
 
@@ -1946,14 +1945,12 @@ updateHistory
 			currentPlayer appendHistory].
 	self triggerEvent: #itemChange! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 15:57'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:27:15'!
 updatePlayer
 	"Make the screen show the latest numbers."
-	self updateNumbers.
-	self updateAllWindows.
-	self updatePlayers.
-	self conditionallyEnableOption.
-	self arena changed! !
+	
+	self triggerEvent: #itemChange.
+	self conditionallyEnableOption! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 15:36'!
 updatePlayerIn: aWindow
@@ -3253,15 +3250,15 @@ rate: anObject
 
 	rate := anObject! !
 
-!Crop methodsFor: 'accessing' stamp: 'dhn 8/29/2017 21:28:06'!
+!Crop methodsFor: 'accessing' stamp: 'dhn 9/1/2017 13:36:30'!
 reportAsAssetFor: aPlayer 
 	| str |
 	str := String new writeStream.
 	str nextPutAll: (self quantity roundTo: 1) asString;
 		nextPutAll: ' acres';	newLine;
-		nextPutAll: '$' , self cost asInteger asStringWithCommas;
+		nextPutAll: '$' , self cost asInteger printStringWithCommas;
 		nextPutAll: ' = cost'; newLine;
-		nextPutAll: '$' , self gross asInteger asStringWithCommas;
+		nextPutAll: '$' , self gross asInteger printStringWithCommas;
 		nextPutAll: ' = gross'; newLine;		
 		nextPutAll: (self profit: self gross orLoss: self cost); newLine;
 		nextPutAll: self factor asString , ' = factor'; newLine;
@@ -3306,12 +3303,12 @@ auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 5! !
 
-!Fruit class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:50'!
+!Fruit class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:38:55'!
 optionText
 	^ 'NEIGHBOR GOES BROKE
 5 acres of Fruit
 at $5,000 per acre
-Total $', self optionCost asStringWithCommas! !
+Total $', self optionCost printStringWithCommas! !
 
 !Fruit class methodsFor: 'as yet unclassified' stamp: 'dhn 9/18/2011 12:56'!
 price
@@ -3359,12 +3356,12 @@ at: aRoll for: aQuantity
 	^sum roundTo:  1
 ! !
 
-!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:50'!
+!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:39:28'!
 optionText
 	^ 'NEIGHBOR SELLS OUT
 10 acres of Grain
 at $2,000 per acre
-Total $', self optionCost asStringWithCommas! !
+Total $', self optionCost printStringWithCommas! !
 
 !Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 1/19/2012 15:24'!
 price
@@ -3417,12 +3414,12 @@ at: aRoll for: aQuantity
 	"Answer the yield as if looking it up in a table."
 	^(self yieldVector at: aRoll) * (aQuantity // 10)! !
 
-!Hay class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:51'!
+!Hay class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:39:43'!
 optionText
 	^ 'NEIGHBOR SELLS OUT
 10 acres of Hay
 at $2,000 per acre
-Total $', self optionCost asStringWithCommas! !
+Total $', self optionCost printStringWithCommas! !
 
 !Hay class methodsFor: 'as yet unclassified' stamp: 'dhn 9/18/2011 10:57'!
 price
@@ -3459,20 +3456,20 @@ initialize
 lotQuantity
 	^ 1! !
 
-!Equipment methodsFor: 'accessing' stamp: 'dhn 8/29/2017 21:28:27'!
+!Equipment methodsFor: 'accessing' stamp: 'dhn 9/1/2017 13:36:50'!
 reportAsAssetFor: aPlayer
 	| str |
 	str := String new writeStream.
 	str nextPutAll: self quantity asString;
 		 nextPutAll: ' each';
 		 newLine;
-		 nextPutAll: '$' , self cost asInteger asStringWithCommas;
+		 nextPutAll: '$' , self cost asInteger printStringWithCommas;
 		 nextPutAll: ' = cost';
 		 newLine;
-		 nextPutAll: '$' , self gross asInteger asStringWithCommas;
+		 nextPutAll: '$' , self gross asInteger printStringWithCommas;
 		 nextPutAll: ' = gross';
 		 newLine;
-		 nextPutAll: '$' , self costAvoided asInteger asStringWithCommas;
+		 nextPutAll: '$' , self costAvoided asInteger printStringWithCommas;
 		 nextPutAll: ' = cost avoided';
 		 newLine;
 		
@@ -3518,27 +3515,27 @@ initialize
 	super initialize.
 	description := 'Tractor'! !
 
-!Tractor class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:52'!
+!Tractor class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:40:39'!
 optionText
 	^ 'EQUIPMENT SALE
 old but useable TRACTOR
-Total $', self optionCost asStringWithCommas! !
+Total $', self optionCost printStringWithCommas! !
 
 !Livestock methodsFor: 'initialize-release' stamp: 'dhn 9/25/2011 05:11'!
 initialize
 	super initialize.
 ! !
 
-!Livestock methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:36:36'!
+!Livestock methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:40:14'!
 reportAsAssetFor: aPlayer
 	| str |
 	
 	str _ String new writeStream.
 	str nextPutAll: self quantity asString;
 		 nextPutAll: ' head'; newLine;
-		 nextPutAll: '$' , self cost asInteger asStringWithCommas;
+		 nextPutAll: '$' , self cost asInteger printStringWithCommas;
 		 nextPutAll: ' = cost'; newLine;
-		 nextPutAll: '$' , self gross asInteger asStringWithCommas;
+		 nextPutAll: '$' , self gross asInteger printStringWithCommas;
 		 nextPutAll: ' = gross'; newLine;
 		 nextPutAll: self factor asString , ' = factor'; newLine;
 		 nextPutAll: self yearCount asString , ' = year count'; newLine;
@@ -3648,13 +3645,13 @@ auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 20! !
 
-!Ahtanum class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:49'!
+!Ahtanum class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:40:54'!
 optionText
 	^ 'LEASE Ahtanum Ridge
 for lifetime at $10,000 and
 buy 20 pregnant cows to stock it
 at $500 each
-Total $', self optionCost asStringWithCommas! !
+Total $', self optionCost printStringWithCommas! !
 
 !Cascade methodsFor: 'as yet unclassified' stamp: 'dhn 1/23/2014 15:30'!
 initialize
@@ -3670,13 +3667,13 @@ auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 40! !
 
-!Cascade class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:50'!
+!Cascade class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:35:39'!
 optionText
 	^ 'LEASE Cascade Ridge
 for lifetime at $20,000 and
 buy 40 pregnant cows to stock it
 at $500 each
-Total $', self optionCost asStringWithCommas! !
+Total $', self optionCost printStringWithCommas! !
 
 !Rattlesnake methodsFor: 'as yet unclassified' stamp: 'dhn 1/23/2014 15:31'!
 initialize
@@ -3692,13 +3689,13 @@ auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 30! !
 
-!Rattlesnake class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:52'!
+!Rattlesnake class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:40:23'!
 optionText
 	^ 'LEASE Rattlesnake Ridge
 for lifetime at $15,000 and
 buy 30 pregnant cows to stock it
 at $500 each
-Total $', self optionCost asStringWithCommas! !
+Total $', self optionCost printStringWithCommas! !
 
 !Toppenish methodsFor: 'as yet unclassified' stamp: 'dhn 1/23/2014 15:31'!
 initialize
@@ -3714,13 +3711,13 @@ auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 50! !
 
-!Toppenish class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:52'!
+!Toppenish class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:40:31'!
 optionText
 	^ 'LEASE Toppenish Ridge
 for lifetime at $25,000 and
 buy 50 pregnant cows to stock it
 at $500 each
-Total $', self optionCost asStringWithCommas! !
+Total $', self optionCost printStringWithCommas! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 12/14/2011 11:47'!
 addOption: anObject
@@ -4337,7 +4334,7 @@ oilLease: aParm
 		do: [:a | acres := acres + (self oilBucksFor: a)].
 	self tally: 100 * acres! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 14:08'!
+!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:37:52'!
 optionDescription: aString 
 	| cost down |
 	cost := Compiler evaluate: aString , ' optionCost'.
@@ -4345,10 +4342,10 @@ optionDescription: aString
 	^ String new writeStream
 		nextPutAll: (Compiler evaluate: aString , ' optionText'); cr; cr;
 		 nextPutAll: 'Exercising this option requires $';
-		 nextPutAll: down asInteger asStringWithCommas;
+		 nextPutAll: down asInteger printStringWithCommas;
 		 nextPutAll: ' cash'; cr;
 		 nextPutAll: 'and a loan for $';
-		 nextPutAll: (cost - down) asInteger asStringWithCommas;
+		 nextPutAll: (cost - down) asInteger printStringWithCommas;
 		 contents! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 9/10/2011 13:04'!
@@ -4374,36 +4371,36 @@ removeOptionAt: aName
 		ifAbsent: [self halt];
 		yourself! !
 
-!Farmer methodsFor: 'nil' stamp: 'dhn 8/29/2017 21:31:48'!
+!Farmer methodsFor: 'nil' stamp: 'dhn 9/1/2017 13:48:49'!
 reportYourself
 	| str exp |
 	exp := self outFlow negated.
 	str := String new writeStream.
-	str nextPutAll: '$' , self inFlow asInteger asStringWithCommas;
+	str nextPutAll: '$' , self inFlow asInteger printStringWithCommas;
 		 nextPutAll: ' farm income';
 		 newLine;
-		 nextPutAll: '$' , self offFarm asInteger asStringWithCommas;
+		 nextPutAll: '$' , self offFarm asInteger printStringWithCommas;
 		 nextPutAll: ' off-farm income';
 		 newLine;
-		 nextPutAll: '$' , (exp roundTo:  1) asStringWithCommas;
+		 nextPutAll: '$' , (exp roundTo:  1) printStringWithCommas;
 		 nextPutAll: ' expense';
 		 newLine.
 	self expenseCount > 0
-		ifTrue: [str nextPutAll: '$' , (exp // self expenseCount roundTo:  1) asStringWithCommas;
+		ifTrue: [str nextPutAll: '$' , (exp // self expenseCount roundTo:  1) printStringWithCommas;
 				 nextPutAll: ' average expense';
 				 newLine].
 	exp ~= 0
 		ifTrue: [str nextPutAll: (self inFlow / exp printShowingDecimalPlaces:  2) asString;
 				 nextPutAll: ' = farm income to expense ratio';
 				 newLine].
-	str nextPutAll: '$' , self interestPd asInteger asStringWithCommas;
+	str nextPutAll: '$' , self interestPd asInteger printStringWithCommas;
 		 nextPutAll: ' interest paid';
 		 newLine;
 		 nextPutAll: self paidInterest asString;
 		 nextPutAll: ' occasions interest was paid';
 		 newLine.
 	self paidInterest = 0
-		ifFalse: [str nextPutAll: '$' , (self interestPd / self paidInterest roundTo:  1) asStringWithCommas;
+		ifFalse: [str nextPutAll: '$' , (self interestPd / self paidInterest roundTo:  1) printStringWithCommas;
 				 nextPutAll: ' = average interest payment';
 				 newLine].
 	^ str nextPutAll: self avoidedDebt asString;
@@ -4418,7 +4415,7 @@ reportYourself
 		 nextPutAll: self garnish asString;
 		 nextPutAll: ': being garnished';
 		 newLine;
-		 nextPutAll: '$' , (exp / (self years + 1) roundTo:  1) asStringWithCommas;
+		 nextPutAll: '$' , (exp / (self years + 1) roundTo:  1) printStringWithCommas;
 		 nextPutAll: ' average yearly expense';
 		 newLine;
 		 nextPutAll: (self turns / (self years + 1) printShowingDecimalPlaces:  1) asString;
@@ -4555,7 +4552,7 @@ Normally $' , normal printStringWithCommas , '.'.
 				ifFalse: [yield := self updateCattleAsset: aRoll]].
 	^ yield! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 8/29/2017 21:33:28'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 13:38:23'!
 updateCattleAsset: aRoll 
 	| yield tale har fac ttl str q1 q2 eachHerd headCount |
 	
@@ -4581,10 +4578,10 @@ updateCattleAsset: aRoll
 							each quality: aRoll + each quality.
 							each count: 1 + each count]].
 			str := String new writeStream.
-			str nextPutAll: 'Cow quality ' , aRoll , ' for ' , ('$' , ttl asInteger asStringWithCommas);
+			str nextPutAll: 'Cow quality ' , aRoll , ' for ' , ('$' , ttl asInteger printStringWithCommas);
 				 nextPutAll: '. Factor ' , fac;
 				 newLine;
-				 nextPutAll: 'Normally $' , (ttl / fac) asInteger asStringWithCommas , '.'.
+				 nextPutAll: 'Normally $' , (ttl / fac) asInteger printStringWithCommas , '.'.
 			tale := str contents.
 			GamePopUp inform: tale title: 'Livestock quantity ' , headCount].
 	har := self mgr buttons submorphs
