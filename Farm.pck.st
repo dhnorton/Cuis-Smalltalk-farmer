@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 2:01:07 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 5:04:36 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 25!
+!provides: 'Farm' 1 26!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1298,64 +1298,65 @@ showYourself
 		ifNotNil: [xw comeToFront].
 	^ xw! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 8/30/2017 17:30:50'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:41:10'!
 space1
 	"Christmas Vacation"
+	
 	self disableAll: {'Move'}.
-	self updatePlayer.
-	 currentPlayer salary.
+	self triggerEvent: #itemChange.
+	currentPlayer salary.
 	GamePopUp inform: 'You will receive a bonus of $1,000.' title: 'Christmas Bonus'.
-	 currentPlayer tally: 1000.
-	 currentPlayer offFarm: 1000 + self currentPlayer offFarm.
-	self updatePlayer.
+	currentPlayer tally: 1000.
+	currentPlayer offFarm: 1000 + self currentPlayer offFarm.
+	self triggerEvent: #itemChange.
 	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 7/12/2013 19:18'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:43:03'!
 space10
 	"Mar week 1"
+	
 	self disableAll: {'Move'}.
-	 currentPlayer tally: 2000 negated.
+	currentPlayer tally: 2000 negated.
 	( currentPlayer assets at: #Wheat)
 		cost: 2000 + ( currentPlayer assets at: #Wheat) cost.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 7/12/2013 19:18'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:42:29'!
 space11
 	"Mar week 2"
+	
 	self disableAll: {'Move'}.
-	 currentPlayer tally: 500 negated.
-	self updatePlayer.
+	currentPlayer tally: 500 negated.
+	self triggerEvent: #itemChange.
 	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/23/2014 14:29'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:44:33'!
 space12
 	"Mar week 3"
+	
 	self disableAll: {'Move'}.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	currentPlayer goBackToJan2.
-	self enableAll: {'End Turn'}.
-	self updateAllWindows.
-! !
+	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 19:59'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:46:32'!
 space13
 	"Mar week 4"
+	
 	self disableAll: {'Move'}.
-	 currentPlayer ifFruit
-		ifTrue: [ currentPlayer tally: 2000 negated.
-			self updatePlayer].
-	self enableAll: {'End Turn'}.
-	self updateAllWindows.
-! !
+	currentPlayer ifFruit
+		ifTrue: [
+			currentPlayer tally: 2000 negated.
+			self triggerEvent: #itemChange].
+	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/17/2014 17:34'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:47:28'!
 space14
 	"Apr week 1"
+	
 	self disableAll: {'Move'}.
-	 currentPlayer
-		addOption: (self drawOptionQuietly: false).
-	self updateAllWindows.
+	currentPlayer addOption: (self drawOptionQuietly: false).
 	self enableAll: {'End Turn'}! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 19:36'!
@@ -1366,38 +1367,42 @@ space15
 	self updateAllWindows.
 	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 7/12/2013 19:20'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:48:59'!
 space16
 	"Apr week 3"
+	
 	self disableAll: {'Move'}.
 	currentPlayer tally: 500 negated.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 7/12/2013 19:21'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:49:32'!
 space17
 	"Apr week 4"
+	
 	self disableAll: {'Move'}.
 	currentPlayer tally: 1000 negated.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 7/12/2013 19:21'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:49:56'!
 space18
 	"May week 1"
+	
 	self disableAll: {'Move'}.
 	currentPlayer tally: 500.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	self queryWin: self won! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 7/12/2013 19:21'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:50:19'!
 space19
 	"May week 2"
+	
 	self disableAll: {'Move'}.
 	currentPlayer tally: 500 negated.
 	(currentPlayer assets at: #Corn)
 		cost: 500 + (currentPlayer assets at: #Corn) cost.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	self enableAll: {'End Turn'}! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:17:12'!
@@ -1412,12 +1417,15 @@ space2
 	self triggerEvent: #itemChange.
 	self queryWin: won! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/27/2013 09:44'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:51:23'!
 space20
 	"May week 3"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer tally: 1000.
-	self updatePlayer; enableHarvestButtons ! !
+	self 
+		triggerEvent: #itemChange;
+		enableHarvestButtons ! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/17/2014 17:33'!
 space21
@@ -1437,12 +1445,15 @@ space22
 	self updateAllWindows.
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/27/2013 09:46'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:51:55'!
 space23
 	"Jun week 2"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer tally: 500.
-	self updatePlayer; enableHarvestButtons! !
+	self 
+		triggerEvent: #itemChange;
+		enableHarvestButtons ! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/23/2014 14:03'!
 space24
@@ -1564,24 +1575,27 @@ space31
 	self updateAllWindows.
  ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:04'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:03:05'!
 space32
 	"Aug week 2"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer hasHarvester
-		ifTrue: [self updatePlayer].
-	self enableHarvestButtons.
-	self updateAllWindows.
-! !
+		ifTrue: [
+			self triggerEvent: #itemChange;
+			enableHarvestButtons]! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/27/2013 09:50'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:53:57'!
 space33
 	"Aug week 3"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer tally: 500.
 	(currentPlayer assets at: #Wheat)
 		gross: 500 + (currentPlayer assets at: #Wheat) gross.
-	self updatePlayer; enableHarvestButtons! !
+	self 
+		triggerEvent: #itemChange;
+		enableHarvestButtons ! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/23/2014 14:08'!
 space34
@@ -1617,12 +1631,13 @@ space36
 	self updateAllWindows.
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:06'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:56:49'!
 space37
 	"Harvest Moon"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer tally: 500.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	currentPlayer ifCows
 		ifTrue: [currentPlayer harvestEnabled
 				ifTrue: [self enableAll: {'Harvest'. 'Expense'}.
@@ -1633,9 +1648,7 @@ space37
 	self won
 		ifTrue: [self wonButtonsState]
 		ifFalse: [self check3Buttons
-					ifTrue: [self enableAll: {'End Turn'}]].
-	self updateAllWindows.
-! !
+					ifTrue: [self enableAll: {'End Turn'}]]! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/23/2014 14:12'!
 space38
@@ -1655,14 +1668,15 @@ space38
 
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/23/2014 14:12'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:56:40'!
 space39
 	"Sep week 4"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer ifFruit
-		ifTrue: [currentPlayer allocateFruitCost: 2000.
-			self updatePlayer].
-	self updateAllWindows.
+		ifTrue: [
+			currentPlayer allocateFruitCost: 2000.
+			self triggerEvent: #itemChange].
 	currentPlayer ifCows
 		ifTrue: [currentPlayer harvestEnabled
 				ifTrue: [self enableAll: {'Harvest'. 'Expense'}.
@@ -1670,9 +1684,7 @@ space39
 				ifFalse: [self enableAll: {'End Turn'}]]
 		ifFalse: [currentPlayer missedCattleHarvest].
 	self check3Buttons
-		ifTrue: [self enableAll: {'End Turn'}].
-	self updateAllWindows.
-
+		ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:20:04'!
@@ -1686,12 +1698,13 @@ space4
 	self enableAll: {'End Turn'}.
 	self triggerEvent: #itemChange! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:07'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:57:30'!
 space40
 	"Oct week 1"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer tally: 500.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	currentPlayer ifCows
 		ifTrue: [currentPlayer harvestEnabled
 				ifTrue: [self enableAll: {'Harvest'. 'Expense'}.
@@ -1699,9 +1712,7 @@ space40
 				ifFalse: [self enableAll: {'End Turn'}]]
 		ifFalse: [currentPlayer missedCattleHarvest].
 	self check3Buttons
-		ifTrue: [self enableAll: {'End Turn'}].
-	self updateAllWindows.
-
+		ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:07'!
@@ -1762,12 +1773,13 @@ space44
 	self updateAllWindows.
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:08'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:58:00'!
 space45
 	"Nov week 2"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer tally: 500.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	(currentPlayer assets at: #Apples)
 		factor: ((currentPlayer assets at: #Apples) factor max: 1).
 	currentPlayer ifFruit
@@ -1775,16 +1787,15 @@ space45
 		ifFalse: [| a |
 			a := currentPlayer assets at: #Apples.
 			a missed: a missed + 1.
-			self enableAll: {'End Turn'}].
-	self updateAllWindows.
-! !
+			self enableAll: {'End Turn'}]! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:08'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:58:33'!
 space46
 	"Nov week 3"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer tally: 1000.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	(currentPlayer assets at: #Apples)
 		factor: ((currentPlayer assets at: #Apples) factor max: 1).
 	currentPlayer ifFruit
@@ -1792,25 +1803,29 @@ space46
 		ifFalse: [| a |
 			a := currentPlayer assets at: #Apples.
 			a missed: a missed + 1.
-			self enableAll: {'End Turn'}].
-	self updateAllWindows.
-! !
+			self enableAll: {'End Turn'}]! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/27/2013 09:53'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:59:26'!
 space47
 	"Nov week 4"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer allocateFruitCost: 1000.
-	self updatePlayer; enableHarvestButtons! !
+	self 
+		triggerEvent: #itemChange;
+		enableHarvestButtons ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 11/27/2013 09:53'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:59:53'!
 space48
 	"Dec week 1"
+	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer tally: 500.
 	(currentPlayer assets at: #Wheat)
 		gross: 500 + (currentPlayer assets at: #Wheat) gross.
-	self updatePlayer; enableHarvestButtons! !
+	self 
+		triggerEvent: #itemChange;
+		enableHarvestButtons ! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 11/22/2014 20:09'!
 space49
@@ -4371,7 +4386,7 @@ removeOptionAt: aName
 		ifAbsent: [self halt];
 		yourself! !
 
-!Farmer methodsFor: 'nil' stamp: 'dhn 9/1/2017 14:00:14'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/1/2017 14:06:41'!
 reportYourself
 	| str exp |
 	exp := self outFlow negated.
