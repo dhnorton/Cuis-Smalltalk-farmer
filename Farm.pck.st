@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 1:49:36 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 2:01:07 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 24!
+!provides: 'Farm' 1 25!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -3250,7 +3250,7 @@ rate: anObject
 
 	rate := anObject! !
 
-!Crop methodsFor: 'accessing' stamp: 'dhn 9/1/2017 13:36:30'!
+!Crop methodsFor: 'accessing' stamp: 'dhn 9/1/2017 13:58:10'!
 reportAsAssetFor: aPlayer 
 	| str |
 	str := String new writeStream.
@@ -3266,7 +3266,7 @@ reportAsAssetFor: aPlayer
 		nextPutAll: self count asString , ' = number of harvests'; newLine;
 		nextPutAll: self missed asString , ' = missed harvests'; newLine.
 	self count = 0
-		ifFalse: [str nextPutAll: (self quality / self count printShowingDecimalPlaces: 1)
+		ifFalse: [str nextPutAll: (self quality / self count printOn: str fractionDigits: 1)
 					, ' = average harvest quality'].
 	^ str contents! !
 
@@ -3526,7 +3526,7 @@ initialize
 	super initialize.
 ! !
 
-!Livestock methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:40:14'!
+!Livestock methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:59:15'!
 reportAsAssetFor: aPlayer
 	| str |
 	
@@ -3543,7 +3543,7 @@ reportAsAssetFor: aPlayer
 		 nextPutAll: self missed asString , ' = missed harvests'; newLine;		
 		nextPutAll: (self profit: self gross orLoss: self cost); newLine.
 	self count = 0
-		ifFalse: [str nextPutAll: (self quality / self count printShowingDecimalPlaces: 1)
+		ifFalse: [str nextPutAll: (self quality / self count printOn: str fractionDigits: 1)
 					, ' = average harvest quality'].
 	^ str contents! !
 
@@ -4371,7 +4371,7 @@ removeOptionAt: aName
 		ifAbsent: [self halt];
 		yourself! !
 
-!Farmer methodsFor: 'nil' stamp: 'dhn 9/1/2017 13:48:49'!
+!Farmer methodsFor: 'nil' stamp: 'dhn 9/1/2017 14:00:14'!
 reportYourself
 	| str exp |
 	exp := self outFlow negated.
@@ -4390,7 +4390,7 @@ reportYourself
 				 nextPutAll: ' average expense';
 				 newLine].
 	exp ~= 0
-		ifTrue: [str nextPutAll: (self inFlow / exp printShowingDecimalPlaces:  2) asString;
+		ifTrue: [str nextPutAll: (self inFlow / exp printOn: str fractionDigits: 2) asString;
 				 nextPutAll: ' = farm income to expense ratio';
 				 newLine].
 	str nextPutAll: '$' , self interestPd asInteger printStringWithCommas;
@@ -4418,7 +4418,7 @@ reportYourself
 		 nextPutAll: '$' , (exp / (self years + 1) roundTo:  1) printStringWithCommas;
 		 nextPutAll: ' average yearly expense';
 		 newLine;
-		 nextPutAll: (self turns / (self years + 1) printShowingDecimalPlaces:  1) asString;
+		 nextPutAll: (self turns / (self years + 1) printOn: str fractionDigits:  1) asString;
 		 nextPutAll: ' turns per year';
 		 newLine;
 		 nextPutAll: self years asString;
