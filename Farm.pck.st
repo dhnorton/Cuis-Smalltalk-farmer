@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 9:05:26 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 9:23:12 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 28!
+!provides: 'Farm' 1 29!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -30,6 +30,16 @@ GameBoard subclass: #FarmingGame
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmingGame class' category: #'Farm-Graphics'!
 FarmingGame class
+	instanceVariableNames: ''!
+
+!classDefinition: #FarmingView category: #'Farm-Graphics'!
+SystemWindow subclass: #FarmingView
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'FarmingView class' category: #'Farm-Graphics'!
+FarmingView class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmAsset category: #'Farm-Model'!
@@ -326,6 +336,9 @@ Start the game from the New morph... window or in a workspace do:
 http://farmgame.com/product/woo-single-2/
 
 !
+
+!FarmingView commentStamp: '<historical>' prior: 0!
+Abstract class for FarmingGame views!
 
 !Farmer commentStamp: '<historical>' prior: 0!
 A player in the Farming Game.
@@ -3240,6 +3253,77 @@ start
 	
 	^ win
 ! !
+
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:22'!
+aboutToBeGrabbedBy: aHand
+	"The receiver is being grabbed by a hand.
+	Perform necessary adjustments (if any) and return the actual morph
+	that should be added to the hand.
+	Answer nil to reject the drag."
+	"This message is sent to the dragged morph, not to the owner.
+	It is included here just for reference."
+
+	^self "Grab me"! !
+
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:32'!
+justDroppedInto: newOwnerMorph event: anEvent 
+	"This message is sent to a dropped morph after it has been dropped on -- and been accepted by -- a drop-sensitive morph"
+	"This message is sent to the dragged morph, not to the owner.
+	It is included here just for reference."
+
+	^super justDroppedInto: newOwnerMorph event: anEvent ! !
+
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:43'!
+justGrabbedFrom: formerOwner
+	"The receiver was just grabbed from its former owner and is now attached to the hand."
+	"This message is sent to the dragged morph, not to the owner.
+	It is included here just for reference."! !
+
+!FarmingView methodsFor: 'initialization' stamp: 'dhn 10/19/2016 20:22:17'!
+removeWindowMenu
+	"Remove the button in the title bar which brings up the window menu"
+	
+	(self findDeepSubmorphThat: [:s | s balloonText = 'window menu'] ifAbsent: [^ nil]) delete! !
+
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:54:11'!
+wantsToBeDroppedInto: aMorph
+	"Return true if it's okay to drop the receiver into aMorph. This check is symmetric to #wantsDroppedMorph:event: to give both parties a chance of figuring out whether they like each other."
+	"This message is sent to the dragged morph, not to the owner.
+	It is included here just for reference."
+
+	^true! !
+
+!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 10/19/2016 20:16:56'!
+open: aModel label: aString
+	"Answer a view on aModel"
+	|  window |
+	
+	window _ self new.
+	window
+		model: aModel;
+		buildMorphicWindow.
+	aString ifNotNil: [ window setLabel: aString ].
+	^ window! !
+
+!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 10/19/2016 20:17:15'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel label: 'Statistics'.
+	win removeWindowMenu.
+			
+	aModel when: #itemChange send: #details to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 11/7/2016 21:19:58'!
+viewPosition
+	"Answer the basic position for instances of this class"
+	
+	^ 200@-50! !
 
 !FarmAsset methodsFor: 'as yet unclassified' stamp: 'dhn 9/23/2014 13:18'!
 assetValue
