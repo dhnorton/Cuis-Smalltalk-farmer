@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 9:23:12 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 9:44:22 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 29!
+!provides: 'Farm' 1 30!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -40,6 +40,16 @@ SystemWindow subclass: #FarmingView
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmingView class' category: #'Farm-Graphics'!
 FarmingView class
+	instanceVariableNames: ''!
+
+!classDefinition: #OptionsView category: #'Farm-Graphics'!
+FarmingView subclass: #OptionsView
+	instanceVariableNames: 'textPane cancelButton buyButton buttonArea'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'OptionsView class' category: #'Farm-Graphics'!
+OptionsView class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmAsset category: #'Farm-Model'!
@@ -339,6 +349,9 @@ http://farmgame.com/product/woo-single-2/
 
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
+
+!OptionsView commentStamp: 'dhn 8/26/2016 16:48:51' prior: 0!
+A Construction Game window which makes it possible for contractors to make purchases.!
 
 !Farmer commentStamp: '<historical>' prior: 0!
 A player in the Farming Game.
@@ -3324,6 +3337,137 @@ viewPosition
 	"Answer the basic position for instances of this class"
 	
 	^ 200@-50! !
+
+!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 15:04:46'!
+buildMorphicWindow
+	"Lay out the window for purchases"
+	| list1 rightPane |
+	
+	self layoutMorph beRow.
+	list1 _ (PluggableListMorph
+		model: model
+		listGetter: #optionsList
+		indexGetter: #optionsItem
+		indexSetter: #optionsItem:
+		mainView: self
+		menuGetter: nil
+		keystrokeAction: nil)
+			name: #catalog.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+	model when: #buyButton: send: #buyButton: to: self with: #state.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'item description'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	rightPane _ LayoutMorph newColumn.
+	rightPane
+		name: 'right pane';
+		addMorph: buttonArea;
+		addMorph: textPane.
+	
+	self layoutMorph
+		addMorph: list1 proportionalWidth: 0.35;
+		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
+! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 12/8/2016 20:19:00'!
+buy
+	"Purchase an asset"
+	| key option cost down balance |
+
+	key _ model optionsList at: model optionsItem.
+	option _ Construction optionsDesc at: key.
+	cost _ option class price * model currentPlayer priceFactor.
+	down _ 0.2 * cost.
+	balance _ cost - down.
+	model
+		pay: down
+		borrow: balance
+		for: option listName asSymbol
+		amount: 1;
+		updateHistory;
+		enableAll: {'doJob'}.
+	self details! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 11:33:35'!
+buyButton: aBool
+	"Change buy button state according to aBool"
+	
+	aBool
+		ifTrue: [buyButton enableButton]
+		ifFalse: [buyButton disableButton]! !
+
+!OptionsView methodsFor: 'termination' stamp: 'dhn 9/12/2016 17:18:16'!
+closeBoxHit
+
+	model 
+		optionsItem: nil;
+		enableAll: {'Purchase'}.
+	super closeBoxHit! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 8/26/2016 15:51:55'!
+details
+
+	textPane model actualContents: model optionsReport 	"note that the textPane model differs from the model for this view"! !
+
+!OptionsView methodsFor: 'termination' stamp: 'dhn 8/28/2016 14:19:18'!
+endIt
+	"Close the receiver"
+	
+	model 
+		optionsItem: nil;
+		enableAll: {'Purchase'}.
+	self delete! !
+
+!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 10:20:02'!
+startButtons
+	"Set the buttons for buying assets"
+	
+	buyButton _ GameButtonMorph label: 'Buy' action: #buy state: false model: self.
+	buyButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Make the purchase.'.
+		
+	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
+	cancelButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Forget about shopping for now.'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: buyButton;
+		addMorph: cancelButton;
+		padding: #center.
+! !
+
+!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 11/2/2016 20:33:52'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+			
+	aModel when: #itemChange send: #details to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
 
 !FarmAsset methodsFor: 'as yet unclassified' stamp: 'dhn 9/23/2014 13:18'!
 assetValue
