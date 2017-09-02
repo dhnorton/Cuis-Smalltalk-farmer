@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 11:21:29 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 1:32:54 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 32!
+!provides: 'Farm' 1 33!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2013,7 +2013,7 @@ defaultGoal
 	
 	^ 250000! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 8/31/2017 11:46:57'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/2/2017 11:45:46'!
 describeSpaces
 	"Descriptions for the spaces on the board."
 	
@@ -2158,7 +2158,7 @@ Week 2
 Hot!! Wish you were in the mountains. Draw Option to Buy.';
 
 		add: 'July
-		Week 3
+Week 3
 
 It''s a cooker!! 114 degrees in the shade. Wipe your brow and go to Harvest Moon after getting hay check.';
 
@@ -2643,21 +2643,21 @@ layoutSubmorphs
     super layoutSubmorphs.
     self board morphExtent: self board owner morphExtent! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:18:22'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:27:21'!
 makeAddPlayerButton
 	"Answer the 'Players' button"
 
 	^ (GameButtonMorph label: 'Players' action: #getPlayers state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Use this button to enter names of two to six players;
 entering an empty name or cancel will start the game'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:19:59'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:27:41'!
 makeAuctionButton
 	"Answer the 'Auction' button"
 
 	^ (GameButtonMorph label: 'Auction' action: #doAuction state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Auction options and equipment'! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:29:09'!
@@ -2679,12 +2679,12 @@ makeButtonArea
 	^ buttonArea
 		! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:09'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:28:01'!
 makeBuyOptionButton
 	"Answer the 'Option' button"
 
 	^ (GameButtonMorph label: 'Option' action: #showOpts state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'See what options you have and make purchases during WINTER.'! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 18:49:08'!
@@ -2727,36 +2727,36 @@ makeCellsArea
 		
 ! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:16'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:28:15'!
 makeDrawFateButton
 	"Answer the 'Fate' button"
 
 	^ (GameButtonMorph label: 'Fate' action: #drawFate state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Determine your Farmer''s Fate.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:18:05'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:28:27'!
 makeEndTurnButton
 	"Answer the 'End Turn' button"
 
 	^ (GameButtonMorph label: 'End Turn' action: #endTurn state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:29'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:28:38'!
 makeHarvestButton
 	"Answer the 'Harvest' button"
 
 	^ (GameButtonMorph label: 'Harvest' action: #harvest state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Harvest the crop for the season indicated above the space.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:44:40'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 12:03:45'!
 makeMoveButton
 	"Answer the 'Move' button"
 
 	^ (GameButtonMorph label: 'Move' action: #move state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.'! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:31:59'!
@@ -2790,28 +2790,28 @@ makeOthersArea
 		name: #others;
 		padding: #center! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:41'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:28:58'!
 makePayExpenseButton
 	"Answer the 'Expense' button"
 
 	^ (GameButtonMorph label: 'Expense' action: #payExpense state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Pay the farming expenses which are owed.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:20:49'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:29:08'!
 makePayLoanButton
 	"Answer the 'Pay Loan' button"
 
 	^ (GameButtonMorph label: 'Pay Loan' action: #payLoan state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Transfer cash to pay off some debt.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:59:32'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:29:17'!
 makeQuitGameButton
 	"Answer the 'Quit' button"
 	
 	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Completely ends the game. Nothing is saved.';
 		color: (Color orange alpha: 0.9)! !
 
@@ -2828,28 +2828,28 @@ makeSeasonsArea
 			color: Color lightGreen;
 			name: #seasons! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:38:47'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:29:32'!
 makeSettingsButton
 	"Answer the 'Settings' button"
 	
 	^ (GameButtonMorph label: 'Settings' action: #doSettings state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Change some of the game parameters'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 17:21:14'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:29:42'!
 makeShowStatsButton
 	"Answer the 'Stats' button"
 
 	^ (GameButtonMorph label: 'Stats' action: #doStats state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:40:43'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:29:52'!
 makeTourButton
 	"Answer the 'Tour' button"
 	
 	^ (GameButtonMorph label: 'Tour' action: #doTour state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		layoutSpec: self class buttonSize;
 		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
 
 !FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
@@ -3045,6 +3045,12 @@ tourAt: anInterval
 boardColor
 	"Answer the color of the board itself"
 	^Color yellow alpha: 0.5! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/2/2017 13:26:24'!
+buttonSize
+	"Answer the layoutSpec for buttons on the game board"
+	
+	^ LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8! !
 
 !FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:01:13'!
 cellColor
