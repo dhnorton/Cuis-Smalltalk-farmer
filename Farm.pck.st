@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 10:23:18 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 11:21:29 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 31!
+!provides: 'Farm' 1 32!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1161,7 +1161,7 @@ setUpSpaces
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 15:15:04'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/2/2017 11:16:47'!
 setUpToken
 	"Answer a token, used throughout the game, for the current player."
 	| tok |
@@ -1169,6 +1169,7 @@ setUpToken
 	tok _ FarmToken newFor: self.
 	tok openInWorld: world.
 	tok morphExtent: world morphExtent * (0.090@0.080).
+	tok labelArea morphPosition: 0.235@0.165 * tok morphExtent.
 	tok morphPosition: tok posAdjust.
 	tokenPos _ tok morphPosition.
 	tok delete. 	"not needed until next player"
@@ -2390,7 +2391,7 @@ doubled
 
 	^ doubled! !
 
-!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:10:40'!
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 9/2/2017 11:18:41'!
 initialize
 
 	super initialize.
