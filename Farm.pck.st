@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 9:44:22 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 10:23:18 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 30!
+!provides: 'Farm' 1 31!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1174,7 +1174,7 @@ setUpToken
 	tok delete. 	"not needed until next player"
 	^ tok! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 12:49:51'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/2/2017 10:14:02'!
 setupPlayer: aName color: aColor
 	"Establish a player named aName and colored aColor"
 	| pl |
@@ -1187,8 +1187,7 @@ setupPlayer: aName color: aColor
 			morphExtent: 18@10);
 		mgr: self;
 		identity: aName).
-	currentPlayer _ pl.
-	self availableOptions do: [:opt | pl options addLast: opt]! !
+	currentPlayer _ pl! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:59'!
 setupToken: aPlayer
