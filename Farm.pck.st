@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 6:50:07 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 1 September 2017 at 9:05:26 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 27!
+!provides: 'Farm' 1 28!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2382,12 +2382,12 @@ initialize
 
 	self addMorphFront: labelArea! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/1/2017 18:48:56'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/1/2017 19:05:06'!
 jan2Move
 	"Animate relocation of self when player must go BACK to Jan. 2"
 	| oldPos posns limit i|
 	
-	oldPos _ model currentPlayer oldPosition.
+	oldPos _ model currentPlayer position.
 	
 	self arrowLeft.
 	posns _ (Interval from: oldPos to: 3 by: -1) asArray.
@@ -3378,17 +3378,18 @@ initialize
 lotQuantity
 	^ 10! !
 
-!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 7/4/2013 16:19'!
+!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 21:04:21'!
 at: aRoll for: aQuantity
 	"Answer the Grain yield on anAcreage for aRoll."
-	|x whole m1 sum|
-	x := aQuantity / 20.0.
-	whole := x integerPart.
-	m1 := whole * self yieldM atRow: aRoll.
-	sum := self yieldV at: aRoll.
-	m1 do: [:n | sum := sum + n].
-	(0.0 = x fractionPart) ifTrue: [sum := sum - self yieldM at: aRoll at: 2].
-	^sum roundTo:  1
+	| x whole m1 sum |
+	
+	x _ aQuantity / 20.0.
+	whole _ x integerPart.
+	m1 _ whole * self yieldM at: aRoll.
+	sum _ self yieldV at: aRoll.
+	m1 do: [:n | sum _ sum + n].
+	(0.0 = x fractionPart) ifTrue: [sum _ sum - (self yieldM at: aRoll) at: 2].
+	^ sum roundTo:  1
 ! !
 
 !Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:39:28'!
@@ -3403,17 +3404,18 @@ price
 	"Per acre"
 	^2000! !
 
-!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 9/21/2011 21:59'!
+!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 20:51:33'!
 yieldM
 	"In combination with yieldV, used to compute Grain yields without a table. (see at:for:)"
-	^Matrix rows: 6 columns: 2 contents: #(
-	700 800
-	1500 1500
-	2500 2500
-	3700 3800
-	5200 5300
-	7000 7000
-		)! !
+	
+	^ #(
+	#(700 800)
+	#(1500 1500)
+	#(2500 2500)
+	#(3700 3800)
+	#(5200 5300)
+	#(7000 7000)
+	)! !
 
 !Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 9/21/2011 22:00'!
 yieldV
@@ -4057,13 +4059,13 @@ garnishSpiel
 	GamePopUp inform: 'The IRS is garnishing your income.' title: 'Loss of Income'.
 ! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 18:42:01'!
+!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 19:03:01'!
 goBackToJan2
 	| delta |
 	
 	GamePopUp inform: 'You will now go back to January Week 2.
 Trouble is, HOW?' title: 'January Week 2'.
-	self mgr jan2Move.
+	self mgr token jan2Move.
 	
 	"self mgr token addMorph: self mgr token arrowLeft.
 	delta := self mgr spaces size - self roll.
@@ -4473,13 +4475,15 @@ reset
 	self assets do: [:ea | ea reset].
 ! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 8/30/2017 17:32:20'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 20:59:54'!
 salary
+	"Account for and record the salary"
+	
 	GamePopUp inform: 'You will receive an annual salary of $5,000.' title: 'Salary'.
 	self tally: 5000;
 		offFarm: 5000 + self offFarm;
 		reset.
-	self history at: turns put: turns @ self netAssets.
+	self history add: self netAssets.
 	self mgr updatePlayer.
 ! !
 
@@ -4563,7 +4567,7 @@ Do you want to inherit?')
 			h quantity: 10 + h quantity].
 ! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 8/30/2017 17:43:39'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 19:12:09'!
 updateAsset: anAsset with: aRoll 
 	| what amt yield tale fac rat normal |
 	yield := 0.
@@ -4582,9 +4586,9 @@ updateAsset: anAsset with: aRoll
 							what gross: yield + what gross.
 							what quality: aRoll + what quality.
 							what count: 1 + what count.
-							tale := 'Crop quality ' , aRoll , ' for ' , ('$' , yield asInteger printStringWithCommas) , '. Factor ' , fac , '. Rate ' , rat , '.
+							tale := 'Crop quality ' , aRoll asString, ' for ' , ('$' , yield asInteger printStringWithCommas) , '. Factor ' , fac asString, '. Rate ' , rat asString, '.
 Normally $' , normal printStringWithCommas , '.'.
-							GamePopUp inform: tale title: anAsset , ' quantity ' , amt]]]
+							GamePopUp inform: tale title: anAsset , ' quantity ' , amt asString]]]
 		ifFalse: ["#Livestock"
 			self garnish
 				ifTrue: [self garnishSpiel]
