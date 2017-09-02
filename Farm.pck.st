@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 1:32:54 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 2:23:23 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 33!
+!provides: 'Farm' 1 34!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2484,14 +2484,14 @@ moved
 			model updateHistory.
 			model enableAll: {'End Turn'}]! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/1/2017 17:29:53'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 14:14:35'!
 springMove
 	"Animate relocation of self when player lands on space 8"
 	| oldPos posns limit i|
 	
 	oldPos _ model currentPlayer oldPosition.
 	self arrowRight.
-	posns _ (Interval from: oldPos to: oldPos + 12 by: 1) asArray.
+	posns _ (Interval from: oldPos + who roll to: 15 - who roll by: 1) asArray.
 	limit _ posns size.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :unused |
