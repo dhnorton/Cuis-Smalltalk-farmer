@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 9:09:48 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 3 September 2017 at 12:04:38 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 38!
+!provides: 'Farm' 1 39!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -439,17 +439,18 @@ check2Buttons
 	^ btn allSatisfy: [:a | a actionSelector isNil]
 ! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:30:44'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/2/2017 21:19:00'!
 check3Buttons
 	"Answer true if the Harvest, Fate, and Expense buttons are disabled."
-	|btn har exp fat|
-	har := buttons submorphs detect: [:n | n label = 'Harvest'] 
+	| btn har exp fat |
+	
+	har _ buttons submorphs detect: [:n | n label = 'Harvest'] 
 		ifNone: [nil].
-	exp := buttons submorphs detect: [:n | n label = 'Expense'] 
+	exp _ buttons submorphs detect: [:n | n label = 'Expense'] 
 		ifNone: [nil].
-	fat := buttons submorphs detect: [:n | n label = 'Fate'] 
+	fat _ buttons submorphs detect: [:n | n label = 'Fate'] 
 		ifNone: [nil].
-	btn := Array with: har with: exp with: fat.
+	btn _ Array with: har with: exp with: fat.
 	^ btn allSatisfy: [:a | a actionSelector isNil]
 ! !
 
@@ -500,40 +501,24 @@ doAuction
 		)) startUpWithCaption: 'Start an Auction'.
 	ans ifNotNil: [self perform: ans]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 8/30/2017 17:15:37'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/3/2017 11:50:20'!
 doAug1
 	"Move the player to February Week 4 after his landing on August Week 1."
+	
 	self check2Buttons
 		ifTrue: [
 			GamePopUp inform: 'You will advance to 4th week in February.' title: 'Farming like a Pro'.
 			self disableAll: {'Stats'. 'Auction'. 'Pay Loan'. 'Option'. 'End Turn'}.
-			currentPlayer advanceTo: 58.
-			currentPlayer years: 1 + currentPlayer years.
-			currentPlayer salary.
-			currentPlayer
-				addOption: (self drawOptionQuietly: false).
-			self 
-				enableAll: {'Stats'. 'Auction'. 'Pay Loan'. 'End Turn'};
-				conditionallyEnableOption;
-				setActionSelectorFor: 'Harvest' to: Farm harvestNormal;
-				setActionSelectorFor: 'Expense' to: Farm expenseNormal]! !
+			token feb4MoveFrom: currentPlayer position]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/2/2017 21:08:08'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/3/2017 10:59:22'!
 doJul3
 	"Move the player to Harvest Moon after his landing on July Week 3."
 	
 	self disableAll: {'End Turn'}.
 	self check2Buttons
 		ifTrue: [GamePopUp inform: 'You will advance to Harvest Moon.' title: 'Harvest Moon'.
-			token moonMove.
-			currentPlayer ifCows
-				ifTrue: [currentPlayer harvestEnabled
-						ifTrue: [self enableAll: {'Harvest'. 'Expense'}]]
-				ifFalse: [self enableAll: {'End Turn'}].
-			self setActionSelectorFor: 'Harvest' to: Farm harvestNormal.
-			self setActionSelectorFor: 'Expense' to: Farm expenseNormal.
-			currentPlayer tally: 500.
-			self updatePlayer]! !
+			token moonMove]! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:46'!
 doOptionAuction
@@ -796,14 +781,15 @@ grain: quantity
 	currentPlayer drawnOption: true.
 	^ quantity! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 11/23/2014 12:01'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/3/2017 11:57:21'!
 harvest
 	"Harvest and account for the result."
 	| income |
-	income := currentPlayer
-				harvest: (Farm harvestSeason at: currentPlayer position).
-	currentPlayer tally: income.
-	currentPlayer harvested.
+	
+	income _ currentPlayer 	harvest: (self class harvestSeason at: currentPlayer position).
+	currentPlayer 
+		tally: income;
+		harvested.
 	self updatePlayer.
 	self disableAll: {'Harvest'}.
 	self check3Buttons
@@ -1137,12 +1123,12 @@ seasonAt: aPosition
 	y _ self class season select: [:a | a range x <= aPosition].
 	^ y last ! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/2/2017 20:49:28'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/3/2017 10:35:37'!
 setActionSelectorFor: aButton to: aSymbol
 	"Set the method for a button."
 	| btn |
 	
-	btn := buttons submorphs detect: [:n | n label = aButton] 
+	btn _ buttons submorphs detect: [:n | n label = aButton] 
 		ifNone: [nil].
 	btn actionSelector: aSymbol.
 ! !
@@ -1659,7 +1645,7 @@ space36
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:56:49'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/3/2017 10:29:49'!
 space37
 	"Harvest Moon"
 	
@@ -1669,7 +1655,7 @@ space37
 	currentPlayer ifCows
 		ifTrue: [currentPlayer harvestEnabled
 				ifTrue: [self enableAll: {'Harvest'. 'Expense'}.
-					self setActionSelectorFor: 'Harvest' to: Farm harvestLivestock]
+					self setActionSelectorFor: 'Harvest' to: self class harvestLivestock]
 				ifFalse: [self enableAll: {'End Turn'}]]
 		ifFalse: [currentPlayer missedCattleHarvest.
 			self enableAll: {'End Turn'}].
@@ -1693,7 +1679,7 @@ space38
 	self check3Buttons 	ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:56:40'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/3/2017 10:30:57'!
 space39
 	"Sep week 4"
 	
@@ -1705,7 +1691,7 @@ space39
 	currentPlayer ifCows
 		ifTrue: [currentPlayer harvestEnabled
 				ifTrue: [self enableAll: {'Harvest'. 'Expense'}.
-					self setActionSelectorFor: 'Harvest' to: Farm harvestLivestock]
+					self setActionSelectorFor: 'Harvest' to: self class harvestLivestock]
 				ifFalse: [self enableAll: {'End Turn'}]]
 		ifFalse: [currentPlayer missedCattleHarvest].
 	self check3Buttons
@@ -1723,7 +1709,7 @@ space4
 	self enableAll: {'End Turn'}.
 	self triggerEvent: #itemChange! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:57:30'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/3/2017 10:31:45'!
 space40
 	"Oct week 1"
 	
@@ -1733,7 +1719,7 @@ space40
 	currentPlayer ifCows
 		ifTrue: [currentPlayer harvestEnabled
 				ifTrue: [self enableAll: {'Harvest'. 'Expense'}.
-					self setActionSelectorFor: 'Harvest' to: Farm harvestLivestock]
+					self setActionSelectorFor: 'Harvest' to: self class harvestLivestock]
 				ifFalse: [self enableAll: {'End Turn'}]]
 		ifFalse: [currentPlayer missedCattleHarvest].
 	self check3Buttons
@@ -2407,6 +2393,44 @@ doubled
 
 	^ doubled! !
 
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/3/2017 11:53:21'!
+feb4MoveFrom: aPosition
+	"Animate relocation of self when player moves ahead to Feb 4 from aPosition"
+	| oldPos newPos index n posns limit i |
+	
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ index atWrap: aPosition.
+	model positionBoardTo: oldPos.
+	self position: 7.
+	newPos _ 9.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
+	
+	self arrowRight.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer 
+					position: 3;
+					years: 1 + model currentPlayer years;
+					salary.
+				model
+					setActionSelectorFor: 'Harvest' to: model class harvestNormal;
+					setActionSelectorFor: 'Expense' to: model class expenseNormal;
+					doSpace.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
 !FarmToken methodsFor: 'initialization' stamp: 'dhn 9/2/2017 11:18:41'!
 initialize
 
@@ -2493,9 +2517,9 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 21:05:05'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/3/2017 10:59:04'!
 moonMove
-	"Animate relocation to Harvest Moon when player lands on space 29"
+	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
 	| oldPos posns limit i|
 	
 	oldPos _ model currentPlayer oldPosition.
@@ -2512,10 +2536,17 @@ moonMove
 				self removeActionsForEvent: #morphicStep.
 				arrow delete.
 				model currentPlayer position: 37.
+				model currentPlayer ifCows
+					ifTrue: [model currentPlayer harvestEnabled
+							ifTrue: [self enableAll: {'Harvest'. 'Expense'}]]
+					ifFalse: [self enableAll: {'End Turn'}].
+				self setActionSelectorFor: 'Harvest' to: self class harvestNormal.
+				self setActionSelectorFor: 'Expense' to: self class expenseNormal.
+				model currentPlayer tally: 500.
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/1/2017 11:52:27'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/3/2017 11:13:50'!
 moved
 	"Perform the results of the move"
 	| pl |
@@ -2526,8 +2557,7 @@ moved
 	pl harvestEnabled 
 		ifTrue: [model enableAll: {'Harvest'}]
 		ifFalse: [
-			model updateHistory.
-			model enableAll: {'End Turn'}]! !
+			model updateHistory]! !
 
 !FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 19:44:24'!
 position: aCell
@@ -2538,7 +2568,7 @@ position: aCell
 	horiz _ (model cells at: aCell) morphPosition x.
 	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 20:59:44'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/3/2017 11:18:37'!
 springMove
 	"Animate relocation to Spring Planting when player lands on space 8"
 	| oldPos posns limit i|
@@ -2557,6 +2587,7 @@ springMove
 				self removeActionsForEvent: #morphicStep.
 				arrow delete.
 				model currentPlayer position: 15.
+				model space15.
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
 
