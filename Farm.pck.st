@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 8:16:44 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 9:09:48 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 37!
+!provides: 'Farm' 1 38!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -20,6 +20,16 @@ Token subclass: #FarmToken
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmToken class' category: #'Farm-Graphics'!
 FarmToken class
+	instanceVariableNames: ''!
+
+!classDefinition: #FarmButton category: #'Farm-Graphics'!
+GameButtonMorph subclass: #FarmButton
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'FarmButton class' category: #'Farm-Graphics'!
+FarmButton class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmingGame category: #'Farm-Graphics'!
@@ -336,6 +346,9 @@ StatListFarm class
 !FarmToken commentStamp: '<historical>' prior: 0!
 The game piece for a farmer - a player in the Farming Game.!
 
+!FarmButton commentStamp: '<historical>' prior: 0!
+A button which can have its action selector changed.!
+
 !FarmingGame commentStamp: '<historical>' prior: 0!
 Manage the visual effects of the Farming Game.
 
@@ -413,16 +426,17 @@ cascade: quantity
 	"Lease Cascade Ridge for $quantity."
 	self lease: 'Cascade' for: quantity! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:32'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/2/2017 20:53:39'!
 check2Buttons
 	"Answer true if the Harvest and Expense buttons are disabled."
 	| btn har exp |
-	har := buttons submorphs detect: [:n | n externalName = 'Harvest'] 
+	
+	har _ buttons submorphs detect: [:n | n label = 'Harvest'] 
 		ifNone: [nil].
-	exp := buttons submorphs detect: [:n | n externalName = 'Expense'] 
+	exp _ buttons submorphs detect: [:n | n label = 'Expense'] 
 		ifNone: [nil].
-	btn := Array with: har with: exp.
-	^btn allSatisfy: [:a | a target isNil]
+	btn _ Array with: har with: exp.
+	^ btn allSatisfy: [:a | a actionSelector isNil]
 ! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:30:44'!
@@ -504,13 +518,14 @@ doAug1
 				setActionSelectorFor: 'Harvest' to: Farm harvestNormal;
 				setActionSelectorFor: 'Expense' to: Farm expenseNormal]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 8/30/2017 17:16:01'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/2/2017 21:08:08'!
 doJul3
 	"Move the player to Harvest Moon after his landing on July Week 3."
+	
 	self disableAll: {'End Turn'}.
 	self check2Buttons
 		ifTrue: [GamePopUp inform: 'You will advance to Harvest Moon.' title: 'Harvest Moon'.
-			currentPlayer advanceTo: 37.
+			token moonMove.
 			currentPlayer ifCows
 				ifTrue: [currentPlayer harvestEnabled
 						ifTrue: [self enableAll: {'Harvest'. 'Expense'}]]
@@ -1122,11 +1137,12 @@ seasonAt: aPosition
 	y _ self class season select: [:a | a range x <= aPosition].
 	^ y last ! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:54'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/2/2017 20:49:28'!
 setActionSelectorFor: aButton to: aSymbol
 	"Set the method for a button."
-	|btn|
-	btn := buttons submorphs detect: [:n | n externalName = aButton] 
+	| btn |
+	
+	btn := buttons submorphs detect: [:n | n label = aButton] 
 		ifNone: [nil].
 	btn actionSelector: aSymbol.
 ! !
@@ -2477,6 +2493,28 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 21:05:05'!
+moonMove
+	"Animate relocation to Harvest Moon when player lands on space 29"
+	| oldPos posns limit i|
+	
+	oldPos _ model currentPlayer oldPosition.
+	self arrowRight.
+	posns _ (Interval from: oldPos + who roll to: 37 - who roll by: 1) asArray.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: 37.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
 !FarmToken methodsFor: 'operations' stamp: 'dhn 9/1/2017 11:52:27'!
 moved
 	"Perform the results of the move"
@@ -2500,9 +2538,9 @@ position: aCell
 	horiz _ (model cells at: aCell) morphPosition x.
 	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 14:14:35'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 20:59:44'!
 springMove
-	"Animate relocation of self when player lands on space 8"
+	"Animate relocation to Spring Planting when player lands on space 8"
 	| oldPos posns limit i|
 	
 	oldPos _ model currentPlayer oldPosition.
@@ -2535,6 +2573,12 @@ waiting
 						]].
 	die
 		ifNotNil: [die delete]! !
+
+!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/2/2017 20:38:50'!
+actionSelector: anObject
+	"Set the value of actionSelector"
+	
+	actionSelector _ anObject! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:26:29'!
 buildMorphicWindow
@@ -2659,20 +2703,20 @@ layoutSubmorphs
     super layoutSubmorphs.
     self board morphExtent: self board owner morphExtent! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:27:21'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:23'!
 makeAddPlayerButton
 	"Answer the 'Players' button"
 
-	^ (GameButtonMorph label: 'Players' action: #getPlayers state: true model: self)
+	^ (FarmButton label: 'Players' action: #getPlayers state: true model: self)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Use this button to enter names of two to six players;
 entering an empty name or cancel will start the game'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:27:41'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:43'!
 makeAuctionButton
 	"Answer the 'Auction' button"
 
-	^ (GameButtonMorph label: 'Auction' action: #doAuction state: true model: model)
+	^ (FarmButton label: 'Auction' action: #doAuction state: true model: model)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Auction options and equipment'! !
 
@@ -2695,11 +2739,11 @@ makeButtonArea
 	^ buttonArea
 		! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:28:01'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:57'!
 makeBuyOptionButton
 	"Answer the 'Option' button"
 
-	^ (GameButtonMorph label: 'Option' action: #showOpts state: true model: model)
+	^ (FarmButton label: 'Option' action: #showOpts state: true model: model)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'See what options you have and make purchases during WINTER.'! !
 
@@ -2743,35 +2787,35 @@ makeCellsArea
 		
 ! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:28:15'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:15'!
 makeDrawFateButton
 	"Answer the 'Fate' button"
 
-	^ (GameButtonMorph label: 'Fate' action: #drawFate state: true model: model)
+	^ (FarmButton label: 'Fate' action: #drawFate state: true model: model)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Determine your Farmer''s Fate.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:28:27'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:28'!
 makeEndTurnButton
 	"Answer the 'End Turn' button"
 
-	^ (GameButtonMorph label: 'End Turn' action: #endTurn state: true model: model)
+	^ (FarmButton label: 'End Turn' action: #endTurn state: true model: model)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:28:38'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:40'!
 makeHarvestButton
 	"Answer the 'Harvest' button"
 
-	^ (GameButtonMorph label: 'Harvest' action: #harvest state: true model: model)
+	^ (FarmButton label: 'Harvest' action: #harvest state: true model: model)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Harvest the crop for the season indicated above the space.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 12:03:45'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:53'!
 makeMoveButton
 	"Answer the 'Move' button"
 
-	^ (GameButtonMorph label: 'Move' action: #move state: true model: model)
+	^ (FarmButton label: 'Move' action: #move state: true model: model)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.'! !
 
@@ -2806,27 +2850,27 @@ makeOthersArea
 		name: #others;
 		padding: #center! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:28:58'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:07'!
 makePayExpenseButton
 	"Answer the 'Expense' button"
 
-	^ (GameButtonMorph label: 'Expense' action: #payExpense state: true model: model)
+	^ (FarmButton label: 'Expense' action: #payExpense state: true model: model)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Pay the farming expenses which are owed.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:29:08'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:23'!
 makePayLoanButton
 	"Answer the 'Pay Loan' button"
 
-	^ (GameButtonMorph label: 'Pay Loan' action: #payLoan state: true model: model)
+	^ (FarmButton label: 'Pay Loan' action: #payLoan state: true model: model)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Transfer cash to pay off some debt.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:29:17'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:41'!
 makeQuitGameButton
 	"Answer the 'Quit' button"
 	
-	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: self)
+	^ (FarmButton label: 'Quit' action: #quitGame state: true model: self)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Completely ends the game. Nothing is saved.';
 		color: (Color orange alpha: 0.9)! !
@@ -2844,27 +2888,27 @@ makeSeasonsArea
 			color: Color lightGreen;
 			name: #seasons! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:29:32'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:55'!
 makeSettingsButton
 	"Answer the 'Settings' button"
 	
-	^ (GameButtonMorph label: 'Settings' action: #doSettings state: true model: model)
+	^ (FarmButton label: 'Settings' action: #doSettings state: true model: model)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Change some of the game parameters'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:29:42'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:36:04'!
 makeShowStatsButton
 	"Answer the 'Stats' button"
 
-	^ (GameButtonMorph label: 'Stats' action: #doStats state: true model: model)
+	^ (FarmButton label: 'Stats' action: #doStats state: true model: model)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 13:29:52'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:36:17'!
 makeTourButton
 	"Answer the 'Tour' button"
 	
-	^ (GameButtonMorph label: 'Tour' action: #doTour state: true model: self)
+	^ (FarmButton label: 'Tour' action: #doTour state: true model: self)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
 
