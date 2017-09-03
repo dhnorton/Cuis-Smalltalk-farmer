@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 2:23:23 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 2 September 2017 at 8:16:44 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 34!
+!provides: 'Farm' 1 37!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -350,8 +350,8 @@ http://farmgame.com/product/woo-single-2/
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
 
-!OptionsView commentStamp: 'dhn 8/26/2016 16:48:51' prior: 0!
-A Construction Game window which makes it possible for contractors to make purchases.!
+!OptionsView commentStamp: '<historical>' prior: 0!
+A FarmingGame window which makes it possible for farmers to make purchases.!
 
 !Farmer commentStamp: '<historical>' prior: 0!
 A player in the Farming Game.
@@ -1357,13 +1357,13 @@ space11
 	self triggerEvent: #itemChange.
 	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 18:32:41'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/2/2017 20:13:59'!
 space12
 	"Mar week 3"
 	
 	self disableAll: {'Move'}.
 	self triggerEvent: #itemChange.
-	token jan2Move! !
+	token jan2MoveFrom: currentPlayer position! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:46:32'!
 space13
@@ -2408,30 +2408,37 @@ initialize
 
 	self addMorphFront: labelArea! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/1/2017 19:05:06'!
-jan2Move
-	"Animate relocation of self when player must go BACK to Jan. 2"
-	| oldPos posns limit i|
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 20:06:28'!
+jan2MoveFrom: aPosition
+	"Animate relocation of self when player must go BACK to Jan. 2 from aPosition"
+	| oldPos newPos index n posns limit i |
 	
-	oldPos _ model currentPlayer position.
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ index atWrap: aPosition - 6.
+	model positionBoardTo: oldPos.
+	self position: 7.
+	newPos _ index atWrap: 3 - 7.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n - 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
 	
 	self arrowLeft.
-	posns _ (Interval from: oldPos to: 3 by: -1) asArray.
-	
 	limit _ posns size.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :unused |
 		i _ i + 1.
-		who mgr positionBoardTo: (posns at: i).
+		model positionBoardTo: (posns at: i).
 		i < limit 
 			ifFalse: [
 				self stopStepping.
 				self removeActionsForEvent: #morphicStep.
 				arrow delete.
-				who mgr currentPlayer position: 3.
-				who mgr enableAll: {'End Turn'}.
-				who mgr doSpace.
-				self doubled contents: who mgr currentPlayer doubledString]].
+				model currentPlayer position: 3.
+				model enableAll: {'End Turn'}.
+				model doSpace.
+				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
 
 !FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:13:17'!
@@ -2483,6 +2490,15 @@ moved
 		ifFalse: [
 			model updateHistory.
 			model enableAll: {'End Turn'}]! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 19:44:24'!
+position: aCell
+	"Position the receiver over the board cell numbered by aCell"
+	| horiz |
+	
+	self morphPosition: self posAdjust.
+	horiz _ (model cells at: aCell) morphPosition x.
+	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
 
 !FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 14:14:35'!
 springMove
@@ -4293,22 +4309,12 @@ garnishSpiel
 	GamePopUp inform: 'The IRS is garnishing your income.' title: 'Loss of Income'.
 ! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 19:03:01'!
+!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/2/2017 20:11:39'!
 goBackToJan2
-	| delta |
+	"Move the token back to Jan 2"
 	
-	GamePopUp inform: 'You will now go back to January Week 2.
-Trouble is, HOW?' title: 'January Week 2'.
-	self mgr token jan2Move.
-	
-	"self mgr token addMorph: self mgr token arrowLeft.
-	delta := self mgr spaces size - self roll.
-	self mgr moveFrom: position + delta to: 3 + delta by: -1.
-	self position: 3.
-	self
-		addOption: (self mgr drawOptionQuietly: false).
-	self mgr updateAllWindows."
-! !
+	GamePopUp inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
+	self mgr token jan2MoveFrom: position! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 10/2/2013 21:05'!
 goDirectly: aPosition 
