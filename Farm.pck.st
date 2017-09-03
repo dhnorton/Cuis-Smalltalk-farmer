@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 3 September 2017 at 12:04:38 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 3 September 2017 at 12:28:49 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 39!
+!provides: 'Farm' 1 40!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -454,14 +454,6 @@ check3Buttons
 	^ btn allSatisfy: [:a | a actionSelector isNil]
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 20:34'!
-conditionallyEnableOption
-	"If no options, disable the Option button."
-	 currentPlayer options isEmpty
-		ifTrue: [self disableAll: {'Option'}]
-		ifFalse: [self optsShown ifFalse: [
-			self enableAll: {'Option'}]]! !
-
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:42'!
 deletePlayersList
 	"Delete the list of players."
@@ -585,15 +577,15 @@ drawExpense
 	^ self drawCard: (self expenses) discard: (self drawnExpenses).
 ! !
 
-!Farm methodsFor: 'fates' stamp: 'dhn 8/30/2017 17:16:44'!
+!Farm methodsFor: 'fates' stamp: 'dhn 9/3/2017 12:15:45'!
 drawFate
 	"Draw a farmer's fate card, account for it, and place it in the discard pile."
 	| assoc |
 	assoc := self drawCard: self fates discard: self drawnFates.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	GamePopUp inform: assoc value title: 'Farmer''s Fate'.
 	currentPlayer perform: assoc key key withArguments: {assoc key value}.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	self disableAll: {'Fate'}.
 	self check3Buttons
 		ifTrue: [self enableAll: {'End Turn'}].
@@ -781,7 +773,7 @@ grain: quantity
 	currentPlayer drawnOption: true.
 	^ quantity! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/3/2017 11:57:21'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/3/2017 12:16:18'!
 harvest
 	"Harvest and account for the result."
 	| income |
@@ -790,7 +782,7 @@ harvest
 	currentPlayer 
 		tally: income;
 		harvested.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	self disableAll: {'Harvest'}.
 	self check3Buttons
 		ifTrue: [self enableAll: {'End Turn'}].
@@ -802,16 +794,18 @@ harvestAug1
 	self harvest;
 	doAug1! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/27/2014 21:30'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/3/2017 12:23:29'!
 harvestCows
 	"Account for income from selling cattle."
 	| income |
-	income :=  currentPlayer updateCattleAsset:  currentPlayer roll.
-	 currentPlayer tally: income.
-	 currentPlayer harvested.
-	self updatePlayer.
+	
+	income _  currentPlayer updateCattleAsset:  currentPlayer roll.
+	currentPlayer 
+		tally: income;
+		harvested.
+	self triggerEvent: #itemChange.
 	self disableAll: {'Harvest'}.
-	self setActionSelectorFor: 'Harvest' to: Farm harvestNormal.
+	self setActionSelectorFor: 'Harvest' to: self class harvestNormal.
 	self check3Buttons
 		ifTrue: [self enableAll: {'End Turn'}].
 ! !
@@ -963,15 +957,16 @@ pay: down borrow: balance for: aSymbol amount: qty
 	asset cost: down + balance + asset cost.
 	self updatePlayer! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 8/30/2017 17:18:03'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/3/2017 12:17:38'!
 payExpense
 	"Account for an expense."
 	| assoc |
-	assoc := self drawExpense.
+	
+	assoc _ self drawExpense.
 	GamePopUp inform: assoc value title: 'Expense'.
 	 currentPlayer perform: assoc key key withArguments: {assoc key value}.
 	 currentPlayer expenseCount: 1 +  currentPlayer expenseCount.
-	self updatePlayer.
+	self triggerEvent: #itemChange.
 	self disableAll: {'Expense'}.
 	self check3Buttons
 		ifTrue: [self enableAll: {'End Turn'}].
@@ -1960,12 +1955,11 @@ updateHistory
 			currentPlayer appendHistory].
 	self triggerEvent: #itemChange! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:27:15'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/3/2017 12:25:39'!
 updatePlayer
 	"Make the screen show the latest numbers."
 	
-	self triggerEvent: #itemChange.
-	self conditionallyEnableOption! !
+	self triggerEvent: #itemChange! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 15:36'!
 updatePlayerIn: aWindow
@@ -4790,7 +4784,7 @@ reset
 	self assets do: [:ea | ea reset].
 ! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 20:59:54'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/3/2017 12:19:25'!
 salary
 	"Account for and record the salary"
 	
@@ -4799,7 +4793,7 @@ salary
 		offFarm: 5000 + self offFarm;
 		reset.
 	self history add: self netAssets.
-	self mgr updatePlayer.
+	self triggerEvent: #itemChange
 ! !
 
 !Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 08:45'!
