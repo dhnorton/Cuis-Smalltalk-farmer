@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 6 September 2017 at 5:42:58 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 6 September 2017 at 7:33:36 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 42!
+!provides: 'Farm' 1 43!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -893,13 +893,14 @@ initialButtonState
 	self enableAll: {'Option'}.
 	self disableAll: {'End Turn'. 'Expense'. 'Fate'. 'Harvest'}! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/1/2017 12:25:40'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/6/2017 18:16:44'!
 initialize
 
 	super initialize.
 	cellCount _ self class cellsForGame.
 	spaces _ self setUpSpaces.
 	availableOptions _ FarmingGame optionsDesc shuffled.
+	exercisedOptions _ OrderedCollection new.
 	fates _ FarmingGame fatesDesc asOrderedCollection shuffled.
 	drawnFates _ OrderedCollection new.
 	expenses _ FarmingGame expenseDesc asOrderedCollection shuffled.
@@ -1580,12 +1581,11 @@ space28
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/6/2017 15:37:17'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/6/2017 17:49:12'!
 space29
 	"Jul week 3"
 	
 	self disableAll: {'Move'. 'Fate'}.
-	self halt.
 	currentPlayer harvestEnabled
 		ifTrue: [
 			(currentPlayer assets at: #Hay)
@@ -2566,14 +2566,23 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/6/2017 17:42:36'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/6/2017 19:29:43'!
 moonMove
 	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
-	| oldPos posns limit i|
+	| oldPos newPos index n posns limit i |
 	
-	oldPos _ model currentPlayer oldPosition.
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ 29.
+	model positionBoardTo: oldPos.
+	self position: 1.
+	newPos _ 37 + 1.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
+	
 	self arrowRight.
-	posns _ (Interval from: oldPos + who roll to: 37 - who roll by: 1) asArray.
 	limit _ posns size.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :unused |
