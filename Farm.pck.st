@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 6 September 2017 at 9:48:32 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 12:21:04 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 44!
+!provides: 'Farm' 1 46!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -50,16 +50,6 @@ SystemWindow subclass: #FarmingView
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmingView class' category: #'Farm-Graphics'!
 FarmingView class
-	instanceVariableNames: ''!
-
-!classDefinition: #OptionsView category: #'Farm-Graphics'!
-FarmingView subclass: #OptionsView
-	instanceVariableNames: 'textPane cancelButton buyButton buttonArea'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'OptionsView class' category: #'Farm-Graphics'!
-OptionsView class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmAsset category: #'Farm-Model'!
@@ -365,9 +355,6 @@ http://farmgame.com/product/woo-single-2/
 
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
-
-!OptionsView commentStamp: '<historical>' prior: 0!
-A FarmingGame window which makes it possible for farmers to make purchases.!
 
 !Farmer commentStamp: '<historical>' prior: 0!
 A player in the Farming Game.
@@ -2040,6 +2027,13 @@ whatSpaceSays
 
 	^ self perform: ((spaces atWrap: self currentPlayer position) routine)! !
 
+!Farm methodsFor: 'accessing' stamp: 'dhn 9/7/2017 12:07:33'!
+windowPosition: aPoint
+	"Answer a staggered position for a window"
+	
+	windowCount _ windowCount + 1.
+	^ aPoint + (windowCount * (20@20))! !
+
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 22:10'!
 wonButtonsState
 	"Set the state of the buttons after a winner is identified."
@@ -3227,6 +3221,12 @@ tourAt: anInterval
 				self removeActionsForEvent: #morphicStep]].
 	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"! !
 
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 12:10:45'!
+windowPosition
+	"Answer the position for a window"
+	
+	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
+
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:39'!
 boardColor
 	"Answer the color of the board itself"
@@ -3459,7 +3459,7 @@ start
 	^ win
 ! !
 
-!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:22'!
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 aboutToBeGrabbedBy: aHand
 	"The receiver is being grabbed by a hand.
 	Perform necessary adjustments (if any) and return the actual morph
@@ -3470,7 +3470,7 @@ aboutToBeGrabbedBy: aHand
 
 	^self "Grab me"! !
 
-!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:32'!
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 justDroppedInto: newOwnerMorph event: anEvent 
 	"This message is sent to a dropped morph after it has been dropped on -- and been accepted by -- a drop-sensitive morph"
 	"This message is sent to the dragged morph, not to the owner.
@@ -3478,19 +3478,19 @@ justDroppedInto: newOwnerMorph event: anEvent
 
 	^super justDroppedInto: newOwnerMorph event: anEvent ! !
 
-!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:43'!
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 justGrabbedFrom: formerOwner
 	"The receiver was just grabbed from its former owner and is now attached to the hand."
 	"This message is sent to the dragged morph, not to the owner.
 	It is included here just for reference."! !
 
-!FarmingView methodsFor: 'initialization' stamp: 'dhn 10/19/2016 20:22:17'!
+!FarmingView methodsFor: 'initialization' stamp: 'dhn 9/7/2017 12:18:32'!
 removeWindowMenu
 	"Remove the button in the title bar which brings up the window menu"
 	
 	(self findDeepSubmorphThat: [:s | s balloonText = 'window menu'] ifAbsent: [^ nil]) delete! !
 
-!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:54:11'!
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 wantsToBeDroppedInto: aMorph
 	"Return true if it's okay to drop the receiver into aMorph. This check is symmetric to #wantsDroppedMorph:event: to give both parties a chance of figuring out whether they like each other."
 	"This message is sent to the dragged morph, not to the owner.
@@ -3498,7 +3498,7 @@ wantsToBeDroppedInto: aMorph
 
 	^true! !
 
-!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 10/19/2016 20:16:56'!
+!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/7/2017 12:18:32'!
 open: aModel label: aString
 	"Answer a view on aModel"
 	|  window |
@@ -3510,7 +3510,7 @@ open: aModel label: aString
 	aString ifNotNil: [ window setLabel: aString ].
 	^ window! !
 
-!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 10/19/2016 20:17:15'!
+!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/7/2017 12:18:32'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
 	| win |
@@ -3524,142 +3524,11 @@ openOn: aModel
 	^ win
 ! !
 
-!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 11/7/2016 21:19:58'!
+!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/7/2017 12:18:32'!
 viewPosition
 	"Answer the basic position for instances of this class"
 	
 	^ 200@-50! !
-
-!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 15:04:46'!
-buildMorphicWindow
-	"Lay out the window for purchases"
-	| list1 rightPane |
-	
-	self layoutMorph beRow.
-	list1 _ (PluggableListMorph
-		model: model
-		listGetter: #optionsList
-		indexGetter: #optionsItem
-		indexSetter: #optionsItem:
-		mainView: self
-		menuGetter: nil
-		keystrokeAction: nil)
-			name: #catalog.
-			
-	buttonArea _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-	buttonArea
-		name: #buttons;
-		padding: #center.
-	model when: #buyButton: send: #buyButton: to: self with: #state.
-
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'item description'. 	"give the TextModelMorph a name which will appear in the halos"
-	textPane 
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.85
-			minorDirectionPadding: #center).
-
-	rightPane _ LayoutMorph newColumn.
-	rightPane
-		name: 'right pane';
-		addMorph: buttonArea;
-		addMorph: textPane.
-	
-	self layoutMorph
-		addMorph: list1 proportionalWidth: 0.35;
-		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
-! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 12/8/2016 20:19:00'!
-buy
-	"Purchase an asset"
-	| key option cost down balance |
-
-	key _ model optionsList at: model optionsItem.
-	option _ Construction optionsDesc at: key.
-	cost _ option class price * model currentPlayer priceFactor.
-	down _ 0.2 * cost.
-	balance _ cost - down.
-	model
-		pay: down
-		borrow: balance
-		for: option listName asSymbol
-		amount: 1;
-		updateHistory;
-		enableAll: {'doJob'}.
-	self details! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 11:33:35'!
-buyButton: aBool
-	"Change buy button state according to aBool"
-	
-	aBool
-		ifTrue: [buyButton enableButton]
-		ifFalse: [buyButton disableButton]! !
-
-!OptionsView methodsFor: 'termination' stamp: 'dhn 9/12/2016 17:18:16'!
-closeBoxHit
-
-	model 
-		optionsItem: nil;
-		enableAll: {'Purchase'}.
-	super closeBoxHit! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 8/26/2016 15:51:55'!
-details
-
-	textPane model actualContents: model optionsReport 	"note that the textPane model differs from the model for this view"! !
-
-!OptionsView methodsFor: 'termination' stamp: 'dhn 8/28/2016 14:19:18'!
-endIt
-	"Close the receiver"
-	
-	model 
-		optionsItem: nil;
-		enableAll: {'Purchase'}.
-	self delete! !
-
-!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 10:20:02'!
-startButtons
-	"Set the buttons for buying assets"
-	
-	buyButton _ GameButtonMorph label: 'Buy' action: #buy state: false model: self.
-	buyButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Make the purchase.'.
-		
-	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
-	cancelButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Forget about shopping for now.'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: buyButton;
-		addMorph: cancelButton;
-		padding: #center.
-! !
-
-!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 11/2/2016 20:33:52'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel.
-	win removeWindowMenu.
-			
-	aModel when: #itemChange send: #details to: win.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
-! !
 
 !FarmAsset methodsFor: 'as yet unclassified' stamp: 'dhn 9/23/2014 13:18'!
 assetValue
