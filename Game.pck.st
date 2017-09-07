@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 31 August 2017 at 4:22:29 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 6 September 2017 at 10:23:18 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 155!
+!provides: 'Game' 1 156!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -382,7 +382,7 @@ hardRoll: anObject
 	
 	hardRoll _ anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 4/4/2017 14:37:54'!
+!Game methodsFor: 'operating' stamp: 'dhn 9/6/2017 22:10:04'!
 hopFor: anObject
 	"Hop token for anObject number of spaces"
 	| roll |
@@ -391,6 +391,7 @@ hopFor: anObject
 	roll _ self testMode ifTrue: [self hardRoll] ifFalse: [anObject].
 	token jump: roll.
 	currentPlayer 
+		roll: roll;
 		position: (currentPlayer forwardTo: (roll + currentPlayer position) 
 			around: spaces size).
 	currentPlayer rollStats: roll! !
@@ -1308,7 +1309,7 @@ setDots
 		borderWidth: 0;
 		morphExtent: self morphExtent * 0.24! !
 
-!DieMorph methodsFor: 'operation' stamp: 'dhn 8/21/2017 10:45:21'!
+!DieMorph methodsFor: 'operation' stamp: 'dhn 9/6/2017 22:10:55'!
 show: aCollection
 	"Display the succession of faces in aCollection on the die, then hop the token"
 	| limit linger t i x |
@@ -1327,7 +1328,6 @@ show: aCollection
 				t > linger ifTrue: [
 					self stopStepping.
 					model hopFor: x.
-					model currentPlayer roll: x.
 					self removeActionsForEvent: #morphicStep.
 					owner removeMorph: self]]].
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
