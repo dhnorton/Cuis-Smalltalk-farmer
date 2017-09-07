@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 1:51:51 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 2:29:55 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 47!
+!provides: 'Farm' 1 48!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer windowCount'
+	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer windowCount loanItem loanReport'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -893,7 +893,7 @@ initialButtonState
 	self enableAll: {'Option'}.
 	self disableAll: {'End Turn'. 'Expense'. 'Fate'. 'Harvest'}! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/6/2017 18:16:44'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/7/2017 14:18:22'!
 initialize
 
 	super initialize.
@@ -906,6 +906,7 @@ initialize
 	expenses _ FarmingGame expenseDesc asOrderedCollection shuffled.
 	drawnExpenses _ OrderedCollection new.
 	leases _ self setUpLeases.
+	windowCount _ 0.
 	won _ false
 ! !
 
@@ -952,6 +953,77 @@ livestock: quantity
 		amount: CattleOnFarm auctionQuantity.
 	currentPlayer drawnOption: true.
 	^ quantity! !
+
+!Farm methodsFor: 'loan' stamp: 'dhn 9/7/2017 14:13:47'!
+loanItem
+	"Answer the value of loanItem"
+
+	loanItem ifNil: [loanItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ loanItem! !
+
+!Farm methodsFor: 'loan' stamp: 'dhn 9/7/2017 14:04:01'!
+loanItem: anObject
+	"Set the value of loanItem and loanReport"
+	| enab |
+	
+	(loanItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [
+			loanReport _ self loanReportFor: anObject.
+			enab _ true]
+		ifFalse: [
+			loanReport _ ''.
+			enab _ false].
+		self triggerEvent: #itemChange.
+		self triggerEvent: #payButton: with: enab.
+		self changed: #loanItem]! !
+
+!Farm methodsFor: 'loan' stamp: 'dhn 9/7/2017 14:02:44'!
+loanList
+	"Answer possible loan payment amounts"
+	| list |
+	
+	list _ OrderedCollection new.
+	1 to: 50 do: [:n | 
+		list add: (String streamContents: [:str |
+			str 
+				nextPut: $$;
+				nextPutAll: (n * self class paymentIncrement) printStringWithCommas;
+				newLine])].
+	^ list! !
+
+!Farm methodsFor: 'loan' stamp: 'dhn 9/7/2017 14:06:36'!
+loanReportFor: anInteger
+	"Answer the effect on cash and debt of a payment selected by anInteger"
+	| pmt enab |
+
+	anInteger > 0
+		ifTrue: [
+			enab _ true.
+			pmt _ anInteger * self class paymentIncrement min: currentPlayer debt negated.
+			^ (String streamContents: [:string |
+				string 
+					nextPutAll: 'By making this payment, ', currentPlayer identity, ' would have:';
+					newLine; newLine;
+					nextPut: $$;
+					nextPutAll: (currentPlayer debt + pmt) negated asInteger printStringWithCommas, ' in debt and';
+					newLine;
+					nextPut: $$;
+					nextPutAll: (currentPlayer cash - pmt) asInteger printStringWithCommas , ' in cash and';
+					newLine;
+					nextPutAll: '$' , currentPlayer playerDebtLimit value negated  printStringWithCommas , ' debt limit.'])]
+		ifFalse: [
+			enab _ false.
+			^ ''].
+	self triggerEvent: #itemChange.
+	self triggerEvent: #payButton: with: enab.
+	self changed: #loanItem! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 9/7/2017 14:23:38'!
+moveButton
+	"Answer the value of moveButton"
+	
+	^ moveButton! !
 
 !Farm methodsFor: 'accessing' stamp: 'dhn 8/31/2017 14:33:52'!
 moveButton: anObject
@@ -2991,11 +3063,11 @@ makePayExpenseButton
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Pay the farming expenses which are owed.'! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:23'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/7/2017 13:59:47'!
 makePayLoanButton
 	"Answer the 'Pay Loan' button"
 
-	^ (FarmButton label: 'Pay Loan' action: #payLoan state: true model: model)
+	^ (FarmButton label: 'Pay Loan' action: #showLoan state: true model: self)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Transfer cash to pay off some debt.'! !
 
