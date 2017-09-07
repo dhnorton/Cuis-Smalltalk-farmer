@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 6 September 2017 at 7:33:36 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 6 September 2017 at 9:48:32 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 43!
+!provides: 'Farm' 1 44!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2566,20 +2566,21 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/6/2017 19:29:43'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/6/2017 20:06:19'!
 moonMove
 	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
 	| oldPos newPos index n posns limit i |
 	
 	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
-	oldPos _ 29.
+	oldPos _ model currentPlayer oldPosition.
 	model positionBoardTo: oldPos.
 	self position: 1.
-	newPos _ 37 + 1.
+	newPos _ 15 + 1.
 	posns _ OrderedCollection new.
 	n _ oldPos.
 	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
 	posns _ posns asArray.
+	{posns} print.
 	model positionBoardTo: posns first.
 	
 	self arrowRight.
@@ -2624,14 +2625,16 @@ position: aCell
 	horiz _ (model cells at: aCell) morphPosition x.
 	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/3/2017 11:18:37'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/6/2017 21:44:55'!
 springMove
 	"Animate relocation to Spring Planting when player lands on space 8"
 	| oldPos posns limit i|
 	
 	oldPos _ model currentPlayer oldPosition.
 	self arrowRight.
-	posns _ (Interval from: oldPos + who roll to: 15 - who roll by: 1) asArray.
+	posns _ (Interval from: oldPos to: 15 - who roll by: 1) asArray.
+	{oldPos. who roll} print.
+	{posns} print.
 	limit _ posns size.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :unused |
