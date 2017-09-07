@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 4:49:49 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 5:25:21 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 49!
+!provides: 'Farm' 1 50!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1038,7 +1038,7 @@ optionsItem
 	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
 	^ optionsItem! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 14:57:19'!
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 17:23:47'!
 optionsItem: anObject
 	"Set the value of optionsItem and optionsReport"
 	| item enab |
@@ -1046,7 +1046,7 @@ optionsItem: anObject
 	(optionsItem _ anObject) ifNotNil: [
 	anObject ~= 0
 		ifTrue: [item _ self optionsList at: anObject.
-			optionsReport _ self reportFor: currentPlayer on: item.
+			optionsReport _ self optionsReport: item.
 			(Compiler evaluate: 'Franchise subclasses includes: ', item)
 				ifTrue: [
 					currentPlayer position = (Compiler evaluate: item, ' location')
@@ -1075,16 +1075,11 @@ optionsReport
 		ifTrue: [^ self optionsReport: (self optionsList at: optionsItem)]
 		ifFalse: [^ '']! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 15:31:53'!
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 17:14:09'!
 optionsReport: anAsset
 	"Show the status of anAsset for shopping purposes"
-	| p |
 	
-	self halt.
-	p _ currentPlayer options at: anAsset ifAbsent: [^ 'No such option named ', anAsset].
-	p owner: currentPlayer.
-	"exerciseButton disableButton."
-	^ p reportOptionTo: currentPlayer mgr! !
+	^ currentPlayer optionDescription: anAsset! !
 
 !Farm methodsFor: 'accessing' stamp: 'dhn 12/12/2011 21:46'!
 optionsWindow
@@ -4963,16 +4958,18 @@ oilLease: aParm
 		do: [:a | acres := acres + (self oilBucksFor: a)].
 	self tally: 100 * acres! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:37:52'!
+!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/7/2017 17:19:00'!
 optionDescription: aString 
+	"Report the effect of buying the option named aString"
 	| cost down |
-	cost := Compiler evaluate: aString , ' optionCost'.
-	down := cost * 0.2.
+	
+	cost _ Compiler evaluate: aString , ' optionCost'.
+	down _ cost * 0.2.
 	^ String new writeStream
-		nextPutAll: (Compiler evaluate: aString , ' optionText'); cr; cr;
+		nextPutAll: (Compiler evaluate: aString , ' optionText'); newLine; newLine;
 		 nextPutAll: 'Exercising this option requires $';
 		 nextPutAll: down asInteger printStringWithCommas;
-		 nextPutAll: ' cash'; cr;
+		 nextPutAll: ' cash'; newLine;
 		 nextPutAll: 'and a loan for $';
 		 nextPutAll: (cost - down) asInteger printStringWithCommas;
 		 contents! !
