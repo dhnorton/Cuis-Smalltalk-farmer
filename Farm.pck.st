@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 2:29:55 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 4:49:49 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 48!
+!provides: 'Farm' 1 49!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer windowCount loanItem loanReport'
+	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer windowCount loanItem loanReport optionsItem optionsReport'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -1031,6 +1031,61 @@ moveButton: anObject
 	
 	^ moveButton _ anObject! !
 
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 14:56:40'!
+optionsItem
+	"Answer the value of optionsItem"
+
+	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ optionsItem! !
+
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 14:57:19'!
+optionsItem: anObject
+	"Set the value of optionsItem and optionsReport"
+	| item enab |
+	
+	(optionsItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [item _ self optionsList at: anObject.
+			optionsReport _ self reportFor: currentPlayer on: item.
+			(Compiler evaluate: 'Franchise subclasses includes: ', item)
+				ifTrue: [
+					currentPlayer position = (Compiler evaluate: item, ' location')
+						ifTrue: [enab _ true]
+						ifFalse: [enab _ false]]
+				ifFalse: [enab _ true]]
+		ifFalse: [
+			optionsReport _ ''.
+			enab _ false].
+		self triggerEvent: #itemChange.
+		self triggerEvent: #buyButton: with: enab.
+		self changed: #optionsItem]! !
+
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 15:07:49'!
+optionsList
+	"Answer the shopping list for a player"
+	
+	^ (OrderedCollection new)
+		addAll: currentPlayer options;
+		yourself! !
+
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 15:15:07'!
+optionsReport
+
+	optionsItem > 0
+		ifTrue: [^ self optionsReport: (self optionsList at: optionsItem)]
+		ifFalse: [^ '']! !
+
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 15:31:53'!
+optionsReport: anAsset
+	"Show the status of anAsset for shopping purposes"
+	| p |
+	
+	self halt.
+	p _ currentPlayer options at: anAsset ifAbsent: [^ 'No such option named ', anAsset].
+	p owner: currentPlayer.
+	"exerciseButton disableButton."
+	^ p reportOptionTo: currentPlayer mgr! !
+
 !Farm methodsFor: 'accessing' stamp: 'dhn 12/12/2011 21:46'!
 optionsWindow
 	"Answer the value of optionsWindow"
@@ -1198,6 +1253,20 @@ reportAllPlayers
 			].
 	^ str contents! !
 
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 15:11:38'!
+reportFor: aPlayer on: anAsset
+	| p asset str col |
+	
+	p _ aPlayer assets at: anAsset ifAbsent: [^ 'No such asset named ', anAsset].
+	asset _ self class translate: anAsset.
+	col _ (aPlayer harvests) select: [:ea | ea assetName = asset].
+	str _ String new writeStream.
+	str nextPutAll: p description,':'; newLine;
+		nextPutAll: (p reportAsAssetFor: aPlayer); newLine.
+	col ifNotEmpty: [col do: [:ea | 
+		ea enabled ifFalse: [str nextPutAll: ea desc, ' - done.'; newLine]]].
+	^ str contents! !
+
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/19/2014 16:20'!
 reportProgress
 	"Plot players' progress"
@@ -1288,7 +1357,7 @@ setUpToken
 	tok delete. 	"not needed until next player"
 	^ tok! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/2/2017 10:14:02'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/7/2017 16:46:53'!
 setupPlayer: aName color: aColor
 	"Establish a player named aName and colored aColor"
 	| pl |
@@ -1301,7 +1370,10 @@ setupPlayer: aName color: aColor
 			morphExtent: 18@10);
 		mgr: self;
 		identity: aName).
-	currentPlayer _ pl! !
+	2 timesRepeat: [pl options addFirst: (self drawOptionQuietly: true)].
+	currentPlayer _ pl
+	
+! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:59'!
 setupToken: aPlayer
@@ -2944,11 +3016,11 @@ makeButtonArea
 	^ buttonArea
 		! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:57'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/7/2017 14:49:58'!
 makeBuyOptionButton
 	"Answer the 'Option' button"
 
-	^ (FarmButton label: 'Option' action: #showOpts state: true model: model)
+	^ (GameButtonMorph label: 'Purchase' action: #showOpts state: true model: self)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'See what options you have and make purchases during WINTER.'! !
 
@@ -3152,19 +3224,6 @@ quitGame
 	(self confirm: 'Are you sure you want to quit ', FarmingGame asString, '?')
 		ifTrue: [model quitGame]! !
 
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2011 21:40'!
-rmButtons: aMorph
-	"Remove button submorphs from aMorph named 'buttons'."
-	(('buttons' = aMorph externalName) and: [aMorph submorphs notNil]) ifTrue: [
-		aMorph submorphs do: [:sm| sm delete].
-		].! !
-
-!FarmingGame methodsFor: 'as yet unclassified' stamp: 'dhn 9/14/2011 10:32'!
-rmSeasons
-	"Get rid of some season submorphs which are obsolete. This relies on there being at most 3 active season submorphs."
-	['season' = (self board submorphs at: 4) externalName] whileTrue: [
-		(self board submorphs at: 4) delete].! !
-
 !FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
 seasons
 	"Answer the value of seasons"
@@ -3209,6 +3268,24 @@ showLoan
 		morphExtent: 300 @ 220.
 				
 	model disableAll: {'Pay Loan'}! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 14:45:22'!
+showOpts
+	"Show window for buying assets"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl options notEmpty
+		ifTrue: [
+			win _ OptionsView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: pl identity, '''s Shopping';
+				setWindowColor: pl color;
+				startButtons;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 220.
+				model disableAll: {'Purchase'}]! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 20:41:28'!
 showSeasons: associations 
