@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 10:06:04 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 8 September 2017 at 2:30:10 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 52!
+!provides: 'Farm' 1 53!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -388,26 +388,6 @@ A player in the Farming Game.
 
 !Field commentStamp: '<historical>' prior: 0!
 A JobSite describes the attributes of a space on the game board!
-
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 10/27/2014 20:25'!
-addPlayer: anIdentity
-	"Add a player named anIdentity to the game."
-	| pl |
-	pl := Farmer test: nil;
-				 new.
-	pl identity: anIdentity.
-	self players: pl.
-	pl mgr: self.
-	hueIndex := self wrap: self hueIndex + 1 on: self playerHues.
-	pl
-		tokenColor: (playerHues at: hueIndex).
-	2
-		timesRepeat: [pl options
-				addFirst: (self drawOptionQuietly: true)].
-	Game testMode
-		ifTrue: [| win |
-			win := pl inspectWithLabel: anIdentity.
-			win bottom: World bottom]! !
 
 !Farm methodsFor: 'initialize-release' stamp: 'dhn 10/27/2014 20:26'!
 addTestPlayer: aString
@@ -1143,21 +1123,6 @@ payExpense
 	self disableAll: {'Expense'}.
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]! !
 
-!Farm methodsFor: 'loan' stamp: 'dhn 11/17/2014 20:35'!
-payLoan
-	"Account for the pay-down of a loan."
-	| window |
-	paymentList := DebtList new
-		collection: self paymentChoices;
-		player: currentPlayer.
-	window := (paymentList 
-		windowLabelled: 'Reduce Debt' color: currentPlayer tokenColor).
-	window
-		extent: 300 @ 180;
-		center: self arena center.
-	self arena addMorph: window.
-! !
-
 !Farm methodsFor: 'loan' stamp: 'dhn 9/1/2017 13:37:11'!
 paymentChoices
 	"Answer a collection of payment amounts for choosing."
@@ -1436,40 +1401,6 @@ showEverybody
 			xw extension externalName: name]
 		ifNotNil: [xw comeToFront].
 	^ xw! !
-
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 20:41:13'!
-showOpts
-	"Open a window showing a player's options."
-	| listOfOptions xw |
-	
-	self halt.
-	listOfOptions := OptionsListFarmX new
-		collection: currentPlayer options;
-		player: currentPlayer.
-	xw := listOfOptions 
-		listWindowLabelled: currentPlayer identity , '''s Options' for: 'Options' proportion: 0.28.
-	xw setWindowColor: currentPlayer tokenColor;
-		refreshMessage: #updateOptionsIn:;
-		extent: 400 @ 250.
-	self arena addMorph: xw.
-	xw center: self arena center.
-! !
-
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 20:39:16'!
-showOptsX
-	"Open a window showing a player's options."
-	| listOfOptions xw |
-	listOfOptions := OptionsListFarmX new
-		collection: currentPlayer options;
-		player: currentPlayer.
-	xw := listOfOptions 
-		listWindowLabelled: currentPlayer identity , '''s Options' for: 'Options' proportion: 0.28.
-	xw setWindowColor: currentPlayer tokenColor;
-		refreshMessage: #updateOptionsIn:;
-		extent: 400 @ 250.
-	self arena addMorph: xw.
-	xw center: self arena center.
-! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/20/2014 09:50'!
 showProgress
