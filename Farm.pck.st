@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 8 September 2017 at 3:06:57 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 8 September 2017 at 6:48:22 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 54!
+!provides: 'Farm' 1 55!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -382,9 +382,66 @@ A FarmingGame window which makes it possible for players to reduce debt.!
 !OptionsView commentStamp: 'dhn 8/26/2016 16:48:51' prior: 0!
 A FarmingGame view which makes it possible for farmers to exercise options.!
 
+!FarmAsset commentStamp: '<historical>' prior: 0!
+The model for an asset of the farm.!
+
+!Crop commentStamp: '<historical>' prior: 0!
+The model for a crop asset.!
+
+!Fruit commentStamp: '<historical>' prior: 0!
+The model for fruit.!
+
+!Cherries commentStamp: '<historical>' prior: 0!
+The model for cherry fruit.!
+
+!Grain commentStamp: '<historical>' prior: 0!
+The model for grain.!
+
+!Corn commentStamp: '<historical>' prior: 0!
+The model for corn grain.!
+
+!Wheat commentStamp: '<historical>' prior: 0!
+The model for wheat grain.!
+
+!Hay commentStamp: '<historical>' prior: 0!
+The model for hay.!
+
+!Equipment commentStamp: '<historical>' prior: 0!
+The model for farm equipment.!
+
+!Harvester commentStamp: '<historical>' prior: 0!
+The model for a harvester.!
+
+!Tractor commentStamp: '<historical>' prior: 0!
+The model for a tractor.!
+
+!Livestock commentStamp: '<historical>' prior: 0!
+The model for livestock.!
+
+!CattleOnFarm commentStamp: '<historical>' prior: 0!
+The model for cattle on farm.!
+
+!CattleOnLease commentStamp: '<historical>' prior: 0!
+The model for cattle on lease.!
+
+!Ahtanum commentStamp: '<historical>' prior: 0!
+The model for the Ahtanum Ridge lease.!
+
+!Cascade commentStamp: '<historical>' prior: 0!
+The model for the Cascade Ridge lease.!
+
+!Rattlesnake commentStamp: '<historical>' prior: 0!
+The model for the Rattlesnake Ridge lease.!
+
+!Toppenish commentStamp: '<historical>' prior: 0!
+The model for the Toppenish Ridge lease.!
+
 !Farmer commentStamp: '<historical>' prior: 0!
 A player in the Farming Game.
 !
+
+!FarmSeason commentStamp: '<historical>' prior: 0!
+The model for a season of the year on the farm.!
 
 !Field commentStamp: '<historical>' prior: 0!
 A JobSite describes the attributes of a space on the game board!
@@ -613,13 +670,13 @@ drawFate
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'})	ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 21:02:40'!
+!Farm methodsFor: 'options' stamp: 'dhn 9/8/2017 15:51:22'!
 drawOptionQuietly: aBoolean 
 	"Answer an option, drawn from those available; resupply as needed."
 	| otb |
 	self availableOptions isEmpty
 		ifTrue: [exercisedOptions isEmpty
-				ifTrue: [availableOptions := FarmingGame optionsNames shuffled]
+				ifTrue: [availableOptions := self class optionsNames shuffled]
 				ifFalse: [self availableOptions: self exercisedOptions shuffled.
 					self exercisedOptions: OrderedCollection new].
 			otb := availableOptions removeFirst.
@@ -886,13 +943,13 @@ initialButtonState
 	self enableAll: {'Option'}.
 	self disableAll: {'End Turn'. 'Expense'. 'Fate'. 'Harvest'}! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/7/2017 21:03:01'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/8/2017 15:51:51'!
 initialize
 
 	super initialize.
 	cellCount _ self class cellsForGame.
 	spaces _ self setUpSpaces.
-	availableOptions _ FarmingGame optionsNames shuffled.
+	availableOptions _ self class optionsNames shuffled.
 	exercisedOptions _ OrderedCollection new.
 	fates _ FarmingGame fatesDesc asOrderedCollection shuffled.
 	drawnFates _ OrderedCollection new.
@@ -1031,21 +1088,20 @@ optionsItem
 	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
 	^ optionsItem! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 17:23:47'!
+!Farm methodsFor: 'options' stamp: 'dhn 9/8/2017 16:05:47'!
 optionsItem: anObject
 	"Set the value of optionsItem and optionsReport"
-	| item enab |
+	| key option enab |
 	
 	(optionsItem _ anObject) ifNotNil: [
 	anObject ~= 0
-		ifTrue: [item _ self optionsList at: anObject.
-			optionsReport _ self optionsReport: item.
-			(Compiler evaluate: 'Franchise subclasses includes: ', item)
-				ifTrue: [
-					currentPlayer position = (Compiler evaluate: item, ' location')
-						ifTrue: [enab _ true]
-						ifFalse: [enab _ false]]
-				ifFalse: [enab _ true]]
+		ifTrue: [
+			key _ self optionsList at: anObject.
+			option _ self class optionsDesc at: key.
+			optionsReport _ self optionsReport: key.
+			option singleOwner not
+				ifTrue: [enab _ true]
+				ifFalse: [enab _ option owner isNil]]
 		ifFalse: [
 			optionsReport _ ''.
 			enab _ false].
@@ -1060,6 +1116,12 @@ optionsList
 	^ (OrderedCollection new)
 		addAll: currentPlayer options;
 		yourself! !
+
+!Farm methodsFor: 'options' stamp: 'dhn 9/8/2017 17:54:26'!
+optionsList: aList
+	"Set the shopping list for a player"
+	
+	currentPlayer options: aList! !
 
 !Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 15:15:07'!
 optionsReport
@@ -1099,14 +1161,13 @@ optsShown: aBool
 
 	optsShown := aBool! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/8/2017 15:06:08'!
+!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:40'!
 pay: down borrow: balance for: aSymbol amount: qty
 	"Account for the down payment and loan balance to purchase the asset named in aSymbol." 
 	| asset |
-	
 	currentPlayer debt: balance negated + currentPlayer debt.
 	currentPlayer tally: down negated.
-	asset _ currentPlayer assets at: aSymbol.
+	asset := currentPlayer assets at: aSymbol.
 	asset quantity: qty + asset quantity.
 	asset cost: down + balance + asset cost.
 	self updatePlayer! !
@@ -2173,7 +2234,7 @@ defaultGoal
 	
 	^ 250000! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/2/2017 11:45:46'!
+!Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 15:50:14'!
 describeSpaces
 	"Descriptions for the spaces on the board."
 	
@@ -2482,6 +2543,57 @@ harvestSeason
 harvestSep1
 	"Answer the actionSelector for the Harvest button when on Sep wk 1."
 	^#harvestSep1! !
+
+!Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 17:15:56'!
+optionMethod
+	"Answer a dictionary of methods which account for the execution of options."
+	
+	^ Dictionary new
+		at: #Tractor put: #tractor:;
+		at: #Harvester put: #harvester:;
+		at: #Fruit put: #fruit:;
+		at: #Grain put: #grain:;
+		at: #Hay put: #hay:;
+		at: #Livestock put: #livestock:;
+		at: #Ahtanum put: #ahtanum:;
+		at: #Rattlesnake put: #rattlesnake:;
+		at: #Cascade put: #cascade:;
+		at: #Toppenish put: #toppenish:;
+		yourself! !
+
+!Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 15:52:22'!
+optionsDesc
+	"Answer a dictionary of things that farmers can purchase."
+	
+	^ Dictionary new
+		at: #Tractor put: Tractor new;
+		at: #Harvester put: Harvester new;
+		at: #Fruit put: Fruit new;
+		at: #Grain put: Grain new;
+		at: #Hay put: Hay new;
+		at: #Livestock put: Livestock new;
+		at: #Ahtanum put: Ahtanum new;
+		at: #Rattlesnake put: Rattlesnake new;
+		at: #Cascade put: Cascade new;
+		at: #Toppenish put: Toppenish new;
+		yourself! !
+
+!Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 15:50:39'!
+optionsNames
+	"Answer the name of each option at the frequency they appear in the deck"
+	
+	^ OrderedCollection new 
+		 add: 'Tractor' withOccurrences: 3;
+		 add: 'Harvester' withOccurrences: 3;
+		 add: 'Fruit' withOccurrences: 6;
+		 add: 'Grain' withOccurrences: 5;
+		 add: 'Hay' withOccurrences: 5;
+		 add: 'Livestock' withOccurrences: 6;
+		 add: 'Ahtanum' withOccurrences: 3;
+		 add: 'Rattlesnake' withOccurrences: 3;
+		 add: 'Cascade' withOccurrences: 3;
+		 add: 'Toppenish' withOccurrences: 3;
+		 yourself! !
 
 !Farm class methodsFor: 'database' stamp: 'dhn 9/7/2017 18:17:37'!
 paymentIncrement
@@ -3527,40 +3639,6 @@ labelAreaHeight
 
 	^ 50! !
 
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/7/2017 21:09:35'!
-optionsDesc
-	"Answer a dictionary of things that farmers can purchase."
-	
-	^ Dictionary new
-		at: #Tractor put: Tractor new;
-		at: #Harvester put: Harvester new;
-		at: #Fruit put: Fruit new;
-		at: #Grain put: Grain new;
-		at: #Hay put: Hay new;
-		at: #Livestock put: Livestock new;
-		at: #Ahtanum put: Ahtanum new;
-		at: #Rattlesnake put: Rattlesnake new;
-		at: #Cascade put: Cascade new;
-		at: #Toppenish put: Toppenish new;
-		yourself! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/7/2017 21:01:47'!
-optionsNames
-	"Answer the name of each option at the frequency they appear in the deck"
-	
-	^ OrderedCollection new 
-		 add: 'Tractor' withOccurrences: 3;
-		 add: 'Harvester' withOccurrences: 3;
-		 add: 'Fruit' withOccurrences: 6;
-		 add: 'Grain' withOccurrences: 5;
-		 add: 'Hay' withOccurrences: 5;
-		 add: 'Livestock' withOccurrences: 6;
-		 add: 'Ahtanum' withOccurrences: 3;
-		 add: 'Rattlesnake' withOccurrences: 3;
-		 add: 'Cascade' withOccurrences: 3;
-		 add: 'Toppenish' withOccurrences: 3;
-		 yourself! !
-
 !FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:11:50'!
 start
 	"Start the Farming Game"
@@ -3849,22 +3927,16 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 14:53:05'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 18:45:47'!
 buy
 	"Purchase an asset"
-	| key option cost down balance |
+	| key method amt |
 	
 	key _ model optionsList at: model optionsItem.
-	option _ FarmingGame optionsDesc at: key.
-	cost _ option class price.
-	down _ 0.2 * cost.
-	balance _ cost - down.
-	model
-		pay: down
-		borrow: balance
-		for: option class asString
-		amount: 1;
-		updateHistory.
+	method _ self class optionMethod at: key.
+	amt _ (Smalltalk classNamed: key) lotQuantity.
+	self perform: method withArguments: {amt}.
+	model currentPlayer options: (model optionsList remove: key; yourself).
 	self details! !
 
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 11:33:35'!
@@ -4015,10 +4087,6 @@ initialize
 	super initialize.
 ! !
 
-!Fruit methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 16:45'!
-lotQuantity
-	^ 5! !
-
 !Fruit class methodsFor: 'as yet unclassified' stamp: 'dhn 9/24/2011 21:49'!
 at: aRoll for: aQuantity
 	"Answer the yield as if looking it up in a table."
@@ -4028,6 +4096,10 @@ at: aRoll for: aQuantity
 auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 5! !
+
+!Fruit class methodsFor: 'as yet unclassified' stamp: 'dhn 9/8/2017 18:02:29'!
+lotQuantity
+	^ 10! !
 
 !Fruit class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:38:55'!
 optionText
@@ -4065,11 +4137,7 @@ initialize
 	super initialize.
 ! !
 
-!Grain methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 16:45'!
-lotQuantity
-	^ 10! !
-
-!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 21:04:21'!
+!Grain class methodsFor: 'operating' stamp: 'dhn 9/8/2017 16:43:48'!
 at: aRoll for: aQuantity
 	"Answer the Grain yield on anAcreage for aRoll."
 	| x whole m1 sum |
@@ -4083,19 +4151,23 @@ at: aRoll for: aQuantity
 	^ sum roundTo:  1
 ! !
 
-!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:39:28'!
+!Grain class methodsFor: 'operating' stamp: 'dhn 9/8/2017 16:45:03'!
+lotQuantity
+	^ 10! !
+
+!Grain class methodsFor: 'operating' stamp: 'dhn 9/8/2017 16:44:10'!
 optionText
 	^ 'NEIGHBOR SELLS OUT
 10 acres of Grain
 at $2,000 per acre
 Total $', self optionCost printStringWithCommas! !
 
-!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 1/19/2012 15:24'!
+!Grain class methodsFor: 'database' stamp: 'dhn 9/8/2017 16:46:41'!
 price
 	"Per acre"
 	^2000! !
 
-!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 20:51:33'!
+!Grain class methodsFor: 'database' stamp: 'dhn 9/8/2017 16:46:58'!
 yieldM
 	"In combination with yieldV, used to compute Grain yields without a table. (see at:for:)"
 	
@@ -4108,7 +4180,7 @@ yieldM
 	#(7000 7000)
 	)! !
 
-!Grain class methodsFor: 'as yet unclassified' stamp: 'dhn 9/21/2011 22:00'!
+!Grain class methodsFor: 'database' stamp: 'dhn 9/8/2017 16:47:13'!
 yieldV
 	"In combination with yieldM, used to compute Grain yields without a table. (see at:for:)"
 	^#(800 1500 2500 3800 5300 7000)! !
@@ -4133,14 +4205,14 @@ initialize
 	super initialize.
 	description := 'Hay'! !
 
-!Hay methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 16:44'!
-lotQuantity
-	^ 10! !
-
 !Hay class methodsFor: 'as yet unclassified' stamp: 'dhn 9/24/2011 21:48'!
 at: aRoll for: aQuantity
 	"Answer the yield as if looking it up in a table."
 	^(self yieldVector at: aRoll) * (aQuantity // 10)! !
+
+!Hay class methodsFor: 'as yet unclassified' stamp: 'dhn 9/8/2017 18:01:10'!
+lotQuantity
+	^ 10! !
 
 !Hay class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:39:43'!
 optionText
@@ -4180,10 +4252,6 @@ initialize
 	super initialize.
 ! !
 
-!Equipment methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 16:47'!
-lotQuantity
-	^ 1! !
-
 !Equipment methodsFor: 'accessing' stamp: 'dhn 9/1/2017 13:36:50'!
 reportAsAssetFor: aPlayer
 	| str |
@@ -4221,6 +4289,10 @@ auctionQuantity
 !Equipment class methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 09:06'!
 lotDescription: aString 
 	^ self auctionQuantity asString , ' each of a ' , aString! !
+
+!Equipment class methodsFor: 'as yet unclassified' stamp: 'dhn 9/8/2017 18:07:32'!
+lotQuantity
+	^ 1! !
 
 !Equipment class methodsFor: 'as yet unclassified' stamp: 'dhn 9/18/2011 14:49'!
 price
@@ -4331,10 +4403,6 @@ initialize
 	super initialize.
 	description := 'Cattle on Farm'! !
 
-!CattleOnFarm methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 16:48'!
-lotQuantity
-	^ 10! !
-
 !CattleOnFarm class methodsFor: 'as yet unclassified' stamp: 'dhn 1/11/2014 14:46'!
 auctionQuantity
 	"Answer the quantity that can be auctioned"
@@ -4344,10 +4412,16 @@ auctionQuantity
 lotDescription: aString 
 	^ self auctionQuantity asString , ' Head of Cattle on Farm'! !
 
-!CattleOnLease methodsFor: 'initialize-release' stamp: 'dhn 1/23/2014 15:30'!
+!CattleOnFarm class methodsFor: 'as yet unclassified' stamp: 'dhn 9/8/2017 18:05:27'!
+lotQuantity
+	^ 10! !
+
+!CattleOnLease methodsFor: 'initialize-release' stamp: 'dhn 9/8/2017 15:21:14'!
 initialize
+
 	super initialize.
-	where := ' Ridge'
+	singleOwner _ true.
+	where _ ' Ridge'
 ! !
 
 !CattleOnLease class methodsFor: 'as yet unclassified' stamp: 'dhn 1/21/2014 10:30'!
@@ -4364,13 +4438,13 @@ initialize
 	super initialize.
 	description := 'Ahtanum', where! !
 
-!Ahtanum methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 12:34'!
-lotQuantity
-	^ 20! !
-
 !Ahtanum class methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 13:08'!
 auctionQuantity
 	"Answer the quantity that can be auctioned"
+	^ 20! !
+
+!Ahtanum class methodsFor: 'as yet unclassified' stamp: 'dhn 9/8/2017 18:03:29'!
+lotQuantity
 	^ 20! !
 
 !Ahtanum class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:40:54'!
@@ -4386,13 +4460,13 @@ initialize
 	super initialize.
 	description := 'Cascade', where! !
 
-!Cascade methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 12:35'!
-lotQuantity
-	^ 40! !
-
 !Cascade class methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 13:11'!
 auctionQuantity
 	"Answer the quantity that can be auctioned"
+	^ 40! !
+
+!Cascade class methodsFor: 'as yet unclassified' stamp: 'dhn 9/8/2017 18:04:44'!
+lotQuantity
 	^ 40! !
 
 !Cascade class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:35:39'!
@@ -4408,13 +4482,13 @@ initialize
 	super initialize.
 	description := 'Rattlesnake', where! !
 
-!Rattlesnake methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 12:36'!
-lotQuantity
-	^ 30! !
-
 !Rattlesnake class methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 13:11'!
 auctionQuantity
 	"Answer the quantity that can be auctioned"
+	^ 30! !
+
+!Rattlesnake class methodsFor: 'as yet unclassified' stamp: 'dhn 9/8/2017 18:09:03'!
+lotQuantity
 	^ 30! !
 
 !Rattlesnake class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:40:23'!
@@ -4430,13 +4504,13 @@ initialize
 	super initialize.
 	description := 'Toppenish', where! !
 
-!Toppenish methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 12:36'!
-lotQuantity
-	^ 50! !
-
 !Toppenish class methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 13:11'!
 auctionQuantity
 	"Answer the quantity that can be auctioned"
+	^ 50! !
+
+!Toppenish class methodsFor: 'as yet unclassified' stamp: 'dhn 9/8/2017 18:22:50'!
+lotQuantity
 	^ 50! !
 
 !Toppenish class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:40:31'!
