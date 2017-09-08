@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 5:25:21 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 8:33:18 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 50!
+!provides: 'Farm' 1 51!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2193,12 +2193,12 @@ wonButtonsState
 	self enableAll: {'End Turn'}.
 ! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 1/17/2014 20:38'!
+!Farm class methodsFor: 'database' stamp: 'dhn 9/7/2017 18:12:02'!
 assetList
 	"Answer the list of assets in order suitable for auction."
 	^ #('Hay' 'Grain' 'Fruit' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
 
-!Farm class methodsFor: 'setup' stamp: 'dhn 8/30/2017 13:00:07'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:18:31'!
 cellsForGame
 	"Answer the number of board spaces in view at any time"
 	
@@ -2457,51 +2457,52 @@ Week 2
 First snow. Draw Farmer''s Fate.';
 	yourself! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/19/2011 16:59'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:19'!
 expenseAug1
 	"Answer the actionSelector for the Expense button when on Aug wk 1."
 	^#expenseAug1! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/22/2011 06:48'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:36'!
 expenseJul3
 	"Answer the actionSelector for the Expense button when on Jul wk 3."
 	^#expenseJul3! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/19/2011 17:15'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:52'!
 expenseNormal
 	"Answer the normal actionSelector for the Expense button."
 	^#payExpense! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/22/2011 12:02'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:13:10'!
 expenseSep1
 	"Answer the actionSelector for the Expense button when on Sep wk 1."
 	^#expenseSep1! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/19/2011 16:59'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:13:27'!
 harvestAug1
 	"Answer the actionSelector for the Harvest button when on Aug wk 1."
 	^#harvestAug1! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/22/2011 06:47'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:10'!
 harvestJul3
 	"Answer the actionSelector for the Harvest button when on Jul wk 3."
 	^#harvestJul3! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/18/2011 21:16'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:22'!
 harvestLivestock
 	"Answer the actionSelector for the Harvest button when cattle are involved."
 	^#harvestCows! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/18/2011 21:10'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:40'!
 harvestNormal
 	"Answer the normal actionSelector for the Harvest button."
 	^#harvest! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 1/19/2012 15:46'!
+!Farm class methodsFor: 'database' stamp: 'dhn 9/7/2017 18:16:44'!
 harvestSeason
 	"Answer an ordered collection of harvest seasons in order of their board positions."
 	|temp|
-	temp := OrderedCollection new.
+	
+	temp _ OrderedCollection new.
 	1 to: 19 do: [:a | temp addLast: #WINTER].
 	20 to: 23 do: [:a | temp addLast: #Hay].
 	24 to: 26 do: [:a | temp addLast: #Cherries].
@@ -2514,12 +2515,12 @@ harvestSeason
 	47 to: 49 do: [:a | temp addLast: #Corn].
 	^temp! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 10/22/2011 12:02'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:17:02'!
 harvestSep1
 	"Answer the actionSelector for the Harvest button when on Sep wk 1."
 	^#harvestSep1! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 4/29/2012 16:33'!
+!Farm class methodsFor: 'database' stamp: 'dhn 9/7/2017 18:17:37'!
 paymentIncrement
 	"Answer the payment increment for displaying loan payment choices"
 	^ 1000! !
@@ -2577,7 +2578,7 @@ season
 			color: Color yellow; range: 47 @ 49);
 		yourself! !
 
-!Farm class methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 13:25'!
+!Farm class methodsFor: 'database' stamp: 'dhn 9/7/2017 18:17:55'!
 statusList
 	"Answer the list of assets in order suitable for status"
 	^ #('Hay' 'Corn' 'Wheat' 'Apples' 'Cherries' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
@@ -2795,20 +2796,6 @@ springMove
 				model space15.
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2013 20:26'!
-waiting
-	"Sit idle; do nothing."
-	| season |
-	season := Farm harvestSeason at: self who position.
-	season = #WINTER
-		ifTrue: [self who options isEmpty
-				ifTrue: [self who mgr disableAll: {'Option'}]
-				ifFalse: [self who mgr won
-						ifTrue: [self who mgr wonButtonsState]
-						]].
-	die
-		ifNotNil: [die delete]! !
 
 !FarmButton methodsFor: 'accessing' stamp: 'dhn 9/2/2017 20:38:50'!
 actionSelector: anObject
@@ -3576,22 +3563,6 @@ includeInNewMorphMenu
 labelAreaHeight
 
 	^ 50! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 09:09'!
-optionsDesc
-	"Answer the name of each option at the frequency they appear in the deck"
-	^ OrderedCollection new 
-		 add: 'Tractor' withOccurrences: 3;
-		 add: 'Harvester' withOccurrences: 3;
-		 add: 'Fruit' withOccurrences: 6;
-		 add: 'Grain' withOccurrences: 5;
-		 add: 'Hay' withOccurrences: 5;
-		 add: 'Livestock' withOccurrences: 6;
-		 add: 'Ahtanum' withOccurrences: 3;
-		 add: 'Rattlesnake' withOccurrences: 3;
-		 add: 'Cascade' withOccurrences: 3;
-		 add: 'Toppenish' withOccurrences: 3;
-		 yourself ! !
 
 !FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:11:50'!
 start
