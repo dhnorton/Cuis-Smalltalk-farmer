@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 8:33:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 7 September 2017 at 10:06:04 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 51!
+!provides: 'Farm' 1 52!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -60,6 +60,16 @@ FarmingView subclass: #LoanView
 	category: 'Farm-Graphics'!
 !classDefinition: 'LoanView class' category: #'Farm-Graphics'!
 LoanView class
+	instanceVariableNames: ''!
+
+!classDefinition: #OptionsView category: #'Farm-Graphics'!
+FarmingView subclass: #OptionsView
+	instanceVariableNames: 'textPane cancelButton buyButton buttonArea'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'OptionsView class' category: #'Farm-Graphics'!
+OptionsView class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmAsset category: #'Farm-Model'!
@@ -322,14 +332,14 @@ ProtoObject subclass: #FarmRelation
 FarmRelation class
 	instanceVariableNames: ''!
 
-!classDefinition: #OptionsListFarm category: #'Farm-Graphics'!
-ProtoObject subclass: #OptionsListFarm
+!classDefinition: #OptionsListFarmX category: #'Farm-Graphics'!
+ProtoObject subclass: #OptionsListFarmX
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
-!classDefinition: 'OptionsListFarm class' category: #'Farm-Graphics'!
-OptionsListFarm class
+!classDefinition: 'OptionsListFarmX class' category: #'Farm-Graphics'!
+OptionsListFarmX class
 	instanceVariableNames: ''!
 
 !classDefinition: #StatListFarm category: #'Farm-Graphics'!
@@ -368,6 +378,9 @@ Abstract class for FarmingGame views!
 
 !LoanView commentStamp: 'dhn 9/14/2016 10:34:25' prior: 0!
 A FarmingGame window which makes it possible for players to reduce debt.!
+
+!OptionsView commentStamp: 'dhn 8/26/2016 16:48:51' prior: 0!
+A FarmingGame view which makes it possible for farmers to exercise options.!
 
 !Farmer commentStamp: '<historical>' prior: 0!
 A player in the Farming Game.
@@ -620,13 +633,13 @@ drawFate
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'})	ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 8/30/2017 17:17:11'!
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 21:02:40'!
 drawOptionQuietly: aBoolean 
 	"Answer an option, drawn from those available; resupply as needed."
 	| otb |
 	self availableOptions isEmpty
 		ifTrue: [exercisedOptions isEmpty
-				ifTrue: [availableOptions := FarmingGame optionsDesc shuffled]
+				ifTrue: [availableOptions := FarmingGame optionsNames shuffled]
 				ifFalse: [self availableOptions: self exercisedOptions shuffled.
 					self exercisedOptions: OrderedCollection new].
 			otb := availableOptions removeFirst.
@@ -893,13 +906,13 @@ initialButtonState
 	self enableAll: {'Option'}.
 	self disableAll: {'End Turn'. 'Expense'. 'Fate'. 'Harvest'}! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/7/2017 14:18:22'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/7/2017 21:03:01'!
 initialize
 
 	super initialize.
 	cellCount _ self class cellsForGame.
 	spaces _ self setUpSpaces.
-	availableOptions _ FarmingGame optionsDesc shuffled.
+	availableOptions _ FarmingGame optionsNames shuffled.
 	exercisedOptions _ OrderedCollection new.
 	fates _ FarmingGame fatesDesc asOrderedCollection shuffled.
 	drawnFates _ OrderedCollection new.
@@ -1424,11 +1437,29 @@ showEverybody
 		ifNotNil: [xw comeToFront].
 	^ xw! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 11/24/2014 10:41'!
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 20:41:13'!
 showOpts
 	"Open a window showing a player's options."
 	| listOfOptions xw |
-	listOfOptions := OptionsListFarm new
+	
+	self halt.
+	listOfOptions := OptionsListFarmX new
+		collection: currentPlayer options;
+		player: currentPlayer.
+	xw := listOfOptions 
+		listWindowLabelled: currentPlayer identity , '''s Options' for: 'Options' proportion: 0.28.
+	xw setWindowColor: currentPlayer tokenColor;
+		refreshMessage: #updateOptionsIn:;
+		extent: 400 @ 250.
+	self arena addMorph: xw.
+	xw center: self arena center.
+! !
+
+!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 20:39:16'!
+showOptsX
+	"Open a window showing a player's options."
+	| listOfOptions xw |
+	listOfOptions := OptionsListFarmX new
 		collection: currentPlayer options;
 		player: currentPlayer.
 	xw := listOfOptions 
@@ -3251,7 +3282,7 @@ showLoan
 				
 	model disableAll: {'Pay Loan'}! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 14:45:22'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 21:56:26'!
 showOpts
 	"Show window for buying assets"
 	| pl win |
@@ -3261,8 +3292,9 @@ showOpts
 		ifTrue: [
 			win _ OptionsView openOn: model.
 			win openInWorld: pasteup.
+			self halt.
 			win
-				setLabel: pl identity, '''s Shopping';
+				setLabel: (pl identity, '''s Shopping');
 				setWindowColor: pl color;
 				startButtons;
 				morphPosition: self windowPosition;
@@ -3564,6 +3596,40 @@ labelAreaHeight
 
 	^ 50! !
 
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/7/2017 21:09:35'!
+optionsDesc
+	"Answer a dictionary of things that farmers can purchase."
+	
+	^ Dictionary new
+		at: #Tractor put: Tractor new;
+		at: #Harvester put: Harvester new;
+		at: #Fruit put: Fruit new;
+		at: #Grain put: Grain new;
+		at: #Hay put: Hay new;
+		at: #Livestock put: Livestock new;
+		at: #Ahtanum put: Ahtanum new;
+		at: #Rattlesnake put: Rattlesnake new;
+		at: #Cascade put: Cascade new;
+		at: #Toppenish put: Toppenish new;
+		yourself! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/7/2017 21:01:47'!
+optionsNames
+	"Answer the name of each option at the frequency they appear in the deck"
+	
+	^ OrderedCollection new 
+		 add: 'Tractor' withOccurrences: 3;
+		 add: 'Harvester' withOccurrences: 3;
+		 add: 'Fruit' withOccurrences: 6;
+		 add: 'Grain' withOccurrences: 5;
+		 add: 'Hay' withOccurrences: 5;
+		 add: 'Livestock' withOccurrences: 6;
+		 add: 'Ahtanum' withOccurrences: 3;
+		 add: 'Rattlesnake' withOccurrences: 3;
+		 add: 'Cascade' withOccurrences: 3;
+		 add: 'Toppenish' withOccurrences: 3;
+		 yourself! !
+
 !FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:11:50'!
 start
 	"Start the Farming Game"
@@ -3797,6 +3863,138 @@ openOn: aModel
 	| win |
 
 	win _ self open: aModel label: 'Purchases'.
+	win removeWindowMenu.
+			
+	aModel when: #itemChange send: #details to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 15:04:46'!
+buildMorphicWindow
+	"Lay out the window for purchases"
+	| list1 rightPane |
+	
+	self layoutMorph beRow.
+	list1 _ (PluggableListMorph
+		model: model
+		listGetter: #optionsList
+		indexGetter: #optionsItem
+		indexSetter: #optionsItem:
+		mainView: self
+		menuGetter: nil
+		keystrokeAction: nil)
+			name: #catalog.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+	model when: #buyButton: send: #buyButton: to: self with: #state.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'item description'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	rightPane _ LayoutMorph newColumn.
+	rightPane
+		name: 'right pane';
+		addMorph: buttonArea;
+		addMorph: textPane.
+	
+	self layoutMorph
+		addMorph: list1 proportionalWidth: 0.35;
+		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
+! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/7/2017 21:41:56'!
+buy
+	"Purchase an asset"
+	| key option cost down balance |
+	
+	self halt.
+	key _ model optionsList at: model optionsItem.
+	option _ FarmingGame optionsDesc at: key.
+	cost _ option class price.
+	down _ 0.2 * cost.
+	balance _ cost - down.
+	model
+		pay: down
+		borrow: balance
+		for: option class asString
+		amount: 1;
+		updateHistory;
+		enableAll: {'doJob'}.
+	self details! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 11:33:35'!
+buyButton: aBool
+	"Change buy button state according to aBool"
+	
+	aBool
+		ifTrue: [buyButton enableButton]
+		ifFalse: [buyButton disableButton]! !
+
+!OptionsView methodsFor: 'termination' stamp: 'dhn 9/12/2016 17:18:16'!
+closeBoxHit
+
+	model 
+		optionsItem: nil;
+		enableAll: {'Purchase'}.
+	super closeBoxHit! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 8/26/2016 15:51:55'!
+details
+
+	textPane model actualContents: model optionsReport 	"note that the textPane model differs from the model for this view"! !
+
+!OptionsView methodsFor: 'termination' stamp: 'dhn 8/28/2016 14:19:18'!
+endIt
+	"Close the receiver"
+	
+	model 
+		optionsItem: nil;
+		enableAll: {'Purchase'}.
+	self delete! !
+
+!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 10:20:02'!
+startButtons
+	"Set the buttons for buying assets"
+	
+	buyButton _ GameButtonMorph label: 'Buy' action: #buy state: false model: self.
+	buyButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Make the purchase.'.
+		
+	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
+	cancelButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Forget about shopping for now.'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: buyButton;
+		addMorph: cancelButton;
+		padding: #center.
+! !
+
+!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 11/2/2016 20:33:52'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
 	win removeWindowMenu.
 			
 	aModel when: #itemChange send: #details to: win.
@@ -5767,11 +5965,11 @@ lineWidth: anObject
 
 	lineWidth := anObject! !
 
-!OptionsListFarm methodsFor: 'as yet unclassified' stamp: 'dhn 5/5/2012 20:35'!
+!OptionsListFarmX methodsFor: 'as yet unclassified' stamp: 'dhn 5/5/2012 20:35'!
 initialize
 	super initialize! !
 
-!OptionsListFarm methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 12:40'!
+!OptionsListFarmX methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 12:40'!
 listWindowLabelled: aString for: aName proportion: aWidth
 	"create a window with a list pane aWidth wide, a button pane, and one text pane"
 	| xw pm panel |
@@ -5811,7 +6009,7 @@ listWindowLabelled: aString for: aName proportion: aWidth
 	^ xw
 ! !
 
-!OptionsListFarm methodsFor: 'as yet unclassified' stamp: 'dhn 11/16/2014 20:34'!
+!OptionsListFarmX methodsFor: 'as yet unclassified' stamp: 'dhn 11/16/2014 20:34'!
 reviewOption
 	"Exercise an option."
 	| option message argument result |
@@ -5828,7 +6026,7 @@ reviewOption
 				ifNotNil: [self statWindow setSelection: self statWindow currentSelection]"
 			]! !
 
-!OptionsListFarm methodsFor: 'as yet unclassified' stamp: 'dhn 11/24/2014 10:56'!
+!OptionsListFarmX methodsFor: 'as yet unclassified' stamp: 'dhn 11/24/2014 10:56'!
 setSelection: anInteger 
 	"Cause the description for an option to be displayed"
 	selectedItem := anInteger.
@@ -5843,7 +6041,7 @@ setSelection: anInteger
 	self changed: #currentSelection;
 		 changed: #text1 ! !
 
-!OptionsListFarm methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2014 20:23'!
+!OptionsListFarmX methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2014 20:23'!
 updateOptionsIn: aWindow
 	"Bring window showing the current player's options up to date"
 	self collection: player options;
@@ -5851,7 +6049,7 @@ updateOptionsIn: aWindow
 		changed: #list
 ! !
 
-!OptionsListFarm class methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 12:51'!
+!OptionsListFarmX class methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 12:51'!
 windowName
 	"Answer the name for windows on this class"
 	^ 'Options'! !
