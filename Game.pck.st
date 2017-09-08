@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 6 September 2017 at 10:23:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 8 September 2017 at 6:27:05 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 156!
+!provides: 'Game' 1 157!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -124,7 +124,7 @@ GamePopUp class
 
 !classDefinition: #Asset category: #'Game-Model'!
 Object subclass: #Asset
-	instanceVariableNames: 'description quantity cost gross factor quality count missed owner'
+	instanceVariableNames: 'description quantity cost gross factor quality count missed owner singleOwner'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Model'!
@@ -1775,6 +1775,13 @@ quantity: anObject
 	"Set the value of quantity"
 
 	quantity := anObject! !
+
+!Asset methodsFor: 'accessing' stamp: 'dhn 9/8/2017 15:19:22'!
+singleOwner
+	"Answer true if the asset can have only one owner"
+
+	singleOwner isNil ifTrue: [singleOwner _ false].
+	^ singleOwner! !
 
 !Asset class methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 08:18'!
 optionCost
