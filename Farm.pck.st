@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 8 September 2017 at 2:30:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 8 September 2017 at 3:06:57 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 53!
+!provides: 'Farm' 1 54!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -515,14 +515,14 @@ doAuction
 		)) startUpWithCaption: 'Start an Auction'.
 	ans ifNotNil: [self perform: ans]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/6/2017 16:15:30'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/8/2017 14:59:36'!
 doAug1
 	"Move the player to February Week 4 after his landing on August  Week 1."
 	
 	(self disabledAll: {'Harvest'. 'Expense'})
 		ifTrue: [
 			GamePopUp inform: 'You will advance to 4th week in February.' title: 'Farming like a Pro'.
-			self disableAll: {'Stats'. 'Auction'. 'Pay Loan'. 'Option'. 'End Turn'}.
+			self disableAll: {'End Turn'}.
 			token feb4MoveFrom: currentPlayer position]! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 9/5/2017 12:58:51'!
@@ -1099,13 +1099,14 @@ optsShown: aBool
 
 	optsShown := aBool! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:40'!
+!Farm methodsFor: 'options' stamp: 'dhn 9/8/2017 15:06:08'!
 pay: down borrow: balance for: aSymbol amount: qty
 	"Account for the down payment and loan balance to purchase the asset named in aSymbol." 
 	| asset |
+	
 	currentPlayer debt: balance negated + currentPlayer debt.
 	currentPlayer tally: down negated.
-	asset := currentPlayer assets at: aSymbol.
+	asset _ currentPlayer assets at: aSymbol.
 	asset quantity: qty + asset quantity.
 	asset cost: down + balance + asset cost.
 	self updatePlayer! !
@@ -2025,14 +2026,14 @@ space8
 	self disableAll: {'Move'}.
 	token springMove! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:48:46'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/8/2017 15:00:39'!
 space9
 	"Feb week 4"
 	
 	self disableAll: {'Move'}.
 	currentPlayer
 		addOption: (self drawOptionQuietly: false).
-	self enableAll: {'Option'. 'End Turn'}! !
+	self enableAll: {'End Turn'}! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:58:25'!
 spaces
@@ -3213,7 +3214,7 @@ showLoan
 				
 	model disableAll: {'Pay Loan'}! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 21:56:26'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/8/2017 14:48:22'!
 showOpts
 	"Show window for buying assets"
 	| pl win |
@@ -3223,7 +3224,6 @@ showOpts
 		ifTrue: [
 			win _ OptionsView openOn: model.
 			win openInWorld: pasteup.
-			self halt.
 			win
 				setLabel: (pl identity, '''s Shopping');
 				setWindowColor: pl color;
@@ -3849,12 +3849,11 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/7/2017 21:41:56'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 14:53:05'!
 buy
 	"Purchase an asset"
 	| key option cost down balance |
 	
-	self halt.
 	key _ model optionsList at: model optionsItem.
 	option _ FarmingGame optionsDesc at: key.
 	cost _ option class price.
@@ -3865,8 +3864,7 @@ buy
 		borrow: balance
 		for: option class asString
 		amount: 1;
-		updateHistory;
-		enableAll: {'doJob'}.
+		updateHistory.
 	self details! !
 
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 11:33:35'!
