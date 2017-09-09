@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 8 September 2017 at 6:48:22 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 9 September 2017 at 4:35:45 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 55!
+!provides: 'Farm' 1 58!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -64,7 +64,7 @@ LoanView class
 
 !classDefinition: #OptionsView category: #'Farm-Graphics'!
 FarmingView subclass: #OptionsView
-	instanceVariableNames: 'textPane cancelButton buyButton buttonArea'
+	instanceVariableNames: 'textPane cancelButton buyButton buttonArea list'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
@@ -670,24 +670,26 @@ drawFate
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'})	ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/8/2017 15:51:22'!
+!Farm methodsFor: 'options' stamp: 'dhn 9/9/2017 16:10:20'!
 drawOptionQuietly: aBoolean 
 	"Answer an option, drawn from those available; resupply as needed."
 	| otb |
+	
 	self availableOptions isEmpty
 		ifTrue: [exercisedOptions isEmpty
-				ifTrue: [availableOptions := self class optionsNames shuffled]
+				ifTrue: [availableOptions _ self class optionsNames shuffled]
 				ifFalse: [self availableOptions: self exercisedOptions shuffled.
 					self exercisedOptions: OrderedCollection new].
-			otb := availableOptions removeFirst.
+			otb _ availableOptions removeFirst.
 			GamePopUp
 				inform: (Compiler evaluate: otb , ' optionText')
 				title: 'Option']
-		ifFalse: [otb := availableOptions removeFirst.
+		ifFalse: [otb _ availableOptions removeFirst.
 			aBoolean
 				ifFalse: [GamePopUp
 						inform: (Compiler evaluate: otb , ' optionText')
 						title: 'Option']].
+	self triggerEvent: #itemChange.
 	^ otb! !
 
 !Farm methodsFor: 'expense' stamp: 'dhn 10/12/2011 21:54'!
@@ -1123,12 +1125,13 @@ optionsList: aList
 	
 	currentPlayer options: aList! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 15:15:07'!
+!Farm methodsFor: 'options' stamp: 'dhn 9/8/2017 21:57:53'!
 optionsReport
+	"Answer the report on the selected option"
 
-	optionsItem > 0
-		ifTrue: [^ self optionsReport: (self optionsList at: optionsItem)]
-		ifFalse: [^ '']! !
+	^ optionsItem > 0
+		ifTrue: [self optionsReport: (self optionsList at: optionsItem)]
+		ifFalse: ['']! !
 
 !Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 17:14:09'!
 optionsReport: anAsset
@@ -2788,7 +2791,7 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/6/2017 20:06:19'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/9/2017 16:22:19'!
 moonMove
 	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
 	| oldPos newPos index n posns limit i |
@@ -2822,7 +2825,7 @@ moonMove
 					setActionSelectorFor: #Expense to: {model class expenseNormal}.
 				model currentPlayer ifCows
 					ifTrue: [model currentPlayer harvestEnabled
-							ifTrue: [self enableAll: {'Harvest'. 'Expense'}]]
+							ifTrue: [model enableAll: {'Harvest'. 'Expense'}]]
 					ifFalse: [model enableAll: {'End Turn'}].
 				model doSpace.
 				self doubled contents: model currentPlayer doubledString]].
@@ -2940,40 +2943,41 @@ describe
 
 	^ ''! !
 
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 14:57:10'!
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 9/9/2017 16:29:41'!
 displayNumbers
 	"Display cash, debt, and goal progress"
-	| c d net otherLead pluralForm others |
-
-	c _ '$', model currentPlayer cash truncated printStringWithCommas.
-	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
-	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
-	numbersArea submorphs first 
-		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
-		color: model currentPlayer color.
-	pluralForm _ model players size = 2
-		ifTrue: ['Player''s']
-		ifFalse: ['Players'''].
-	otherLead _ (StringMorph contents: (String streamContents: [:string |
-		string
-			nextPutAll: 'Other ';
-			nextPutAll: pluralForm;
-			nextPutAll: ' Cash: '])).
-	otherLead
-		emphasis: AbstractFont boldCode;
-		color: Color lightBrown;
-		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-	othersArea 
-		removeAllMorphs;
-		addMorph: otherLead.
-	others _ model players select: [:a | a ~= model currentPlayer].
-	others do: [:ea | | x |
-		x _ ' $', ea cash truncated printStringWithCommas.
-		othersArea addMorph: ((StringMorph contents: x) 
+	| pl c d net otherLead pluralForm others |
+	
+	(pl _ model currentPlayer) ifNotNil: [
+		c _ '$', pl cash truncated printStringWithCommas.
+		d _ '$', pl debt negated asInteger printStringWithCommas.
+		net _ (pl netAssets / model goal * 100 roundDownTo: 0.1) asString.
+		numbersArea submorphs first 
+			contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+			color: pl color.
+		pluralForm _ model players size = 2
+			ifTrue: ['Player''s']
+			ifFalse: ['Players'''].
+		otherLead _ (StringMorph contents: (String streamContents: [:string |
+			string
+				nextPutAll: 'Other ';
+				nextPutAll: pluralForm;
+				nextPutAll: ' Cash: '])).
+		otherLead
 			emphasis: AbstractFont boldCode;
-			color: ea color;
-			setBalloonText: 'cash held by ', ea identity;
-			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
+			color: Color lightBrown;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+		othersArea 
+			removeAllMorphs;
+			addMorph: otherLead.
+		others _ model players select: [:a | a ~= pl].
+		others do: [:ea | | x |
+			x _ ' $', ea cash truncated printStringWithCommas.
+			othersArea addMorph: ((StringMorph contents: x) 
+				emphasis: AbstractFont boldCode;
+				color: ea color;
+				setBalloonText: 'cash held by ', ea identity;
+				font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]]! !
 
 !FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:38:51'!
 doTour
@@ -3730,16 +3734,13 @@ open: aModel label: aString
 	aString ifNotNil: [ window setLabel: aString ].
 	^ window! !
 
-!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/7/2017 12:18:32'!
+!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/8/2017 19:58:36'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
 	| win |
 
-	win _ self open: aModel label: 'Statistics'.
+	win _ self open: aModel label: ''.
 	win removeWindowMenu.
-			
-	aModel when: #itemChange send: #details to: win.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
 	
 	^ win
 ! !
@@ -3880,13 +3881,13 @@ openOn: aModel
 	^ win
 ! !
 
-!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 15:04:46'!
+!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/8/2017 21:39:52'!
 buildMorphicWindow
 	"Lay out the window for purchases"
-	| list1 rightPane |
+	| rightPane |
 	
 	self layoutMorph beRow.
-	list1 _ (PluggableListMorph
+	list _ (PluggableListMorph
 		model: model
 		listGetter: #optionsList
 		indexGetter: #optionsItem
@@ -3923,20 +3924,23 @@ buildMorphicWindow
 		addMorph: textPane.
 	
 	self layoutMorph
-		addMorph: list1 proportionalWidth: 0.35;
+		addMorph: list proportionalWidth: 0.35;
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 18:45:47'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/9/2017 16:06:16'!
 buy
 	"Purchase an asset"
 	| key method amt |
 	
 	key _ model optionsList at: model optionsItem.
-	method _ self class optionMethod at: key.
+	method _ model class optionMethod at: key.
 	amt _ (Smalltalk classNamed: key) lotQuantity.
-	self perform: method withArguments: {amt}.
+	model perform: method withArguments: {amt}.
 	model currentPlayer options: (model optionsList remove: key; yourself).
+	list updateList.
+	model optionsItem: 0.
+	self buyButton: false.
 	self details! !
 
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 11:33:35'!
@@ -3955,10 +3959,13 @@ closeBoxHit
 		enableAll: {'Purchase'}.
 	super closeBoxHit! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 8/26/2016 15:51:55'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 21:56:09'!
 details
-
-	textPane model actualContents: model optionsReport 	"note that the textPane model differs from the model for this view"! !
+	"Set the content of the text pane"
+	
+	textPane model actualContents: (model currentPlayer options
+		ifEmpty: ['']
+		ifNotEmpty: [model optionsReport])! !
 
 !OptionsView methodsFor: 'termination' stamp: 'dhn 8/28/2016 14:19:18'!
 endIt
@@ -3968,6 +3975,24 @@ endIt
 		optionsItem: nil;
 		enableAll: {'Purchase'}.
 	self delete! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/9/2017 15:27:11'!
+getList
+	"Update the list of options"
+	
+	list updateList! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:15:42'!
+list
+	"Answer the value of list"
+	
+	^ list! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:16:32'!
+list: aCollection
+	"Set the value of list"
+	
+	list _ aCollection! !
 
 !OptionsView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 10:20:02'!
 startButtons
@@ -3990,7 +4015,7 @@ startButtons
 		padding: #center.
 ! !
 
-!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 11/2/2016 20:33:52'!
+!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/8/2017 20:23:18'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
 	| win |
@@ -3998,6 +4023,7 @@ openOn: aModel
 	win _ self open: aModel.
 	win removeWindowMenu.
 			
+	aModel when: #itemChange send: #getList to: win.
 	aModel when: #itemChange send: #details to: win.
 	aModel when: #deleteOpenWindows send: #endIt to: win.
 	
@@ -4377,6 +4403,11 @@ at: aRoll for: aQuantity
 auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 10! !
+
+!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/9/2017 16:03:41'!
+lotQuantity 
+
+	^ self auctionQuantity! !
 
 !Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 12:23:48'!
 optionText
