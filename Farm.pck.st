@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 10 September 2017 at 2:43:00 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 10 September 2017 at 3:48:16 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 62!
+!provides: 'Farm' 1 63!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -3922,40 +3922,45 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/9/2017 21:35:50'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:47:29'!
 buy
 	"Purchase an asset"
 	| key method amt |
 	
-	key _ model optionsList at: model optionsItem.
-	method _ model class optionMethod at: key.
-	amt _ (Smalltalk classNamed: key) lotQuantity.
-	model perform: method withArguments: {amt}.
+	(model seasonAt: model currentPlayer position) enabled
+		ifTrue: [buyButton disableButton] 		"can buy only in Winter"
+		ifFalse: [
+			key _ model optionsList at: model optionsItem.
+			method _ model class optionMethod at: key.
+			amt _ (Smalltalk classNamed: key) lotQuantity.
+			model perform: method withArguments: {amt}.
 	
-	"remove option from player"
-	model currentPlayer options: (model optionsList remove: key; yourself).
+			"remove option from player"
+			model currentPlayer options: (model optionsList remove: key; yourself).
 	
-	"put the option in the 'discard pile' "
-	model exercisedOptions add: key.
+			"put the option in the 'discard pile' "
+			model exercisedOptions add: key.
 	
-	"remove option from the shopping window list"
-	list updateList.
+			"remove option from the shopping window list"
+			list updateList.
 	
-	"de-select the list in the shopping window"
-	model optionsItem: 0.
+			"de-select the list in the shopping window"
+			model optionsItem: 0.
 	
-	"disable the 'Buy' button"
-	self buyButton: false.
+			"disable the 'Buy' button"
+			buyButton disableButton.
 	
-	"update the text pane"
-	self details! !
+			"update the text pane"
+			self details]! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 11:33:35'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:22:04'!
 buyButton: aBool
 	"Change buy button state according to aBool"
 	
 	aBool
-		ifTrue: [buyButton enableButton]
+		ifTrue: [
+			(model seasonAt: model currentPlayer position) enabled
+				ifFalse: [buyButton enableButton]]
 		ifFalse: [buyButton disableButton]! !
 
 !OptionsView methodsFor: 'termination' stamp: 'dhn 9/12/2016 17:18:16'!
@@ -5469,15 +5474,18 @@ moveInterval
 test: aString
 	FarmerTest := aString.! !
 
-!FarmSeason methodsFor: 'accessing' stamp: 'dhn 11/30/2014 14:35'!
+!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:03:23'!
 enabled
+	"Answer the value of enabled"
 
+	enabled ifNil: [enabled _ false].
 	^ enabled! !
 
-!FarmSeason methodsFor: 'accessing' stamp: 'dhn 11/30/2014 14:35'!
+!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:04:15'!
 enabled: anObject
-
-	enabled := anObject! !
+	"Set the value of enabled"
+	
+	enabled _ anObject! !
 
 !Field methodsFor: 'as yet unclassified' stamp: 'dhn 10/21/2014 20:11'!
 describe
