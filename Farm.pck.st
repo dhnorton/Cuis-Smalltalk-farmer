@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 9 September 2017 at 4:35:45 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 9 September 2017 at 8:23:55 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 58!
+!provides: 'Farm' 1 59!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -456,19 +456,19 @@ addTestPlayer: aString
 	2 timesRepeat: [pl options addFirst: (self drawOptionQuietly: true).].
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 20:27'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 20:27'!
 ahtanum: quantity
 	"Lease Ahtanum Ridge for $quantity."
 	self lease: 'Ahtanum' for: quantity! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 1/22/2014 10:43'!
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 17:58:22'!
 availableOptions
 	"Answer the value of availableOptions"
 
 	availableOptions ifNil: [availableOptions := OrderedCollection new].
 	^ availableOptions! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/12/2011 21:51'!
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 17:58:44'!
 availableOptions: anObject
 	"Set the value of availableOptions"
 
@@ -485,7 +485,7 @@ buttonsNamed: aCollection
 		btn ifNotNil: [ans add: btn; yourself]].
 	^ ans! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 20:28'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 20:28'!
 cascade: quantity 
 	"Lease Cascade Ridge for $quantity."
 	self lease: 'Cascade' for: quantity! !
@@ -670,7 +670,7 @@ drawFate
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'})	ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/9/2017 16:10:20'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 19:51:04'!
 drawOptionQuietly: aBoolean 
 	"Answer an option, drawn from those available; resupply as needed."
 	| otb |
@@ -689,7 +689,6 @@ drawOptionQuietly: aBoolean
 				ifFalse: [GamePopUp
 						inform: (Compiler evaluate: otb , ' optionText')
 						title: 'Option']].
-	self triggerEvent: #itemChange.
 	^ otb! !
 
 !Farm methodsFor: 'expense' stamp: 'dhn 10/12/2011 21:54'!
@@ -737,12 +736,6 @@ enableHarvestButtons
 							ifTrue: [self enableAll: {'End Turn'}]]
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 8/7/2014 11:32'!
-enableOption
-	 currentPlayer options isEmpty
-		ifTrue: [self disableAll: {'Option'}]
-		ifFalse: [self enableAll: {'Option'}]! !
-
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/31/2017 17:16:55'!
 endTurn
 	"End a player's turn"
@@ -774,14 +767,14 @@ endTurn
 						ifFalse: [self enableAll: {'Move'. 'Stats'}.
 							self disableAll: {'End Turn'}]]]! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/16/2011 12:59'!
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:01:09'!
 exercisedOptions
 	"Answer the value of exercisedOptions"
 
 	exercisedOptions isNil ifTrue: [exercisedOptions := OrderedCollection new].
 	^ exercisedOptions! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/12/2011 21:57'!
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:01:26'!
 exercisedOptions: anObject
 	"Set the value of exercisedOptions"
 
@@ -826,12 +819,14 @@ fates: anObject
 
 	fates := anObject! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:24'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 18:59:55'!
 fruit: quantity
 	"Answer the purchased number of acres of fruit; split the cost." 
-	| down balance |
-	down := 0.2 * quantity.
-	balance := quantity - down.
+	| total down balance |
+	
+	total _ quantity * Fruit price.
+	down _ 0.2 * total.
+	balance _ total - down.
 	self
 		pay: down / 2
 		borrow: balance / 2
@@ -845,12 +840,14 @@ fruit: quantity
 	currentPlayer drawnOption: true.
 	^ quantity! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:24'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 17:52:05'!
 grain: quantity 
 	"Answer the purchased number of acres of grain; split the cost." 
-	| down balance |
-	down := 0.2 * quantity.
-	balance := quantity - down.
+	| total down balance |
+	
+	total _ quantity * Grain price.
+	down _ 0.2 * total.
+	balance _ total - down.
 	self
 		pay: down / 2
 		borrow: balance / 2
@@ -911,12 +908,14 @@ harvestSep1
 	self harvest;
 	 doSep1! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:33'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 19:01:27'!
 harvester: quantity 
 	"Answer the purchased number of harvesters; account for the cost." 
-	| down balance |
-	down := 0.2 * quantity.
-	balance := quantity - down.
+	| total down balance |
+	
+	total _ quantity * Harvester price.
+	down _ 0.2 * total.
+	balance _ total - down.
 	self
 		pay: down
 		borrow: balance
@@ -925,12 +924,14 @@ harvester: quantity
 	currentPlayer drawnOption: true.
 	^ quantity! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:34'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 19:02:17'!
 hay: quantity 
 	"Answer the purchased number of acres of hay; account for the cost." 
-	| down balance |
-	down := 0.2 * quantity.
-	balance := quantity - down.
+	| total down balance |
+	
+	total _ quantity * Hay price.
+	down _ 0.2 * total.
+	balance _ total - down.
 	self
 		pay: down
 		borrow: balance
@@ -962,14 +963,18 @@ initialize
 	won _ false
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 8/30/2017 17:17:40'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 19:40:59'!
 lease: aName for: quantity 
 	"Answer the purchased number of cattle on aName lease; account for the cost." 
-	| down balance who |
-	who := leases at: aName.
+	| total down balance who |
+	
+	who _ leases at: aName.
 	who isNil
-		ifTrue: [down := 0.2 * quantity.
-			balance := quantity - down.
+		ifTrue: [
+			self halt.
+			total _ quantity * CattleOnLease price.
+			down _ 0.2 * total.
+			balance _ total - down.
 			self
 				pay: down
 				borrow: balance
@@ -992,12 +997,14 @@ listOfOptions: anObject
 
 	listOfOptions := anObject! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:37'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 17:37:24'!
 livestock: quantity 
 	"Answer the purchased number of cattle for the farm; account for the cost." 
-	| down balance |
-	down := 0.2 * quantity.
-	balance := quantity - down.
+	| total down balance |
+	
+	total _ quantity * CattleOnFarm price.
+	down _ 0.2 * total.
+	balance _ total - down.
 	self
 		pay: down
 		borrow: balance
@@ -1083,14 +1090,14 @@ moveButton: anObject
 	
 	^ moveButton _ anObject! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 14:56:40'!
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:02:01'!
 optionsItem
 	"Answer the value of optionsItem"
 
 	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
 	^ optionsItem! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/8/2017 16:05:47'!
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:02:29'!
 optionsItem: anObject
 	"Set the value of optionsItem and optionsReport"
 	| key option enab |
@@ -1111,7 +1118,7 @@ optionsItem: anObject
 		self triggerEvent: #buyButton: with: enab.
 		self changed: #optionsItem]! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 15:07:49'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/7/2017 15:07:49'!
 optionsList
 	"Answer the shopping list for a player"
 	
@@ -1119,13 +1126,13 @@ optionsList
 		addAll: currentPlayer options;
 		yourself! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/8/2017 17:54:26'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/8/2017 17:54:26'!
 optionsList: aList
 	"Set the shopping list for a player"
 	
 	currentPlayer options: aList! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/8/2017 21:57:53'!
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:04:14'!
 optionsReport
 	"Answer the report on the selected option"
 
@@ -1133,7 +1140,7 @@ optionsReport
 		ifTrue: [self optionsReport: (self optionsList at: optionsItem)]
 		ifFalse: ['']! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 17:14:09'!
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:04:30'!
 optionsReport: anAsset
 	"Show the status of anAsset for shopping purposes"
 	
@@ -1151,20 +1158,7 @@ optionsWindow: anObject
 
 	optionsWindow := anObject! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 8/7/2014 11:04'!
-optsShown
-	"Answer the value of optsShown"
-
-	optsShown ifNil: [optsShown := false].
-	^ optsShown! !
-
-!Farm methodsFor: 'options' stamp: 'dhn 8/7/2014 11:05'!
-optsShown: aBool
-	"Set the value of optsShown"
-
-	optsShown := aBool! !
-
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:40'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 21:40'!
 pay: down borrow: balance for: aSymbol amount: qty
 	"Account for the down payment and loan balance to purchase the asset named in aSymbol." 
 	| asset |
@@ -1240,7 +1234,7 @@ queryWin: aBool
 		aBool ifTrue: [self wonButtonsState]
 		ifFalse: [self enableAll: {'End Turn'}]! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:47'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 21:47'!
 rattlesnake: quantity 
 	"Lease Rattlesnake Ridge for $quantity."
 	self lease: 'Rattlesnake' for: quantity! !
@@ -1291,7 +1285,7 @@ reportAllPlayers
 			].
 	^ str contents! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 9/7/2017 15:11:38'!
+!Farm methodsFor: 'operating' stamp: 'dhn 9/9/2017 18:08:12'!
 reportFor: aPlayer on: anAsset
 	| p asset str col |
 	
@@ -1359,7 +1353,7 @@ setTestMode
 		self testMode: self testMode not.
 		self testMode ifTrue: [goal _ self testGoal]]! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:58'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/9/2017 19:41:53'!
 setUpLeases
 	"Answer the leases as unowned."
 	^ Dictionary new 
@@ -1584,12 +1578,13 @@ space13
 			self triggerEvent: #itemChange].
 	self enableAll: {'End Turn'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:47:28'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:51:31'!
 space14
 	"Apr week 1"
 	
 	self disableAll: {'Move'}.
 	currentPlayer addOption: (self drawOptionQuietly: false).
+	self triggerEvent: #itemChange.
 	self enableAll: {'End Turn'}! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:34:01'!
@@ -1660,12 +1655,13 @@ space20
 		triggerEvent: #itemChange;
 		enableHarvestButtons ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:37:07'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:51:21'!
 space21
 	"May week 4"
 	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer addOption: (self drawOptionQuietly: false).
+	self triggerEvent: #itemChange.
 	self enableHarvestButtons! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:37:36'!
@@ -1737,12 +1733,13 @@ space27
 	self enableHarvestButtons
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:40:51'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:51:49'!
 space28
 	"Jul week 2"
 	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer addOption: (self drawOptionQuietly: false).
+	self triggerEvent: #itemChange.
 	(currentPlayer assets at: #Hay)
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
@@ -1841,12 +1838,13 @@ space35
 			self setActionSelectorFor: #Harvest to: {self class harvestSep1}.
 			self setActionSelectorFor: #Expense to: {self class expenseSep1}]! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:44:31'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:52:28'!
 space36
 	"Sep week 2"
 	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer addOption: (self drawOptionQuietly: false).
+	self triggerEvent: #itemChange.
 	(currentPlayer assets at: #Hay)
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
@@ -1947,12 +1945,13 @@ space41
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:46:36'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:52:39'!
 space42
 	"Oct week 3"
 	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer addOption: (self drawOptionQuietly: false).
+	self triggerEvent: #itemChange.
 	(currentPlayer assets at: #Hay)
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
@@ -1972,12 +1971,13 @@ space43
 			a missed: a missed + 1.
 			(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]]! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:47:41'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:52:50'!
 space44
 	"Nov week 1"
 	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer addOption: (self drawOptionQuietly: false).
+	self triggerEvent: #itemChange.
 	(currentPlayer assets at: #Apples)
 		factor: ((currentPlayer assets at: #Apples) factor max: 1).
 	currentPlayer ifFruit
@@ -2090,13 +2090,14 @@ space8
 	self disableAll: {'Move'}.
 	token springMove! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/8/2017 15:00:39'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:53:00'!
 space9
 	"Feb week 4"
 	
 	self disableAll: {'Move'}.
 	currentPlayer
 		addOption: (self drawOptionQuietly: false).
+	self triggerEvent: #itemChange.
 	self enableAll: {'End Turn'}! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:58:25'!
@@ -2139,18 +2140,20 @@ testMode: aBool
 	
 	TestMode _ aBool! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 22:06'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 22:06'!
 toppenish: quantity 
 	"Lease Toppenish Ridge for $quantity."
 	self lease: 'Toppenish' for: quantity
 ! !
 
-!Farm methodsFor: 'options' stamp: 'dhn 10/27/2014 21:33'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 19:43:28'!
 tractor: quantity 
 	"Answer the purchased number of tractors; account for the cost." 
-	| down balance |
-	down := 0.2 * quantity.
-	balance := quantity - down.
+	| total down balance |
+	
+	total _ quantity * Tractor price.
+	down _ 0.2 * total.
+	balance _ total - down.
 	self
 		pay: down
 		borrow: balance
@@ -5384,40 +5387,41 @@ Normally $' , normal printStringWithCommas , '.'.
 				ifFalse: [yield := self updateCattleAsset: aRoll]].
 	^ yield! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 13:38:23'!
-updateCattleAsset: aRoll 
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/9/2017 20:10:16'!
+updateCattleAsset: aRoll
+	"Record the effect of harvesting cattle with  aRoll"
 	| yield tale har fac ttl str q1 q2 eachHerd headCount |
 	
 	ttl _ 0.
 	self garnish
 		ifTrue: [GamePopUp inform: 'The IRS is garnishing your income.' title: 'Loss of Income']
-		ifFalse: [q1 := self cowsOnLeases.
+		ifFalse: [q1 _ self cowsOnLeases.
 			q2 := (assets at: #CattleOnFarm) quantity.
-			headCount := q1
+			headCount _ q1
 						inject: q2
 						into: [:a :b | a + b].
 			0 < headCount
-				ifTrue: [eachHerd := self leasesHeld add: #CattleOnFarm
+				ifTrue: [eachHerd _ self leasesHeld add: #CattleOnFarm
 									-> (assets at: #CattleOnFarm);
 								 yourself.
 					eachHerd
 						do: [:each | 
-							fac := each factor.
-							yield := fac
+							fac _ each factor.
+							yield _ fac
 										* (Livestock at: aRoll for: each quantity).
-							ttl := ttl + yield.
+							ttl _ ttl + yield.
 							each gross: yield + each gross.
 							each quality: aRoll + each quality.
 							each count: 1 + each count]].
-			str := String new writeStream.
-			str nextPutAll: 'Cow quality ' , aRoll , ' for ' , ('$' , ttl asInteger printStringWithCommas);
-				 nextPutAll: '. Factor ' , fac;
+			str _ String new writeStream.
+			str nextPutAll: 'Cow quality ' , aRoll asString, ' for ' , ('$' , ttl asInteger printStringWithCommas);
+				 nextPutAll: '. Factor ' , fac asString;
 				 newLine;
 				 nextPutAll: 'Normally $' , (ttl / fac) asInteger printStringWithCommas , '.'.
-			tale := str contents.
-			GamePopUp inform: tale title: 'Livestock quantity ' , headCount].
-	har := self mgr buttons submorphs
-				detect: [:n | n externalName = 'Harvest']
+			tale _ str contents.
+			GamePopUp inform: tale title: 'Livestock quantity ' , headCount asString].
+	har _ self mgr buttons submorphs
+				detect: [:n | n label = 'Harvest']
 				ifNone: [].
 	har actionSelector: Farm harvestNormal.
 	^ ttl! !
