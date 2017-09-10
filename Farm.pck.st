@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 9 September 2017 at 8:23:55 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 9 September 2017 at 9:47:17 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 59!
+!provides: 'Farm' 1 60!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -670,25 +670,22 @@ drawFate
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'})	ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 19:51:04'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 21:06:24'!
 drawOptionQuietly: aBoolean 
-	"Answer an option, drawn from those available; resupply as needed."
+	"Answer an option, drawn from those available if possible; however,
+	 resupply first from exercised options, if any; failing that,
+	resupply from a new 'deck' of options."
 	| otb |
 	
 	self availableOptions isEmpty
 		ifTrue: [exercisedOptions isEmpty
-				ifTrue: [availableOptions _ self class optionsNames shuffled]
-				ifFalse: [self availableOptions: self exercisedOptions shuffled.
-					self exercisedOptions: OrderedCollection new].
-			otb _ availableOptions removeFirst.
-			GamePopUp
-				inform: (Compiler evaluate: otb , ' optionText')
-				title: 'Option']
-		ifFalse: [otb _ availableOptions removeFirst.
-			aBoolean
-				ifFalse: [GamePopUp
-						inform: (Compiler evaluate: otb , ' optionText')
-						title: 'Option']].
+			ifTrue: [availableOptions _ self class optionsNames shuffled]
+			ifFalse: [
+				availableOptions _ exercisedOptions shuffled.
+				exercisedOptions _ OrderedCollection new]].
+	otb _ availableOptions removeFirst.
+	aBoolean ifFalse: [
+		GamePopUp inform: (Compiler evaluate: otb , ' optionText') title: 'Option'].
 	^ otb! !
 
 !Farm methodsFor: 'expense' stamp: 'dhn 10/12/2011 21:54'!
@@ -3931,7 +3928,7 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/9/2017 16:06:16'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/9/2017 21:35:50'!
 buy
 	"Purchase an asset"
 	| key method amt |
@@ -3940,10 +3937,23 @@ buy
 	method _ model class optionMethod at: key.
 	amt _ (Smalltalk classNamed: key) lotQuantity.
 	model perform: method withArguments: {amt}.
+	
+	"remove option from player"
 	model currentPlayer options: (model optionsList remove: key; yourself).
+	
+	"put the option in the 'discard pile' "
+	model exercisedOptions add: key.
+	
+	"remove option from the shopping window list"
 	list updateList.
+	
+	"de-select the list in the shopping window"
 	model optionsItem: 0.
+	
+	"disable the 'Buy' button"
 	self buyButton: false.
+	
+	"update the text pane"
 	self details! !
 
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 11:33:35'!
