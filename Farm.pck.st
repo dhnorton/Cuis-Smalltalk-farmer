@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 10 September 2017 at 2:23:05 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 10 September 2017 at 2:43:00 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 61!
+!provides: 'Farm' 1 62!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2657,16 +2657,17 @@ doubled
 
 	^ doubled! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/6/2017 17:24:29'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:37:41'!
 feb4MoveFrom: aPosition
 	"Animate relocation of self when player moves ahead to Feb 4 from aPosition"
-	| oldPos newPos index n posns limit i |
+	| oldPos newPos index n posns limit i final |
 	
+	final _ 9.
 	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
 	oldPos _ index atWrap: aPosition.
 	model positionBoardTo: oldPos.
 	self position: 1.
-	newPos _ 9 + 1.
+	newPos _ final + 1.
 	posns _ OrderedCollection new.
 	n _ oldPos.
 	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
@@ -2685,7 +2686,7 @@ feb4MoveFrom: aPosition
 				self removeActionsForEvent: #morphicStep.
 				arrow delete.
 				model currentPlayer 
-					position: 3;
+					position: final;
 					years: 1 + model currentPlayer years;
 					salary.
 				model
@@ -2712,16 +2713,17 @@ initialize
 
 	self addMorphFront: labelArea! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 20:06:28'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:38:48'!
 jan2MoveFrom: aPosition
 	"Animate relocation of self when player must go BACK to Jan. 2 from aPosition"
-	| oldPos newPos index n posns limit i |
+	| oldPos newPos index n posns limit i final |
 	
+	final _ 3.
 	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
 	oldPos _ index atWrap: aPosition - 6.
 	model positionBoardTo: oldPos.
 	self position: 7.
-	newPos _ index atWrap: 3 - 7.
+	newPos _ index atWrap: final - 7.
 	posns _ OrderedCollection new.
 	n _ oldPos.
 	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n - 1].
@@ -2739,7 +2741,7 @@ jan2MoveFrom: aPosition
 				self stopStepping.
 				self removeActionsForEvent: #morphicStep.
 				arrow delete.
-				model currentPlayer position: 3.
+				model currentPlayer position: final.
 				model enableAll: {'End Turn'}.
 				model doSpace.
 				self doubled contents: model currentPlayer doubledString]].
@@ -2781,16 +2783,17 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/9/2017 16:22:19'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:36:05'!
 moonMove
 	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
-	| oldPos newPos index n posns limit i |
+	| oldPos newPos index n posns limit i final |
 	
+	final _ 37.
 	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
 	oldPos _ model currentPlayer oldPosition.
 	model positionBoardTo: oldPos.
 	self position: 1.
-	newPos _ 15 + 1.
+	newPos _ final + 1.
 	posns _ OrderedCollection new.
 	n _ oldPos.
 	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
@@ -2809,7 +2812,7 @@ moonMove
 				self stopStepping.
 				self removeActionsForEvent: #morphicStep.
 				arrow delete.
-				model currentPlayer position: 37.
+				model currentPlayer position: final.
 				model
 					setActionSelectorFor: #Harvest to: {model class harvestNormal};
 					setActionSelectorFor: #Expense to: {model class expenseNormal}.
@@ -2840,14 +2843,15 @@ position: aCell
 	horiz _ (model cells at: aCell) morphPosition x.
 	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/6/2017 21:44:55'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:39:53'!
 springMove
 	"Animate relocation to Spring Planting when player lands on space 8"
-	| oldPos posns limit i|
+	| oldPos posns limit i final |
 	
+	final _ 15.
 	oldPos _ model currentPlayer oldPosition.
 	self arrowRight.
-	posns _ (Interval from: oldPos to: 15 - who roll by: 1) asArray.
+	posns _ (Interval from: oldPos to: final - who roll by: 1) asArray.
 	{oldPos. who roll} print.
 	{posns} print.
 	limit _ posns size.
@@ -2860,7 +2864,7 @@ springMove
 				self stopStepping.
 				self removeActionsForEvent: #morphicStep.
 				arrow delete.
-				model currentPlayer position: 15.
+				model currentPlayer position: final.
 				model space15.
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
