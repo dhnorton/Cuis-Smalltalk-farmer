@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 9 September 2017 at 9:47:17 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 10 September 2017 at 2:23:05 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 60!
+!provides: 'Farm' 1 61!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -330,16 +330,6 @@ ProtoObject subclass: #FarmRelation
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmRelation class' category: #'Farm-Graphics'!
 FarmRelation class
-	instanceVariableNames: ''!
-
-!classDefinition: #OptionsListFarmX category: #'Farm-Graphics'!
-ProtoObject subclass: #OptionsListFarmX
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'OptionsListFarmX class' category: #'Farm-Graphics'!
-OptionsListFarmX class
 	instanceVariableNames: ''!
 
 !classDefinition: #StatListFarm category: #'Farm-Graphics'!
@@ -6012,95 +6002,6 @@ lineWidth
 lineWidth: anObject
 
 	lineWidth := anObject! !
-
-!OptionsListFarmX methodsFor: 'as yet unclassified' stamp: 'dhn 5/5/2012 20:35'!
-initialize
-	super initialize! !
-
-!OptionsListFarmX methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 12:40'!
-listWindowLabelled: aString for: aName proportion: aWidth
-	"create a window with a list pane aWidth wide, a button pane, and one text pane"
-	| xw pm panel |
-	(xw := player mgr windowNamed: aName)
-		ifNil: [
-			player mgr windows add: (
-				xw := (CustomSystemWindow labelled: aString)
-					removeMenuBox;
-					model: self;
-					layoutPolicy: ProportionalLayout new;
-					endReceiver: player mgr;
-					endMessage: #deleteWindow: with: aName;
-					color: Color lightGray;
-					addMorph: (PluggableListMorph
-							on: self
-							list: #list
-							selected: #currentSelection
-							changeSelected: #setSelection:)
-						frame: (0.0 @ 0.0 extent: aWidth @ 1.0);
-					addMorph: (panel := self buttonsPanel)
-						frame: (aWidth @ 0 extent: (1 - aWidth) @ 0.15);
-					addMorph: (pm := PasteUpMorph new
-						layoutPolicy: TableLayout new;
-						layoutInset: 6@6;
-						color: Color white)
-						frame: (aWidth @ 0.15 extent: (1 - aWidth) @ 0.85)).
-				pm addMorph: (textMorph := TextMorph new
-					layoutPolicy: ProportionalLayout new;
-					wrapFlag: true;
-					hResizing: #spaceFill;
-					vResizing: #spaceFill;
-					contents: ' ').
-				panel addAllMorphs: (self optionsButtons).
-				textMorph extension locked: true.
-				xw extension externalName: aName]
-			ifNotNil: [xw comeToFront].
-	^ xw
-! !
-
-!OptionsListFarmX methodsFor: 'as yet unclassified' stamp: 'dhn 11/16/2014 20:34'!
-reviewOption
-	"Exercise an option."
-	| option message argument result |
-	option := player options at: selectedItem.
-	player mgr deleteWindow: 'Options'.
-	message := (option asLowercase, ':') asSymbol.
-	argument := Compiler evaluate: option, ' optionCost'.
-	result := (Message new setSelector: message arguments: (Array with: argument)) sentTo: player mgr.
-	player drawnOption
-		ifTrue: [player removeOptionAt: option.
-			player mgr exercisedOptions addLast: option.
-			player drawnOption: false.
-			"statWindow
-				ifNotNil: [self statWindow setSelection: self statWindow currentSelection]"
-			]! !
-
-!OptionsListFarmX methodsFor: 'as yet unclassified' stamp: 'dhn 11/24/2014 10:56'!
-setSelection: anInteger 
-	"Cause the description for an option to be displayed"
-	selectedItem := anInteger.
-	anInteger ~= 0
-		ifTrue: [text1 := self player optionDescription: (collection at: selectedItem).
-			(self player mgr seasonAt: self player position) desc = 'WINTER'
-				ifTrue: [self player mgr won
-						ifFalse: [exerciseButton enableButton]]]
-		ifFalse: [exerciseButton ifNotNil: [exerciseButton disableButton].
-			text1 := ''].
-	textMorph contents: text1.
-	self changed: #currentSelection;
-		 changed: #text1 ! !
-
-!OptionsListFarmX methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2014 20:23'!
-updateOptionsIn: aWindow
-	"Bring window showing the current player's options up to date"
-	self collection: player options;
-		setSelection: 0;
-		changed: #list
-! !
-
-!OptionsListFarmX class methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 12:51'!
-windowName
-	"Answer the name for windows on this class"
-	^ 'Options'! !
 
 !StatListFarm methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:37:11'!
 reportFor: aPlayer on: anAsset
