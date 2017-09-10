@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 10 September 2017 at 3:48:16 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 10 September 2017 at 6:23:07 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 63!
+!provides: 'Farm' 1 64!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -50,6 +50,16 @@ SystemWindow subclass: #FarmingView
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmingView class' category: #'Farm-Graphics'!
 FarmingView class
+	instanceVariableNames: ''!
+
+!classDefinition: #DrawView category: #'Farm-Graphics'!
+FarmingView subclass: #DrawView
+	instanceVariableNames: 'textPane buttonArea ackButton'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'DrawView class' category: #'Farm-Graphics'!
+DrawView class
 	instanceVariableNames: ''!
 
 !classDefinition: #LoanView category: #'Farm-Graphics'!
@@ -366,6 +376,9 @@ http://farmgame.com/product/woo-single-2/
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
 
+!DrawView commentStamp: '<historical>' prior: 0!
+A FarmingGame view which shows the option which was drawn.!
+
 !LoanView commentStamp: 'dhn 9/14/2016 10:34:25' prior: 0!
 A FarmingGame window which makes it possible for players to reduce debt.!
 
@@ -660,7 +673,7 @@ drawFate
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'})	ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 21:06:24'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/10/2017 18:15:53'!
 drawOptionQuietly: aBoolean 
 	"Answer an option, drawn from those available if possible; however,
 	 resupply first from exercised options, if any; failing that,
@@ -674,8 +687,7 @@ drawOptionQuietly: aBoolean
 				availableOptions _ exercisedOptions shuffled.
 				exercisedOptions _ OrderedCollection new]].
 	otb _ availableOptions removeFirst.
-	aBoolean ifFalse: [
-		GamePopUp inform: (Compiler evaluate: otb , ' optionText') title: 'Option'].
+	aBoolean ifFalse: [self triggerEvent: #showDraw with: (Compiler evaluate: otb , ' optionText')].
 	^ otb! !
 
 !Farm methodsFor: 'expense' stamp: 'dhn 10/12/2011 21:54'!
@@ -2911,7 +2923,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:26:29'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/10/2017 18:11:33'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2930,6 +2942,7 @@ buildMorphicWindow
 	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
 	model when: #showToken send: #showToken to: self.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
+	model when: #showDraw send: #showDraw: to: self with: #option.
 ! !
 
 !FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
@@ -3306,6 +3319,22 @@ setupToken: aPlayer
 		morphPosition: owner morphExtent * (0.006@0.72).
 	pasteup addMorph: model token.
 	^ model token who: aPlayer! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/10/2017 18:14:26'!
+showDraw: anObject
+	"Show window with description of an option"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	win _ DrawView openOn: self.
+	win openInWorld: pasteup.
+	win
+		setLabel: ('Option for ', pl identity);
+		setWindowColor: pl color;
+		startButtons;
+		details: anObject;
+		morphPosition: self windowPosition;
+		morphExtent: 300 @ 220! !
 
 !FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 13:49:51'!
 showLoan
@@ -3744,6 +3773,88 @@ viewPosition
 	"Answer the basic position for instances of this class"
 	
 	^ 200@-50! !
+
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 17:06:23'!
+ack
+	"Acknowledge what is in the text pane and close the receiver"
+	
+	self delete! !
+
+!DrawView methodsFor: 'initialization' stamp: 'dhn 9/10/2017 17:51:13'!
+buildMorphicWindow
+	"Lay out the window for purchases"
+	
+	self layoutMorph beColumn.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	layoutMorph
+		addMorph: textPane;
+		addMorph: buttonArea! !
+
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 16:53:05'!
+closeBoxHit
+
+	model 
+		optionsItem: nil;
+		enableAll: {'Purchase'}.
+	super closeBoxHit! !
+
+!DrawView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 17:57:56'!
+details: aString
+	"Set the content of the text pane"
+	
+	textPane model actualContents: aString! !
+
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 17:05:16'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
+!DrawView methodsFor: 'initialization' stamp: 'dhn 9/10/2017 17:51:45'!
+startButtons
+	"Set the buttons for buying assets"
+	
+	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
+	ackButton 
+		morphExtent: 70@20;
+		setBalloonText: 'acknowledge receipt'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: ackButton;
+		padding: #center.
+! !
+
+!DrawView class methodsFor: 'class initialization' stamp: 'dhn 9/10/2017 16:56:28'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
 
 !LoanView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 12:05:14'!
 buildMorphicWindow
