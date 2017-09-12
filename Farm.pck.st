@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 10 September 2017 at 6:23:07 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 11 September 2017 at 10:20:46 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 64!
+!provides: 'Farm' 1 65!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -3320,13 +3320,13 @@ setupToken: aPlayer
 	pasteup addMorph: model token.
 	^ model token who: aPlayer! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/10/2017 18:14:26'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/11/2017 21:45:55'!
 showDraw: anObject
 	"Show window with description of an option"
 	| pl win |
 		
 	pl _ model currentPlayer.
-	win _ DrawView openOn: self.
+	win _ DrawView openOn: model.
 	win openInWorld: pasteup.
 	win
 		setLabel: ('Option for ', pl identity);
@@ -3774,10 +3774,11 @@ viewPosition
 	
 	^ 200@-50! !
 
-!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 17:06:23'!
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 20:11:34'!
 ack
 	"Acknowledge what is in the text pane and close the receiver"
 	
+	model triggerEvent: #optionDrawn.
 	self delete! !
 
 !DrawView methodsFor: 'initialization' stamp: 'dhn 9/10/2017 17:51:13'!
@@ -3809,12 +3810,9 @@ buildMorphicWindow
 		addMorph: textPane;
 		addMorph: buttonArea! !
 
-!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 16:53:05'!
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 20:13:44'!
 closeBoxHit
 
-	model 
-		optionsItem: nil;
-		enableAll: {'Purchase'}.
 	super closeBoxHit! !
 
 !DrawView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 17:57:56'!
@@ -4138,7 +4136,7 @@ startButtons
 		padding: #center.
 ! !
 
-!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/8/2017 20:23:18'!
+!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/11/2017 20:26:27'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
 	| win |
@@ -4146,8 +4144,7 @@ openOn: aModel
 	win _ self open: aModel.
 	win removeWindowMenu.
 			
-	aModel when: #itemChange send: #getList to: win.
-	aModel when: #itemChange send: #details to: win.
+	aModel when: #optionDrawn send: #getList to: win.
 	aModel when: #deleteOpenWindows send: #endIt to: win.
 	
 	^ win
