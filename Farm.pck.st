@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 11 September 2017 at 10:20:46 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 12 September 2017 at 8:02:52 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 65!
+!provides: 'Farm' 1 66!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1096,7 +1096,7 @@ optionsItem
 	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
 	^ optionsItem! !
 
-!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:02:29'!
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/12/2017 07:59:01'!
 optionsItem: anObject
 	"Set the value of optionsItem and optionsReport"
 	| key option enab |
@@ -1114,8 +1114,8 @@ optionsItem: anObject
 			optionsReport _ ''.
 			enab _ false].
 		self triggerEvent: #itemChange.
-		self triggerEvent: #buyButton: with: enab.
-		self changed: #optionsItem]! !
+		self triggerEvent: #details.
+		self triggerEvent: #buyButton: with: enab]! !
 
 !Farm methodsFor: 'options-buying' stamp: 'dhn 9/7/2017 15:07:49'!
 optionsList
@@ -4136,7 +4136,7 @@ startButtons
 		padding: #center.
 ! !
 
-!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/11/2017 20:26:27'!
+!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/12/2017 07:57:08'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
 	| win |
@@ -4145,6 +4145,7 @@ openOn: aModel
 	win removeWindowMenu.
 			
 	aModel when: #optionDrawn send: #getList to: win.
+	aModel when: #details send: #details to: win.
 	aModel when: #deleteOpenWindows send: #endIt to: win.
 	
 	^ win
