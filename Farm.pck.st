@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 12 September 2017 at 8:02:52 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 13 September 2017 at 11:39:52 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 66!
+!provides: 'Farm' 1 67!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -50,6 +50,16 @@ SystemWindow subclass: #FarmingView
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmingView class' category: #'Farm-Graphics'!
 FarmingView class
+	instanceVariableNames: ''!
+
+!classDefinition: #AssetView category: #'Farm-Graphics'!
+FarmingView subclass: #AssetView
+	instanceVariableNames: 'textPane buttonArea player list assetItem assetReport'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'AssetView class' category: #'Farm-Graphics'!
+AssetView class
 	instanceVariableNames: ''!
 
 !classDefinition: #DrawView category: #'Farm-Graphics'!
@@ -376,6 +386,9 @@ http://farmgame.com/product/woo-single-2/
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
 
+!AssetView commentStamp: '<historical>' prior: 0!
+A FarmingGame view which shows the status of a player's assets.!
+
 !DrawView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the option which was drawn.!
 
@@ -493,52 +506,6 @@ cascade: quantity
 	"Lease Cascade Ridge for $quantity."
 	self lease: 'Cascade' for: quantity! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/2/2017 20:53:39'!
-check2Buttons
-	"Answer true if the Harvest and Expense buttons are disabled."
-	| btn har exp |
-	
-	har _ buttons submorphs detect: [:n | n label = 'Harvest'] 
-		ifNone: [nil].
-	exp _ buttons submorphs detect: [:n | n label = 'Expense'] 
-		ifNone: [nil].
-	btn _ Array with: har with: exp.
-	^ btn allSatisfy: [:a | a actionSelector isNil]
-! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/2/2017 21:19:00'!
-check3Buttons
-	"Answer true if the Harvest, Fate, and Expense buttons are disabled."
-	| btn har exp fat |
-	
-	har _ buttons submorphs detect: [:n | n label = 'Harvest'] 
-		ifNone: [nil].
-	exp _ buttons submorphs detect: [:n | n label = 'Expense'] 
-		ifNone: [nil].
-	fat _ buttons submorphs detect: [:n | n label = 'Fate'] 
-		ifNone: [nil].
-	btn _ Array with: har with: exp with: fat.
-	^ btn allSatisfy: [:a | a actionSelector isNil]
-! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:42'!
-deletePlayersList
-	"Delete the list of players."
-	self playersList delete! !
-
-!Farm methodsFor: 'loan' stamp: 'dhn 11/17/2014 14:34'!
-deleteStats
-	"Delete the status window and the plot window."
-	| win statWindow |
-self halt.
-	statWindow dependents
-		ifNotEmpty: [win := statWindow dependents first.
-			win
-				ifNotNil: [win delete]].
-	plotWindow
-		ifNotNil: [plotWindow graph delete].
-	self enableAll: {'Stats'} ! !
-
 !Farm methodsFor: 'buttons' stamp: 'dhn 9/5/2017 12:29:59'!
 disableAll: aCollection
 	"Disable each button in aCollection"
@@ -639,11 +606,12 @@ doSpace
 	
 	currentPlayer spaceEffect: self whatSpaceSays! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:02'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/12/2017 08:17:27'!
 doStats
 	"Display the Stats button menu."
 	| ans |
-	ans := (SelectionMenu fromArray:
+	
+	ans _ (SelectionMenu fromArray:
 	#(	('Your Assets'	            showAssets)
 		('Yourself'	                  showYourself)
 		('All Players'                  showEverybody)
@@ -651,7 +619,8 @@ doStats
 		('Progress Graph'          showProgress)
 		('Space Histogram'        showSpaceHistogram)
 		)) startUpWithCaption: '  Statistics  '.
-	ans ifNotNil: [self perform: ans]! !
+		
+	ans ifNotNil: [self triggerEvent: ans]! !
 
 !Farm methodsFor: 'expense' stamp: 'dhn 10/27/2014 21:05'!
 drawExpense
@@ -1411,23 +1380,6 @@ setupToken: aPlayer
 	"Set the token for aPlayer."
 	token := FarmToken new.
 	super setupToken: aPlayer
-! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 20:19'!
-showAssets
-	"Open a window showing a player's assets and leases."
-	| statWindow xw |
-	statWindow := StatListFarm new
-		collection: Farm statusList;
-		player: currentPlayer.
-	xw := statWindow 
-		listWindowLabelled: currentPlayer identity , '''s Asset Statistics' for: 'Assets' proportion: 0.32.
-	xw setWindowColor: currentPlayer tokenColor;
-		refreshMessage: #updateAssetsIn:;
-		extent: 375 @ 280.
-	self arena addMorph: xw.
-	xw center: self arena center.
-	currentPlayer status: statWindow.
 ! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/20/2014 10:11'!
@@ -2222,7 +2174,7 @@ wonButtonsState
 	self enableAll: {'End Turn'}.
 ! !
 
-!Farm class methodsFor: 'database' stamp: 'dhn 9/7/2017 18:12:02'!
+!Farm class methodsFor: 'database' stamp: 'dhn 9/12/2017 14:35:26'!
 assetList
 	"Answer the list of assets in order suitable for auction."
 	^ #('Hay' 'Grain' 'Fruit' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
@@ -2658,11 +2610,6 @@ season
 			color: Color yellow; range: 47 @ 49);
 		yourself! !
 
-!Farm class methodsFor: 'database' stamp: 'dhn 9/7/2017 18:17:55'!
-statusList
-	"Answer the list of assets in order suitable for status"
-	^ #('Hay' 'Corn' 'Wheat' 'Apples' 'Cherries' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
-
 !FarmToken methodsFor: 'accessing' stamp: 'dhn 8/31/2017 15:21:13'!
 doubled
 	"Answer the value of doubled"
@@ -2923,7 +2870,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/10/2017 18:11:33'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/12/2017 15:21:56'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2943,6 +2890,7 @@ buildMorphicWindow
 	model when: #showToken send: #showToken to: self.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
 	model when: #showDraw send: #showDraw: to: self with: #option.
+	model when: #showAssets send: #showAssets to: self.
 ! !
 
 !FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
@@ -3319,6 +3267,24 @@ setupToken: aPlayer
 		morphPosition: owner morphExtent * (0.006@0.72).
 	pasteup addMorph: model token.
 	^ model token who: aPlayer! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 10:48:39'!
+showAssets
+	"Show window for status of assets"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ AssetView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: (pl identity, '''s Assets');
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 220]! !
 
 !FarmingGame methodsFor: 'windows' stamp: 'dhn 9/11/2017 21:45:55'!
 showDraw: anObject
@@ -3774,6 +3740,157 @@ viewPosition
 	
 	^ 200@-50! !
 
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 10:57:33'!
+assetItem
+	"Answer the value of assetItem"
+
+	assetItem ifNil: [assetItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ assetItem! !
+
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 11:22:59'!
+assetItem: anObject
+	"Set the value of assetItem"
+	
+	(assetItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [
+			assetReport _ self reportFor: (self class statusList at: anObject)]
+		ifFalse: [
+			assetReport _ '']].
+	textPane model actualContents: assetReport.
+	self changed: #assetItem 	"makes deselection of the list happen"! !
+
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 10:56:47'!
+assetList
+	"Answer the asset list for a player"
+	
+	^ self class statusList! !
+
+!AssetView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 10:59:32'!
+buildMorphicWindow
+	"Lay out the window for asset status"
+	| rightPane |
+	
+	self layoutMorph beRow.
+	list _ (PluggableListMorph
+		model: self
+		listGetter: #assetList
+		indexGetter: #assetItem
+		indexSetter: #assetItem:
+		mainView: self
+		menuGetter: nil
+		keystrokeAction: nil)
+			name: #assets.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'asset status'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	rightPane _ LayoutMorph newColumn.
+	rightPane
+		name: 'right pane';
+		addMorph: textPane;
+		addMorph: buttonArea.
+	
+	self layoutMorph
+		addMorph: list proportionalWidth: 0.35;
+		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
+! !
+
+!AssetView methodsFor: 'termination' stamp: 'dhn 9/12/2017 20:55:38'!
+closeBoxHit
+
+	super closeBoxHit! !
+
+!AssetView methodsFor: 'termination' stamp: 'dhn 9/13/2017 11:36:23'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
+!AssetView methodsFor: 'access' stamp: 'dhn 9/13/2017 10:46:58'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
+
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 10:13:04'!
+reportFor: aName
+	"Answer the status report for anAsset"
+	| property player asset col |
+	
+	player _ model currentPlayer.
+	property _ player assets at: aName ifAbsent: [^ 'No such asset named ', aName].
+	asset _ self class translate: aName.
+	col _ (player harvests) select: [:ea | ea assetName = asset].
+	
+	^ String streamContents: [:str |
+		str 
+			nextPutAll: property description,':'; newLine;
+			nextPutAll: (property reportAsAssetFor: player); newLine.
+		col ifNotEmpty: [
+			col do: [:ea | 
+				ea enabled ifFalse: [str nextPutAll: ea desc, ' - done.'; newLine]]]]! !
+
+!AssetView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 10:43:31'!
+startButtons
+	"Set the button for acknowledging an asset status report"
+	| btn |
+	
+	btn _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
+	btn 
+		morphExtent: 70@20;
+		setBalloonText: 'quit'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: btn;
+		padding: #center.
+! !
+
+!AssetView class methodsFor: 'class initialization' stamp: 'dhn 9/13/2017 11:35:11'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+			
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!AssetView class methodsFor: 'class initialization' stamp: 'dhn 9/13/2017 10:55:29'!
+statusList
+	"Answer the list of assets in order suitable for the list in the window"
+	
+	^ #('Hay' 'Corn' 'Wheat' 'Apples' 'Cherries' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
+
+!AssetView class methodsFor: 'operation' stamp: 'dhn 9/12/2017 15:32:57'!
+translate: aName
+	"Answer a name suited for status reporting, translated from aName"
+	
+	{'CattleOnFarm'. 'Ahtanum'. 'Rattlesnake'. 'Cascade'. 'Toppenish'}
+		detect: [:a | a = aName] ifNone: [^ aName].
+	^ 'Livestock'
+! !
+
 !DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 20:11:34'!
 ack
 	"Acknowledge what is in the text pane and close the receiver"
@@ -3827,9 +3944,9 @@ endIt
 	
 	self delete! !
 
-!DrawView methodsFor: 'initialization' stamp: 'dhn 9/10/2017 17:51:45'!
+!DrawView methodsFor: 'initialization' stamp: 'dhn 9/12/2017 09:32:37'!
 startButtons
-	"Set the buttons for buying assets"
+	"Set the button for acknowledging an option"
 	
 	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
 	ackButton 
@@ -3909,9 +4026,10 @@ closeBoxHit
 		enableAll: {'Pay Loan'}.
 	super closeBoxHit! !
 
-!LoanView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 15:48:26'!
+!LoanView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 10:34:52'!
 details
-
+	
+	{model loanItem} print.
 	textPane model actualContents: (model loanReportFor: model loanItem)	"note that the textPane model differs from the model for this view"! !
 
 !LoanView methodsFor: 'termination' stamp: 'dhn 9/12/2016 17:00:38'!
