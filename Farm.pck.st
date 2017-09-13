@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 13 September 2017 at 11:54:36 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 13 September 2017 at 5:06:56 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 68!
+!provides: 'Farm' 1 69!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optionsWindow optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer windowCount loanItem loanReport optionsItem optionsReport'
+	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer windowCount loanItem loanReport'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -84,7 +84,7 @@ LoanView class
 
 !classDefinition: #OptionsView category: #'Farm-Graphics'!
 FarmingView subclass: #OptionsView
-	instanceVariableNames: 'textPane cancelButton buyButton buttonArea list'
+	instanceVariableNames: 'textPane cancelButton buyButton buttonArea player list optionsItem optionsReport'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
@@ -1047,74 +1047,6 @@ moveButton: anObject
 	"Set the value of moveButton"
 	
 	^ moveButton _ anObject! !
-
-!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:02:01'!
-optionsItem
-	"Answer the value of optionsItem"
-
-	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ optionsItem! !
-
-!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/12/2017 07:59:01'!
-optionsItem: anObject
-	"Set the value of optionsItem and optionsReport"
-	| key option enab |
-	
-	(optionsItem _ anObject) ifNotNil: [
-	anObject ~= 0
-		ifTrue: [
-			key _ self optionsList at: anObject.
-			option _ self class optionsDesc at: key.
-			optionsReport _ self optionsReport: key.
-			option singleOwner not
-				ifTrue: [enab _ true]
-				ifFalse: [enab _ option owner isNil]]
-		ifFalse: [
-			optionsReport _ ''.
-			enab _ false].
-		self triggerEvent: #itemChange.
-		self triggerEvent: #details.
-		self triggerEvent: #buyButton: with: enab]! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/7/2017 15:07:49'!
-optionsList
-	"Answer the shopping list for a player"
-	
-	^ (OrderedCollection new)
-		addAll: currentPlayer options;
-		yourself! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/8/2017 17:54:26'!
-optionsList: aList
-	"Set the shopping list for a player"
-	
-	currentPlayer options: aList! !
-
-!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:04:14'!
-optionsReport
-	"Answer the report on the selected option"
-
-	^ optionsItem > 0
-		ifTrue: [self optionsReport: (self optionsList at: optionsItem)]
-		ifFalse: ['']! !
-
-!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:04:30'!
-optionsReport: anAsset
-	"Show the status of anAsset for shopping purposes"
-	
-	^ currentPlayer optionDescription: anAsset! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 12/12/2011 21:46'!
-optionsWindow
-	"Answer the value of optionsWindow"
-
-	^ optionsWindow! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 12/12/2011 21:46'!
-optionsWindow: anObject
-	"Set the value of optionsWindow"
-
-	optionsWindow := anObject! !
 
 !Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 21:40'!
 pay: down borrow: balance for: aSymbol amount: qty
@@ -3295,7 +3227,7 @@ showLoan
 				
 	model disableAll: {'Pay Loan'}! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/8/2017 14:48:22'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 16:32:20'!
 showOpts
 	"Show window for buying assets"
 	| pl win |
@@ -3307,11 +3239,13 @@ showOpts
 			win openInWorld: pasteup.
 			win
 				setLabel: (pl identity, '''s Shopping');
+				player: pl;
 				setWindowColor: pl color;
 				startButtons;
 				morphPosition: self windowPosition;
 				morphExtent: 300 @ 220.
-				model disableAll: {'Purchase'}]! !
+			win list updateList.
+			model disableAll: {'Purchase'}]! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 20:41:28'!
 showSeasons: associations 
@@ -4078,14 +4012,14 @@ openOn: aModel
 	^ win
 ! !
 
-!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/8/2017 21:39:52'!
+!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 14:18:31'!
 buildMorphicWindow
 	"Lay out the window for purchases"
 	| rightPane |
 	
 	self layoutMorph beRow.
 	list _ (PluggableListMorph
-		model: model
+		model: self
 		listGetter: #optionsList
 		indexGetter: #optionsItem
 		indexSetter: #optionsItem:
@@ -4102,7 +4036,6 @@ buildMorphicWindow
 	buttonArea
 		name: #buttons;
 		padding: #center.
-	model when: #buyButton: send: #buyButton: to: self with: #state.
 
 	textPane _ (TextModelMorph
 		withModel: (TextModel withText: '')) 	"note the different model specification"
@@ -4125,33 +4058,33 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:47:29'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 16:10:55'!
 buy
 	"Purchase an asset"
 	| key method amt |
 	
-	(model seasonAt: model currentPlayer position) enabled
-		ifTrue: [buyButton disableButton] 		"can buy only in Winter"
+	(model seasonAt: player position) enabled
+		ifTrue: [self buyButton: false] 		"can buy only in Winter"
 		ifFalse: [
-			key _ model optionsList at: model optionsItem.
-			method _ model class optionMethod at: key.
+			key _ self optionsList at: self optionsItem.
+			method _ self class optionMethod at: key.
 			amt _ (Smalltalk classNamed: key) lotQuantity.
 			model perform: method withArguments: {amt}.
 	
 			"remove option from player"
-			model currentPlayer options: (model optionsList remove: key; yourself).
+			player options: (self optionsList remove: key; yourself).
 	
 			"put the option in the 'discard pile' "
-			model exercisedOptions add: key.
+			player mgr exercisedOptions add: key.
 	
 			"remove option from the shopping window list"
 			list updateList.
 	
 			"de-select the list in the shopping window"
-			model optionsItem: 0.
+			self optionsItem: 0.
 	
 			"disable the 'Buy' button"
-			buyButton disableButton.
+			self buyButton: false.
 	
 			"update the text pane"
 			self details]! !
@@ -4166,29 +4099,26 @@ buyButton: aBool
 				ifFalse: [buyButton enableButton]]
 		ifFalse: [buyButton disableButton]! !
 
-!OptionsView methodsFor: 'termination' stamp: 'dhn 9/12/2016 17:18:16'!
+!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:25'!
 closeBoxHit
 
-	model 
-		optionsItem: nil;
-		enableAll: {'Purchase'}.
+	model enableAll: {'Purchase'}.
 	super closeBoxHit! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 21:56:09'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 16:44:48'!
 details
 	"Set the content of the text pane"
 	
-	textPane model actualContents: (model currentPlayer options
-		ifEmpty: ['']
-		ifNotEmpty: [model optionsReport])! !
+	textPane model actualContents: 
+		(player options
+			ifEmpty: ['']
+			ifNotEmpty: [self optionsReport])! !
 
-!OptionsView methodsFor: 'termination' stamp: 'dhn 8/28/2016 14:19:18'!
+!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:41'!
 endIt
 	"Close the receiver"
 	
-	model 
-		optionsItem: nil;
-		enableAll: {'Purchase'}.
+	model enableAll: {'Purchase'}.
 	self delete! !
 
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/9/2017 15:27:11'!
@@ -4208,6 +4138,68 @@ list: aCollection
 	"Set the value of list"
 	
 	list _ aCollection! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:13:20'!
+optionsItem
+	"Answer the value of optionsItem"
+
+	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ optionsItem! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 16:55:01'!
+optionsItem: anObject
+	"Set the value of optionsItem and optionsReport"
+	| key option enab |
+	
+	(optionsItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [
+			key _ self optionsList at: anObject.
+			option _ self class optionsDesc at: key.
+			optionsReport _ self optionsReport: key.
+			option singleOwner not
+				ifTrue: [enab _ true]
+				ifFalse: [enab _ option owner isNil]]
+		ifFalse: [
+			optionsReport _ ''.
+			enab _ false].
+		self buyButton: enab].
+	self details.
+	self changed: #optionsItem 	"makes deselection of the list happen"! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:30:52'!
+optionsList
+	"Answer the shopping list for a player"
+	
+	^ (player 
+		ifNotNil: [player options]
+		ifNil: [OrderedCollection new])! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:21:40'!
+optionsList: aList
+	"Set the shopping list for a player"
+	
+	player options: aList! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:22:11'!
+optionsReport
+	"Answer the report on the selected option"
+
+	^ optionsItem > 0
+		ifTrue: [self optionsReport: (self optionsList at: optionsItem)]
+		ifFalse: ['']! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:22:43'!
+optionsReport: anAsset
+	"Show the status of anAsset for shopping purposes"
+	
+	^ player optionDescription: anAsset! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
 
 !OptionsView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 10:20:02'!
 startButtons
@@ -4244,6 +4236,40 @@ openOn: aModel
 	
 	^ win
 ! !
+
+!OptionsView class methodsFor: 'database' stamp: 'dhn 9/13/2017 16:05:53'!
+optionMethod
+	"Answer a dictionary of methods which account for the execution of options."
+	
+	^ Dictionary new
+		at: #Tractor put: #tractor:;
+		at: #Harvester put: #harvester:;
+		at: #Fruit put: #fruit:;
+		at: #Grain put: #grain:;
+		at: #Hay put: #hay:;
+		at: #Livestock put: #livestock:;
+		at: #Ahtanum put: #ahtanum:;
+		at: #Rattlesnake put: #rattlesnake:;
+		at: #Cascade put: #cascade:;
+		at: #Toppenish put: #toppenish:;
+		yourself! !
+
+!OptionsView class methodsFor: 'database' stamp: 'dhn 9/13/2017 14:15:14'!
+optionsDesc
+	"Answer a dictionary of things that farmers can purchase."
+	
+	^ Dictionary new
+		at: #Tractor put: Tractor new;
+		at: #Harvester put: Harvester new;
+		at: #Fruit put: Fruit new;
+		at: #Grain put: Grain new;
+		at: #Hay put: Hay new;
+		at: #Livestock put: Livestock new;
+		at: #Ahtanum put: Ahtanum new;
+		at: #Rattlesnake put: Rattlesnake new;
+		at: #Cascade put: Cascade new;
+		at: #Toppenish put: Toppenish new;
+		yourself! !
 
 !FarmAsset methodsFor: 'as yet unclassified' stamp: 'dhn 9/23/2014 13:18'!
 assetValue
@@ -4289,7 +4315,7 @@ rate: anObject
 
 	rate := anObject! !
 
-!Crop methodsFor: 'accessing' stamp: 'dhn 9/1/2017 13:58:10'!
+!Crop methodsFor: 'accessing' stamp: 'dhn 9/13/2017 14:00:18'!
 reportAsAssetFor: aPlayer 
 	| str |
 	str := String new writeStream.
@@ -4305,7 +4331,7 @@ reportAsAssetFor: aPlayer
 		nextPutAll: self count asString , ' = number of harvests'; newLine;
 		nextPutAll: self missed asString , ' = missed harvests'; newLine.
 	self count = 0
-		ifFalse: [str nextPutAll: (self quality / self count printOn: str fractionDigits: 1)
+		ifFalse: [str nextPutAll: (self quality / self count printOn: str fractionDigits: 1) asString
 					, ' = average harvest quality'].
 	^ str contents! !
 
