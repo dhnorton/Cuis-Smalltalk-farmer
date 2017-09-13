@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 13 September 2017 at 11:39:52 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 13 September 2017 at 11:54:36 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 67!
+!provides: 'Farm' 1 68!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -350,16 +350,6 @@ ProtoObject subclass: #FarmRelation
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmRelation class' category: #'Farm-Graphics'!
 FarmRelation class
-	instanceVariableNames: ''!
-
-!classDefinition: #StatListFarm category: #'Farm-Graphics'!
-ProtoObject subclass: #StatListFarm
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'StatListFarm class' category: #'Farm-Graphics'!
-StatListFarm class
 	instanceVariableNames: ''!
 
 
@@ -1251,20 +1241,6 @@ reportAllPlayers
 			 nextPutAll: pl options size asString;
 			 nextPutAll: ' options held'; newLine.
 			].
-	^ str contents! !
-
-!Farm methodsFor: 'operating' stamp: 'dhn 9/9/2017 18:08:12'!
-reportFor: aPlayer on: anAsset
-	| p asset str col |
-	
-	p _ aPlayer assets at: anAsset ifAbsent: [^ 'No such asset named ', anAsset].
-	asset _ self class translate: anAsset.
-	col _ (aPlayer harvests) select: [:ea | ea assetName = asset].
-	str _ String new writeStream.
-	str nextPutAll: p description,':'; newLine;
-		nextPutAll: (p reportAsAssetFor: aPlayer); newLine.
-	col ifNotEmpty: [col do: [:ea | 
-		ea enabled ifFalse: [str nextPutAll: ea desc, ' - done.'; newLine]]].
 	^ str contents! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/19/2014 16:20'!
@@ -6241,26 +6217,3 @@ lineWidth
 lineWidth: anObject
 
 	lineWidth := anObject! !
-
-!StatListFarm methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:37:11'!
-reportFor: aPlayer on: anAsset
-	| p asset str col |
-	
-	p _ aPlayer assets at: anAsset ifAbsent: [^ 'No such asset named ', anAsset].
-	asset := self class translate: anAsset.
-	col := (aPlayer harvests) select: [:ea | ea assetName = asset].
-	str := String new writeStream.
-	str nextPutAll: p description,':'; newLine;
-		nextPutAll: (p reportAsAssetFor: aPlayer); newLine.
-	col ifNotEmpty: [col do: [:ea | 
-		ea enabled ifFalse: [str nextPutAll: ea desc, ' - done.'; newLine]]].
-	^ str contents! !
-
-!StatListFarm class methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 20:11'!
-translate: aName
-	"Answer a name suited for harvest reporting translated from aName"
-	| match |
-	match := #('CattleOnFarm'. 'Ahtanum'. 'Rattlesnake'. 'Cascade'. 'Toppenish') 
-		detect: [:a | a = aName] ifNone: [^ aName].
-	^ 'Livestock'
-! !
