@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 13 September 2017 at 5:06:56 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 14 September 2017 at 9:46:24 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 69!
+!provides: 'Farm' 1 70!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -74,7 +74,7 @@ DrawView class
 
 !classDefinition: #LoanView category: #'Farm-Graphics'!
 FarmingView subclass: #LoanView
-	instanceVariableNames: 'textPane cancelButton payButton buttonArea'
+	instanceVariableNames: 'textPane cancelButton payButton buttonArea player'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
@@ -3210,7 +3210,7 @@ showDraw: anObject
 		morphPosition: self windowPosition;
 		morphExtent: 300 @ 220! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 13:49:51'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 17:12:17'!
 showLoan
 	"Show window for reducing debt"
 	| pl win |
@@ -3220,6 +3220,7 @@ showLoan
 	win openInWorld: pasteup.
 	win
 		setLabel: pl identity, '''s Debt';
+		player: pl;
 		setWindowColor: pl color;
 		startButtons;
 		morphPosition: self windowPosition;
@@ -3977,6 +3978,12 @@ payButton: aBool
 		ifTrue: [payButton enableButton]
 		ifFalse: [payButton disableButton]! !
 
+!LoanView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:14:36'!
+player: anObject
+	"Set the value of player to anObject"
+	
+	player _ anObject! !
+
 !LoanView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 16:30:09'!
 startButtons
 	"Set the Loan Payment buttons"
@@ -4058,7 +4065,7 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 16:10:55'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:27:03'!
 buy
 	"Purchase an asset"
 	| key method amt |
@@ -4075,7 +4082,7 @@ buy
 			player options: (self optionsList remove: key; yourself).
 	
 			"put the option in the 'discard pile' "
-			player mgr exercisedOptions add: key.
+			model exercisedOptions add: key.
 	
 			"remove option from the shopping window list"
 			list updateList.
@@ -4121,10 +4128,11 @@ endIt
 	model enableAll: {'Purchase'}.
 	self delete! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/9/2017 15:27:11'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 09:41:12'!
 getList
 	"Update the list of options"
 	
+	self optionsItem: 0.
 	list updateList! !
 
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:15:42'!
