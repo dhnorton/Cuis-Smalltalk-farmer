@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 14 September 2017 at 9:46:24 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 14 September 2017 at 1:47:53 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 70!
+!provides: 'Farm' 1 71!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions optsShown fates drawnFates expenses drawnExpenses payLoanWindow paymentList leases playersList plotWindow moveButton latestPlayer windowCount loanItem loanReport'
+	instanceVariableNames: 'availableOptions exercisedOptions fates drawnFates expenses drawnExpenses leases plotWindow moveButton latestPlayer windowCount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -74,7 +74,7 @@ DrawView class
 
 !classDefinition: #LoanView category: #'Farm-Graphics'!
 FarmingView subclass: #LoanView
-	instanceVariableNames: 'textPane cancelButton payButton buttonArea player'
+	instanceVariableNames: 'textPane cancelButton payButton buttonArea player loanItem loanReport'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
@@ -284,7 +284,7 @@ Toppenish class
 
 !classDefinition: #Farmer category: #'Farm-Model'!
 Gamer subclass: #Farmer
-	instanceVariableNames: 'offFarm options drawnOption garnish emergencies harvests markets spaceEffect'
+	instanceVariableNames: 'offFarm options priorOptions garnish emergencies harvests markets spaceEffect'
 	classVariableNames: 'FarmerTest'
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -777,7 +777,7 @@ fates: anObject
 
 	fates := anObject! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 18:59:55'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:03'!
 fruit: quantity
 	"Answer the purchased number of acres of fruit; split the cost." 
 	| total down balance |
@@ -795,10 +795,9 @@ fruit: quantity
 		borrow: balance / 2
 		for: #Apples
 		amount: Apples auctionQuantity.
-	currentPlayer drawnOption: true.
 	^ quantity! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 17:52:05'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:15'!
 grain: quantity 
 	"Answer the purchased number of acres of grain; split the cost." 
 	| total down balance |
@@ -816,7 +815,6 @@ grain: quantity
 		borrow: balance / 2
 		for: #Corn
 		amount: Corn auctionQuantity.
-	currentPlayer drawnOption: true.
 	^ quantity! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 9/5/2017 20:09:28'!
@@ -866,7 +864,7 @@ harvestSep1
 	self harvest;
 	 doSep1! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 19:01:27'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:26'!
 harvester: quantity 
 	"Answer the purchased number of harvesters; account for the cost." 
 	| total down balance |
@@ -879,10 +877,9 @@ harvester: quantity
 		borrow: balance
 		for: #Harvester
 		amount: Harvester auctionQuantity.
-	currentPlayer drawnOption: true.
 	^ quantity! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 19:02:17'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:34'!
 hay: quantity 
 	"Answer the purchased number of acres of hay; account for the cost." 
 	| total down balance |
@@ -895,7 +892,6 @@ hay: quantity
 		borrow: balance
 		for: #Hay
 		amount: Hay auctionQuantity.
-	currentPlayer drawnOption: true.
 	^ quantity! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/2/2014 21:33'!
@@ -921,7 +917,7 @@ initialize
 	won _ false
 ! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 19:40:59'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:16:04'!
 lease: aName for: quantity 
 	"Answer the purchased number of cattle on aName lease; account for the cost." 
 	| total down balance who |
@@ -938,24 +934,11 @@ lease: aName for: quantity
 				borrow: balance
 				for: aName asSymbol
 				amount: (Compiler evaluate: aName , ' auctionQuantity').
-			currentPlayer drawnOption: true.
 			leases at: aName put: currentPlayer identity]
 		ifFalse: [GamePopUp inform: 'Sorry, but the ' , aName , ' lease is held by ' , who title: 'Lease Taken'].
 	^ quantity! !
 
-!Farm methodsFor: 'accessing' stamp: 'dhn 12/12/2011 21:46'!
-listOfOptions
-	"Answer the value of listOfOptions"
-
-	^ listOfOptions! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 12/12/2011 21:46'!
-listOfOptions: anObject
-	"Set the value of listOfOptions"
-
-	listOfOptions := anObject! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 17:37:24'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:16:14'!
 livestock: quantity 
 	"Answer the purchased number of cattle for the farm; account for the cost." 
 	| total down balance |
@@ -968,73 +951,7 @@ livestock: quantity
 		borrow: balance
 		for: #CattleOnFarm
 		amount: CattleOnFarm auctionQuantity.
-	currentPlayer drawnOption: true.
 	^ quantity! !
-
-!Farm methodsFor: 'loan' stamp: 'dhn 9/7/2017 14:13:47'!
-loanItem
-	"Answer the value of loanItem"
-
-	loanItem ifNil: [loanItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ loanItem! !
-
-!Farm methodsFor: 'loan' stamp: 'dhn 9/7/2017 14:04:01'!
-loanItem: anObject
-	"Set the value of loanItem and loanReport"
-	| enab |
-	
-	(loanItem _ anObject) ifNotNil: [
-	anObject ~= 0
-		ifTrue: [
-			loanReport _ self loanReportFor: anObject.
-			enab _ true]
-		ifFalse: [
-			loanReport _ ''.
-			enab _ false].
-		self triggerEvent: #itemChange.
-		self triggerEvent: #payButton: with: enab.
-		self changed: #loanItem]! !
-
-!Farm methodsFor: 'loan' stamp: 'dhn 9/7/2017 14:02:44'!
-loanList
-	"Answer possible loan payment amounts"
-	| list |
-	
-	list _ OrderedCollection new.
-	1 to: 50 do: [:n | 
-		list add: (String streamContents: [:str |
-			str 
-				nextPut: $$;
-				nextPutAll: (n * self class paymentIncrement) printStringWithCommas;
-				newLine])].
-	^ list! !
-
-!Farm methodsFor: 'loan' stamp: 'dhn 9/7/2017 14:06:36'!
-loanReportFor: anInteger
-	"Answer the effect on cash and debt of a payment selected by anInteger"
-	| pmt enab |
-
-	anInteger > 0
-		ifTrue: [
-			enab _ true.
-			pmt _ anInteger * self class paymentIncrement min: currentPlayer debt negated.
-			^ (String streamContents: [:string |
-				string 
-					nextPutAll: 'By making this payment, ', currentPlayer identity, ' would have:';
-					newLine; newLine;
-					nextPut: $$;
-					nextPutAll: (currentPlayer debt + pmt) negated asInteger printStringWithCommas, ' in debt and';
-					newLine;
-					nextPut: $$;
-					nextPutAll: (currentPlayer cash - pmt) asInteger printStringWithCommas , ' in cash and';
-					newLine;
-					nextPutAll: '$' , currentPlayer playerDebtLimit value negated  printStringWithCommas , ' debt limit.'])]
-		ifFalse: [
-			enab _ false.
-			^ ''].
-	self triggerEvent: #itemChange.
-	self triggerEvent: #payButton: with: enab.
-	self changed: #loanItem! !
 
 !Farm methodsFor: 'accessing' stamp: 'dhn 9/7/2017 14:23:38'!
 moveButton
@@ -1083,30 +1000,6 @@ paymentChoices
 			list addLast: '$' , n printStringWithCommas].
 	^ list
 ! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 12:25'!
-paymentList
-	"Answer the value of paymentList"
-
-	^ paymentList! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 12:24'!
-paymentList: anObject
-	"Set the value of paymentList"
-
-	paymentList := anObject! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 3/22/2012 11:24'!
-playersList
-	"Answer the value of playersList"
-
-	^ playersList! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 3/22/2012 11:24'!
-playersList: anObject
-	"Set the value of playersList"
-
-	playersList := anObject! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:44'!
 plotWindow
@@ -1265,7 +1158,7 @@ setUpToken
 	tok delete. 	"not needed until next player"
 	^ tok! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/7/2017 16:46:53'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/14/2017 13:22:36'!
 setupPlayer: aName color: aColor
 	"Establish a player named aName and colored aColor"
 	| pl |
@@ -1279,6 +1172,7 @@ setupPlayer: aName color: aColor
 		mgr: self;
 		identity: aName).
 	2 timesRepeat: [pl options addFirst: (self drawOptionQuietly: true)].
+	pl priorOptions: pl options copy.
 	currentPlayer _ pl
 	
 ! !
@@ -2005,7 +1899,7 @@ toppenish: quantity
 	self lease: 'Toppenish' for: quantity
 ! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/9/2017 19:43:28'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:16:25'!
 tractor: quantity 
 	"Answer the purchased number of tractors; account for the cost." 
 	| total down balance |
@@ -2018,7 +1912,6 @@ tractor: quantity
 		borrow: balance
 		for: #Tractor
 		amount: Tractor auctionQuantity.
-	self currentPlayer drawnOption: true.
 	^ quantity! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 15:53'!
@@ -2459,11 +2352,6 @@ optionsNames
 		 add: 'Cascade' withOccurrences: 3;
 		 add: 'Toppenish' withOccurrences: 3;
 		 yourself! !
-
-!Farm class methodsFor: 'database' stamp: 'dhn 9/7/2017 18:17:37'!
-paymentIncrement
-	"Answer the payment increment for displaying loan payment choices"
-	^ 1000! !
 
 !Farm class methodsFor: 'setup' stamp: 'dhn 8/31/2017 10:58:45'!
 season
@@ -3228,13 +3116,13 @@ showLoan
 				
 	model disableAll: {'Pay Loan'}! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 16:32:20'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/14/2017 13:28:25'!
 showOpts
 	"Show window for buying assets"
 	| pl win |
 		
 	pl _ model currentPlayer.
-	pl options notEmpty
+	pl priorOptions notEmpty
 		ifTrue: [
 			win _ OptionsView openOn: model.
 			win openInWorld: pasteup.
@@ -3802,10 +3690,11 @@ translate: aName
 	^ 'Livestock'
 ! !
 
-!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 20:11:34'!
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/14/2017 13:34:27'!
 ack
 	"Acknowledge what is in the text pane and close the receiver"
 	
+	model currentPlayer priorOptions: model currentPlayer options copy.
 	model triggerEvent: #optionDrawn.
 	self delete! !
 
@@ -3882,14 +3771,14 @@ openOn: aModel
 	^ win
 ! !
 
-!LoanView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 12:05:14'!
+!LoanView methodsFor: 'initialization' stamp: 'dhn 9/14/2017 11:07:48'!
 buildMorphicWindow
 	"Lay out the window for paying down debt"
 	| list1 rightPane |
 	
 	self layoutMorph beRow.
 	list1 _ (PluggableListMorph
-		model: model
+		model: self
 		listGetter: #loanList
 		indexGetter: #loanItem
 		indexSetter: #loanItem:
@@ -3937,37 +3826,98 @@ closeBoxHit
 		enableAll: {'Pay Loan'}.
 	super closeBoxHit! !
 
-!LoanView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 10:34:52'!
+!LoanView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 11:48:00'!
 details
+	"Set the loan report in the textPane"
 	
-	{model loanItem} print.
-	textPane model actualContents: (model loanReportFor: model loanItem)	"note that the textPane model differs from the model for this view"! !
+	textPane model actualContents: (self loanReportFor: self loanItem)	"note that the textPane model differs from the model for this view"! !
 
-!LoanView methodsFor: 'termination' stamp: 'dhn 9/12/2016 17:00:38'!
+!LoanView methodsFor: 'termination' stamp: 'dhn 9/14/2017 11:48:54'!
 endIt
 	"Close the receiver"
 	
-	model 
-		loanItem: nil;
-		enableAll: {'Pay Loan'}.
+	model enableAll: {'Pay Loan'}.
 	self delete! !
 
-!LoanView methodsFor: 'operating' stamp: 'dhn 9/7/2017 13:46:46'!
+!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:00:58'!
+loanItem
+	"Answer the value of loanItem"
+
+	loanItem ifNil: [loanItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ loanItem! !
+
+!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:21:30'!
+loanItem: anObject
+	"Set the value of loanItem and loanReport"
+	| enab |
+	
+	(loanItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [
+			loanReport _ self loanReportFor: anObject.
+			enab _ true]
+		ifFalse: [
+			loanReport _ ''.
+			enab _ false].
+		textPane model actualContents: loanReport.
+		self payButton: enab.
+		model triggerEvent: #itemChange.
+		self changed: #loanItem]! !
+
+!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:04:20'!
+loanList
+	"Answer possible loan payment amounts"
+	| list |
+	
+	list _ OrderedCollection new.
+	1 to: 50 do: [:n | 
+		list add: (String streamContents: [:str |
+			str 
+				nextPut: $$;
+				nextPutAll: (n * self class paymentIncrement) printStringWithCommas;
+				newLine])].
+	^ list! !
+
+!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:06:35'!
+loanReportFor: anInteger
+	"Answer the effect on cash and debt of a payment selected by anInteger"
+	| pmt enab |
+
+	anInteger > 0
+		ifTrue: [
+			enab _ true.
+			pmt _ anInteger * self class paymentIncrement min: player debt negated.
+			^ (String streamContents: [:string |
+				string 
+					nextPutAll: 'By making this payment, ', player identity, ' would have:';
+					newLine; newLine;
+					nextPut: $$;
+					nextPutAll: (player debt + pmt) negated asInteger printStringWithCommas, ' in debt and';
+					newLine;
+					nextPut: $$;
+					nextPutAll: (player cash - pmt) asInteger printStringWithCommas , ' in cash and';
+					newLine;
+					nextPutAll: '$' , player playerDebtLimit value negated  printStringWithCommas , ' debt limit.'])]
+		ifFalse: [
+			enab _ false.
+			^ ''].
+	self payButton: enab.
+	self triggerEvent: #itemChange.
+	self changed: #loanItem! !
+
+!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 13:38:30'!
 pay
 	"Make payment on the loan"
-	| payment selection pl |
+	| index payment |
 	
-	selection _ model loanItem.
-	model loanItem: 0. 	"avoid multiples via contact bounce"
-	pl _ model currentPlayer.
-	payment _ selection * model class paymentIncrement min: pl debt negated.
-	pl debt: pl debt + payment.
-	pl cash: pl cash - payment.
+	index _ loanItem.
+	self loanItem: 0. 	"avoid multiples via contact bounce"
+	payment _ index * self class paymentIncrement min: player debt negated.
+	player debt: player debt + payment.
+	player cash: player cash - payment.
 	model updatePlayer.
-	(pl playerDebtLimit value <= pl debt and: [model moveButton enabled not])
-		ifTrue: [
-			model updateHistory.
-			model enableAll: {'End Turn'}].
+	(player playerDebtLimit value <= player debt and: [model moveButton enabled not])
+		ifTrue: [model updateHistory].
 	self details! !
 
 !LoanView methodsFor: 'accessing' stamp: 'dhn 9/16/2016 14:57:28'!
@@ -4005,7 +3955,7 @@ startButtons
 		padding: #center.
 ! !
 
-!LoanView class methodsFor: 'class initialization' stamp: 'dhn 9/12/2016 14:08:41'!
+!LoanView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:59'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
 	| win |
@@ -4013,11 +3963,16 @@ openOn: aModel
 	win _ self open: aModel label: 'Purchases'.
 	win removeWindowMenu.
 			
-	aModel when: #itemChange send: #details to: win.
 	aModel when: #deleteOpenWindows send: #endIt to: win.
 	
 	^ win
 ! !
+
+!LoanView class methodsFor: 'database' stamp: 'dhn 9/14/2017 11:12:09'!
+paymentIncrement
+	"Answer the payment increment for displaying loan payment choices"
+	
+	^ 1000! !
 
 !OptionsView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 14:18:31'!
 buildMorphicWindow
@@ -4065,7 +4020,7 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:27:03'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:25:16'!
 buy
 	"Purchase an asset"
 	| key method amt |
@@ -4080,6 +4035,7 @@ buy
 	
 			"remove option from player"
 			player options: (self optionsList remove: key; yourself).
+			player priorOptions: player options copy.
 	
 			"put the option in the 'discard pile' "
 			model exercisedOptions add: key.
@@ -4112,12 +4068,12 @@ closeBoxHit
 	model enableAll: {'Purchase'}.
 	super closeBoxHit! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 16:44:48'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:26:01'!
 details
 	"Set the content of the text pane"
 	
 	textPane model actualContents: 
-		(player options
+		(player priorOptions
 			ifEmpty: ['']
 			ifNotEmpty: [self optionsReport])! !
 
@@ -4154,7 +4110,7 @@ optionsItem
 	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
 	^ optionsItem! !
 
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 16:55:01'!
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/14/2017 12:00:01'!
 optionsItem: anObject
 	"Set the value of optionsItem and optionsReport"
 	| key option enab |
@@ -4172,15 +4128,15 @@ optionsItem: anObject
 			optionsReport _ ''.
 			enab _ false].
 		self buyButton: enab].
-	self details.
+	textPane model actualContents: optionsReport.
 	self changed: #optionsItem 	"makes deselection of the list happen"! !
 
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:30:52'!
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/14/2017 13:29:18'!
 optionsList
 	"Answer the shopping list for a player"
 	
 	^ (player 
-		ifNotNil: [player options]
+		ifNotNil: [player priorOptions]
 		ifNil: [OrderedCollection new])! !
 
 !OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:21:40'!
@@ -4230,7 +4186,7 @@ startButtons
 		padding: #center.
 ! !
 
-!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/12/2017 07:57:08'!
+!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:33'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
 	| win |
@@ -4239,7 +4195,6 @@ openOn: aModel
 	win removeWindowMenu.
 			
 	aModel when: #optionDrawn send: #getList to: win.
-	aModel when: #details send: #details to: win.
 	aModel when: #deleteOpenWindows send: #endIt to: win.
 	
 	^ win
@@ -4999,18 +4954,6 @@ doubledString
 drawExpense: anObject
 	^self mgr drawExpense! !
 
-!Farmer methodsFor: 'accessing' stamp: 'dhn 10/28/2011 16:20'!
-drawnOption
-	"Answer the value of drawnOption"
-	drawnOption ifNil: [drawnOption := false].
-	^ drawnOption! !
-
-!Farmer methodsFor: 'accessing' stamp: 'dhn 10/28/2011 16:18'!
-drawnOption: aBool
-	"Set the value of drawnOption"
-
-	drawnOption := aBool! !
-
 !Farmer methodsFor: 'accessing' stamp: 'dhn 9/25/2011 10:39'!
 emergencies
 	"Answer the value of emergencies"
@@ -5441,6 +5384,18 @@ options: anOrderedCollection
 !Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2013 10:55'!
 playerDebtLimit
 	^ FarmingGame debtLimit! !
+
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:20:09'!
+priorOptions
+	"Answer the value of priorOptions"
+
+	^ priorOptions! !
+
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:21:04'!
+priorOptions: anOrderedCollection
+	"Set the value of priorOptions"
+
+	priorOptions _ anOrderedCollection! !
 
 !Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 14:51'!
 removeOptionAt: aName
