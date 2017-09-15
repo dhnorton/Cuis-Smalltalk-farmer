@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 14 September 2017 at 8:21:07 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 12:00:54 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 72!
+!provides: 'Farm' 1 74!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -4152,19 +4152,19 @@ optionsList: aList
 	
 	player options: aList! !
 
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:22:11'!
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/15/2017 11:27:48'!
 optionsReport
 	"Answer the report on the selected option"
 
 	^ optionsItem > 0
-		ifTrue: [self optionsReport: (self optionsList at: optionsItem)]
+		ifTrue: [self optionsReport: (self class translate: (self optionsList at: optionsItem))]
 		ifFalse: ['']! !
 
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:22:43'!
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/15/2017 11:25:37'!
 optionsReport: anAsset
 	"Show the status of anAsset for shopping purposes"
 	
-	^ player optionDescription: anAsset! !
+	^ player optionDescription: (self class translate: anAsset)! !
 
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
 player: anObject
@@ -4241,6 +4241,24 @@ optionsDesc
 		at: #Toppenish put: Toppenish new;
 		yourself! !
 
+!OptionsView class methodsFor: 'database' stamp: 'dhn 9/15/2017 11:20:46'!
+translate: aName
+	"Answer a name suited for option reporting, translated from aName"
+	
+	^ (Dictionary new
+		at: #Hay put: #Hay;
+		at: #Grain put: #Wheat; 	"same as Corn"
+		at: #Fruit put: #Cherries; 	"same as Apples"
+		at: #Tractor put: #Tractor;
+		at: #Harvester put: #Harvester;
+		at: #Livestock put: #Livestock;
+		at: #Ahtanum put: #Ahtanum;
+		at: #Rattlesnake put: #Rattlesnake;
+		at: #Cascade put: #Cascade;
+		at: #Toppenish put: #Toppenish;
+		yourself)
+			at: aName! !
+
 !FarmAsset methodsFor: 'as yet unclassified' stamp: 'dhn 9/23/2014 13:18'!
 assetValue
 	^self class price * (self quantity / 2)! !
@@ -4285,7 +4303,7 @@ rate: anObject
 
 	rate := anObject! !
 
-!Crop methodsFor: 'accessing' stamp: 'dhn 9/14/2017 20:17:15'!
+!Crop methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:41:21'!
 reportAsAssetFor: aPlayer 
 	"Answer the status report for a crop"
 	| str |
@@ -4307,10 +4325,16 @@ reportAsAssetFor: aPlayer
 					, ' = average harvest quality'].
 	^ str contents! !
 
-!Crop methodsFor: 'accessing' stamp: 'dhn 9/18/2011 12:49'!
+!Crop methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:41:03'!
 reset
 	self factor: 1.
 	self rate: 0.! !
+
+!Crop methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:40:35'!
+units
+	"Answer the value of units"
+	
+	^ ' acres'! !
 
 !Crop class methodsFor: 'as yet unclassified' stamp: 'dhn 1/11/2014 14:51'!
 auctionQuantity
@@ -4469,9 +4493,11 @@ price
 yieldVector
 	^#(400 600 1000 1500 2200 3000)! !
 
-!Equipment methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2014 10:43'!
+!Equipment methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:36:41'!
 assetValue
-	^self class price * self quantity! !
+	"Answer the value of the receiver"
+	
+	^ self class price * self quantity! !
 
 !Equipment methodsFor: 'accessing' stamp: 'dhn 9/25/2011 10:34'!
 costAvoided
@@ -4491,7 +4517,7 @@ initialize
 	super initialize.
 ! !
 
-!Equipment methodsFor: 'accessing' stamp: 'dhn 9/1/2017 13:36:50'!
+!Equipment methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:37:16'!
 reportAsAssetFor: aPlayer
 	| str |
 	str := String new writeStream.
@@ -4512,8 +4538,14 @@ reportAsAssetFor: aPlayer
 		 newLine.
 	^ str contents! !
 
-!Equipment methodsFor: 'accessing' stamp: 'dhn 9/18/2011 14:39'!
+!Equipment methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:37:50'!
 reset! !
+
+!Equipment methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:38:54'!
+units
+	"Answer the value of units"
+	
+	^ ' each'! !
 
 !Equipment class methodsFor: 'as yet unclassified' stamp: 'dhn 9/25/2011 15:18'!
 at: aRoll for: aQuantity
@@ -4638,14 +4670,22 @@ price
 yieldVector
 	^#(1400 2000 2800 3800 5000 7500)! !
 
-!CattleOnFarm methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2014 10:43'!
+!CattleOnFarm methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:44:48'!
 assetValue
-	^self class price * self quantity! !
+	"Answer the value of the receiver"
+	
+	^ self class price * self quantity! !
 
 !CattleOnFarm methodsFor: 'initialize-release' stamp: 'dhn 1/18/2014 12:22'!
 initialize
 	super initialize.
 	description := 'Cattle on Farm'! !
+
+!CattleOnFarm methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:43:57'!
+units
+	"Answer the value of units"
+	
+	^ ' head'! !
 
 !CattleOnFarm class methodsFor: 'as yet unclassified' stamp: 'dhn 1/11/2014 14:46'!
 auctionQuantity
@@ -4667,6 +4707,12 @@ initialize
 	singleOwner _ true.
 	where _ ' Ridge'
 ! !
+
+!CattleOnLease methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:48:27'!
+units
+	"Answer the value of units"
+	
+	^ ' head at ', self className! !
 
 !CattleOnLease class methodsFor: 'as yet unclassified' stamp: 'dhn 1/21/2014 10:30'!
 lotDescription: aString 
@@ -5366,21 +5412,26 @@ oilLease: aParm
 		do: [:a | acres := acres + (self oilBucksFor: a)].
 	self tally: 100 * acres! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/7/2017 17:19:00'!
+!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 11:56:30'!
 optionDescription: aString 
 	"Report the effect of buying the option named aString"
-	| cost down |
+	| cost down asset |
 	
+	asset _ self assets at: aString.
 	cost _ Compiler evaluate: aString , ' optionCost'.
 	down _ cost * 0.2.
 	^ String new writeStream
-		nextPutAll: (Compiler evaluate: aString , ' optionText'); newLine; newLine;
-		 nextPutAll: 'Exercising this option requires $';
-		 nextPutAll: down asInteger printStringWithCommas;
-		 nextPutAll: ' cash'; newLine;
-		 nextPutAll: 'and a loan for $';
-		 nextPutAll: (cost - down) asInteger printStringWithCommas;
-		 contents! !
+		nextPutAll: (Compiler evaluate: aString , ' optionText'); newLine;
+		nextPutAll: 'You have ';
+		nextPutAll: asset quantity asString; 
+		nextPutAll: asset units; 
+		nextPut: $.; newLine; newLine;
+		nextPutAll: 'Exercising this option requires $';
+		nextPutAll: down asInteger printStringWithCommas;
+		nextPutAll: ' cash'; newLine;
+		nextPutAll: 'and a loan for $';
+		nextPutAll: (cost - down) asInteger printStringWithCommas;
+		contents! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 9/10/2011 13:04'!
 options
