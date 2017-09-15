@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 14 September 2017 at 8:12:39 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 6:44:06 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 158!
+!provides: 'Game' 1 159!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -316,6 +316,43 @@ currentPlayer
 currentPlayer: anObject
 	currentPlayer := anObject! !
 
+!Game methodsFor: 'operating' stamp: 'dhn 9/15/2017 18:36:32'!
+declareBroke: aString
+	"Inform that the player named aString is out of cash"
+	
+	GamePopUp 
+		inform: aString , ' is out of cash and must auction 
+assets until cash is no longer negative.'
+		title: 'Out of Cash'! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 9/15/2017 18:32:11'!
+declareOver: aString
+	"Inform that the player named aString is over the debt limit"
+	
+	GamePopUp 
+		inform: (String streamContents: [:str |
+			str
+				nextPutAll: currentPlayer identity;
+				nextPutAll: ' must use cash to bring debt to $';
+				nextPutAll: currentPlayer playerDebtLimit value negated printStringWithCommas;
+				nextPutAll: ' or less.']) 
+		title: 'Debt Too High'! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 9/15/2017 18:42:37'!
+declareWinner
+	"Inform that there is a winner"
+
+	GamePopUp 
+		inform: (String streamContents: [:str |
+			str
+				nextPutAll: self currentPlayer identity;
+				nextPutAll: ' has amassed net assets of more than $';
+				nextPutAll: self goal printStringWithCommas; nextLine;
+				nextPutAll: ' and is the winner of the game.']) 
+		title: 'THE WINNAH!!!!!!!!'.
+	token delete.
+	self won: true! !
+
 !Game methodsFor: 'initialize' stamp: 'dhn 8/31/2017 16:10:39'!
 describeSpaces
 	"Descriptions for the spaces on the board."
@@ -451,6 +488,10 @@ nextPlayer
 !Game methodsFor: 'accessing' stamp: 'dhn 10/2/2016 17:01:38'!
 oldGoal
 	^ self class oldGoal asNumber! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 9/15/2017 18:41:18'!
+outOfAssets
+	^ currentPlayer assets allSatisfy: [:a | a quantity <= 0]! !
 
 !Game methodsFor: 'accessing' stamp: 'dhn 11/4/2011 08:31'!
 outs
