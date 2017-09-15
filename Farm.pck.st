@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 14 September 2017 at 1:47:53 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 14 September 2017 at 8:21:07 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 71!
+!provides: 'Farm' 1 72!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -917,7 +917,7 @@ initialize
 	won _ false
 ! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:16:04'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 14:37:52'!
 lease: aName for: quantity 
 	"Answer the purchased number of cattle on aName lease; account for the cost." 
 	| total down balance who |
@@ -925,7 +925,6 @@ lease: aName for: quantity
 	who _ leases at: aName.
 	who isNil
 		ifTrue: [
-			self halt.
 			total _ quantity * CattleOnLease price.
 			down _ 0.2 * total.
 			balance _ total - down.
@@ -976,15 +975,18 @@ pay: down borrow: balance for: aSymbol amount: qty
 	asset cost: down + balance + asset cost.
 	self updatePlayer! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/6/2017 16:20:56'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/14/2017 19:58:22'!
 payExpense
 	"Account for an expense."
-	| assoc |
+	| assoc asset expense |
 	
 	assoc _ self drawExpense.
+	expense _ assoc key value.
 	GamePopUp inform: assoc value title: 'Expense'.
-	currentPlayer perform: assoc key key withArguments: {assoc key value}.
+	currentPlayer perform: assoc key key with: expense.
 	currentPlayer expenseCount: 1 +  currentPlayer expenseCount.
+	asset _ currentPlayer assets at: (self class harvestSeason at: currentPlayer position).
+	asset cost: asset cost + expense negated.
 	self triggerEvent: #itemChange.
 	self disableAll: {'Expense'}.
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]! !
@@ -2538,7 +2540,7 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:36:05'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/14/2017 19:04:16'!
 moonMove
 	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
 	| oldPos newPos index n posns limit i final |
@@ -2553,7 +2555,6 @@ moonMove
 	n _ oldPos.
 	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
 	posns _ posns asArray.
-	{posns} print.
 	model positionBoardTo: posns first.
 	
 	self arrowRight.
@@ -2598,7 +2599,7 @@ position: aCell
 	horiz _ (model cells at: aCell) morphPosition x.
 	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:39:53'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/14/2017 19:04:41'!
 springMove
 	"Animate relocation to Spring Planting when player lands on space 8"
 	| oldPos posns limit i final |
@@ -2607,8 +2608,6 @@ springMove
 	oldPos _ model currentPlayer oldPosition.
 	self arrowRight.
 	posns _ (Interval from: oldPos to: final - who roll by: 1) asArray.
-	{oldPos. who roll} print.
-	{posns} print.
 	limit _ posns size.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :unused |
@@ -3628,12 +3627,11 @@ player: anObject
 	
 	player _ anObject! !
 
-!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 10:13:04'!
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/14/2017 15:16:50'!
 reportFor: aName
 	"Answer the status report for anAsset"
-	| property player asset col |
+	| property asset col |
 	
-	player _ model currentPlayer.
 	property _ player assets at: aName ifAbsent: [^ 'No such asset named ', aName].
 	asset _ self class translate: aName.
 	col _ (player harvests) select: [:ea | ea assetName = asset].
@@ -3662,7 +3660,14 @@ startButtons
 		padding: #center.
 ! !
 
-!AssetView class methodsFor: 'class initialization' stamp: 'dhn 9/13/2017 11:35:11'!
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/14/2017 19:22:26'!
+updateStatus
+	"Show the latest status of the selected asset"
+	
+	assetReport _ self reportFor: (self class statusList at: assetItem).
+	textPane model actualContents: assetReport! !
+
+!AssetView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 15:27:25'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
 	| win |
@@ -3670,6 +3675,7 @@ openOn: aModel
 	win _ self open: aModel.
 	win removeWindowMenu.
 			
+	aModel when: #itemChange send: #updateStatus to: win.
 	aModel when: #deleteOpenWindows send: #endIt to: win.
 	
 	^ win
@@ -4020,7 +4026,7 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:25:16'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 15:12:22'!
 buy
 	"Purchase an asset"
 	| key method amt |
@@ -4036,6 +4042,7 @@ buy
 			"remove option from player"
 			player options: (self optionsList remove: key; yourself).
 			player priorOptions: player options copy.
+			model triggerEvent: #itemChange.
 	
 			"put the option in the 'discard pile' "
 			model exercisedOptions add: key.
@@ -4278,10 +4285,12 @@ rate: anObject
 
 	rate := anObject! !
 
-!Crop methodsFor: 'accessing' stamp: 'dhn 9/13/2017 14:00:18'!
+!Crop methodsFor: 'accessing' stamp: 'dhn 9/14/2017 20:17:15'!
 reportAsAssetFor: aPlayer 
+	"Answer the status report for a crop"
 	| str |
-	str := String new writeStream.
+	
+	str _ String new writeStream.
 	str nextPutAll: (self quantity roundTo: 1) asString;
 		nextPutAll: ' acres';	newLine;
 		nextPutAll: '$' , self cost asInteger printStringWithCommas;
@@ -5264,17 +5273,21 @@ initialize
 	options _ OrderedCollection new.
 	history _ OrderedCollection with: self netAssets! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 11/23/2014 12:02'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/14/2017 18:40:56'!
 interest: aRate
+	"Answer the amount of interest = debt * aRate"
 	| int |
-	0 > self debt ifTrue: [
-		int := (aRate * self debt negated) roundTo:  1.
-		self tally: int negated.
-		self paidInterest: 1 + self paidInterest.
-		self interestPd: int + self interestPd.
-		]
-	ifFalse: [self avoidedDebt: 1 + self avoidedDebt].
-! !
+	
+	0 > self debt
+		ifTrue: [
+			int _ (aRate * self debt negated) roundTo:  1.
+			self tally: int negated.
+			self paidInterest: 1 + self paidInterest.
+			self interestPd: int + self interestPd]
+		ifFalse: [
+			int _ 0.
+			self avoidedDebt: 1 + self avoidedDebt].
+	^ int! !
 
 !Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/16/2014 18:56'!
 leasesHeld
