@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 12:00:54 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 3:26:50 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 74!
+!provides: 'Farm' 1 76!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -90,6 +90,16 @@ FarmingView subclass: #OptionsView
 	category: 'Farm-Graphics'!
 !classDefinition: 'OptionsView class' category: #'Farm-Graphics'!
 OptionsView class
+	instanceVariableNames: ''!
+
+!classDefinition: #YouView category: #'Farm-Graphics'!
+FarmingView subclass: #YouView
+	instanceVariableNames: 'textPane buttonArea ackButton player'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'YouView class' category: #'Farm-Graphics'!
+YouView class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmAsset category: #'Farm-Model'!
@@ -387,6 +397,9 @@ A FarmingGame window which makes it possible for players to reduce debt.!
 
 !OptionsView commentStamp: 'dhn 8/26/2016 16:48:51' prior: 0!
 A FarmingGame view which makes it possible for farmers to exercise options.!
+
+!YouView commentStamp: '<historical>' prior: 0!
+A FarmingGame view which shows the option which was drawn.!
 
 !FarmAsset commentStamp: '<historical>' prior: 0!
 The model for an asset of the farm.!
@@ -2665,7 +2678,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/12/2017 15:21:56'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:49:49'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2686,6 +2699,7 @@ buildMorphicWindow
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
 	model when: #showDraw send: #showDraw: to: self with: #option.
 	model when: #showAssets send: #showAssets to: self.
+	model when: #showYourself send: #showYourself to: self.
 ! !
 
 !FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
@@ -3163,6 +3177,25 @@ showSeasons: associations
 			txt contents: sea desc.
 			set add: txt].
 	^ set! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 15:13:33'!
+showYourself
+	"Show window for player's statistics"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ YouView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: (pl identity, '''s Status');
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				updatePerformance;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 280]! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:35:45'!
 startButtonSet
@@ -3704,9 +3737,9 @@ ack
 	model triggerEvent: #optionDrawn.
 	self delete! !
 
-!DrawView methodsFor: 'initialization' stamp: 'dhn 9/10/2017 17:51:13'!
+!DrawView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:45:20'!
 buildMorphicWindow
-	"Lay out the window for purchases"
+	"Lay out the window for the drawn option"
 	
 	self layoutMorph beColumn.
 			
@@ -4241,7 +4274,7 @@ optionsDesc
 		at: #Toppenish put: Toppenish new;
 		yourself! !
 
-!OptionsView class methodsFor: 'database' stamp: 'dhn 9/15/2017 11:20:46'!
+!OptionsView class methodsFor: 'database' stamp: 'dhn 9/15/2017 12:11:29'!
 translate: aName
 	"Answer a name suited for option reporting, translated from aName"
 	
@@ -4251,13 +4284,100 @@ translate: aName
 		at: #Fruit put: #Cherries; 	"same as Apples"
 		at: #Tractor put: #Tractor;
 		at: #Harvester put: #Harvester;
-		at: #Livestock put: #Livestock;
+		at: #Livestock put: #CattleOnFarm;
 		at: #Ahtanum put: #Ahtanum;
 		at: #Rattlesnake put: #Rattlesnake;
 		at: #Cascade put: #Cascade;
 		at: #Toppenish put: #Toppenish;
 		yourself)
 			at: aName! !
+
+!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:44:00'!
+ack
+	"Acknowledge what is in the text pane and close the receiver"
+	
+	self delete! !
+
+!YouView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:44:33'!
+buildMorphicWindow
+	"Lay out the window for player status"
+	
+	self layoutMorph beColumn.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	layoutMorph
+		addMorph: textPane;
+		addMorph: buttonArea! !
+
+!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:34:54'!
+closeBoxHit
+
+	super closeBoxHit! !
+
+!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:34:54'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
+!YouView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 14:36:00'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
+
+!YouView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:34:54'!
+startButtons
+	"Set the button for acknowledging an option"
+	
+	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
+	ackButton 
+		morphExtent: 70@20;
+		setBalloonText: 'acknowledge receipt'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: ackButton;
+		padding: #center.
+! !
+
+!YouView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 14:40:37'!
+updatePerformance
+	"Show the latest status of the current player"
+	
+	textPane model actualContents: player reportYourself ! !
+
+!YouView class methodsFor: 'class initialization' stamp: 'dhn 9/15/2017 14:46:49'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+	
+	aModel when: #itemChange send: #updatePerformance to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
 
 !FarmAsset methodsFor: 'as yet unclassified' stamp: 'dhn 9/23/2014 13:18'!
 assetValue
@@ -4745,10 +4865,11 @@ buy 20 pregnant cows to stock it
 at $500 each
 Total $', self optionCost printStringWithCommas! !
 
-!Cascade methodsFor: 'as yet unclassified' stamp: 'dhn 1/23/2014 15:30'!
+!Cascade methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 12:46:45'!
 initialize
+
 	super initialize.
-	description := 'Cascade', where! !
+	description _ 'Cascades'! !
 
 !Cascade class methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 13:11'!
 auctionQuantity
@@ -5468,59 +5589,61 @@ removeOptionAt: aName
 		ifAbsent: [self halt];
 		yourself! !
 
-!Farmer methodsFor: 'accessing' stamp: 'dhn 9/1/2017 14:06:41'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/15/2017 15:22:29'!
 reportYourself
+	"Answer the status of the receiver"
 	| str exp |
-	exp := self outFlow negated.
-	str := String new writeStream.
+	
+	exp _ self outFlow negated.
+	str _ String new writeStream.
 	str nextPutAll: '$' , self inFlow asInteger printStringWithCommas;
-		 nextPutAll: ' farm income';
-		 newLine;
-		 nextPutAll: '$' , self offFarm asInteger printStringWithCommas;
-		 nextPutAll: ' off-farm income';
-		 newLine;
-		 nextPutAll: '$' , (exp roundTo:  1) printStringWithCommas;
-		 nextPutAll: ' expense';
-		 newLine.
+		nextPutAll: ' farm income';
+		newLine;
+		nextPutAll: '$' , self offFarm asInteger printStringWithCommas;
+		nextPutAll: ' off-farm income';
+		newLine;
+		nextPutAll: '$' , (exp roundTo:  1) printStringWithCommas;
+		nextPutAll: ' expense';
+		newLine.
 	self expenseCount > 0
 		ifTrue: [str nextPutAll: '$' , (exp // self expenseCount roundTo:  1) printStringWithCommas;
-				 nextPutAll: ' average expense';
-				 newLine].
+				nextPutAll: ' average expense';
+				newLine].
 	exp ~= 0
-		ifTrue: [str nextPutAll: (self inFlow / exp printOn: str fractionDigits: 2) asString;
-				 nextPutAll: ' = farm income to expense ratio';
-				 newLine].
+		ifTrue: [str nextPutAll: (self inFlow / exp printStringFractionDigits: 2);
+				nextPutAll: ' = farm income to expense ratio';
+				newLine].
 	str nextPutAll: '$' , self interestPd asInteger printStringWithCommas;
-		 nextPutAll: ' interest paid';
-		 newLine;
-		 nextPutAll: self paidInterest asString;
-		 nextPutAll: ' occasions interest was paid';
-		 newLine.
+		nextPutAll: ' interest paid';
+		newLine;
+		nextPutAll: self paidInterest asString;
+		nextPutAll: ' occasions interest was paid';
+		newLine.
 	self paidInterest = 0
 		ifFalse: [str nextPutAll: '$' , (self interestPd / self paidInterest roundTo:  1) printStringWithCommas;
-				 nextPutAll: ' = average interest payment';
-				 newLine].
+				nextPutAll: ' = average interest payment';
+				newLine].
 	^ str nextPutAll: self avoidedDebt asString;
-		 nextPutAll: ' times interest was avoided';
-		 newLine;
-		 nextPutAll: self emergencies asString;
-		 nextPutAll: ' emergency loans obtained';
-		 newLine;
-		 nextPutAll: self options size asString;
-		 nextPutAll: ' options held';
-		 newLine;
-		 nextPutAll: self garnish asString;
-		 nextPutAll: ': being garnished';
-		 newLine;
-		 nextPutAll: '$' , (exp / (self years + 1) roundTo:  1) printStringWithCommas;
-		 nextPutAll: ' average yearly expense';
-		 newLine;
-		 nextPutAll: (self turns / (self years + 1) printOn: str fractionDigits:  1) asString;
-		 nextPutAll: ' turns per year';
-		 newLine;
-		 nextPutAll: self years asString;
-		 nextPutAll: ' full years farming';
-		 newLine;
+		nextPutAll: ' times interest was avoided';
+		newLine;
+		nextPutAll: self emergencies asString;
+		nextPutAll: ' emergency loans obtained';
+		newLine;
+		nextPutAll: self priorOptions size asString;
+		nextPutAll: ' options held';
+		newLine;
+		nextPutAll: 'Garnished: ';
+		nextPutAll: self garnish asString;
+		newLine;
+		nextPutAll: '$' , (exp / (self years + 1) roundTo:  1) printStringWithCommas;
+		nextPutAll: ' average yearly expense';
+		newLine;
+		nextPutAll: (self turns / (self years + 1) printStringFractionDigits: 1);
+		nextPutAll: ' turns per year';
+		newLine;
+		nextPutAll: self years asString;
+		nextPutAll: ' full years farming';
+		newLine;
 		contents! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 11/30/2014 15:24'!
