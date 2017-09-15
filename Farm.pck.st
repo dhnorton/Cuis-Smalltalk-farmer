@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 3:26:50 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 4:22:49 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 76!
+!provides: 'Farm' 1 77!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -50,6 +50,16 @@ SystemWindow subclass: #FarmingView
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmingView class' category: #'Farm-Graphics'!
 FarmingView class
+	instanceVariableNames: ''!
+
+!classDefinition: #AllView category: #'Farm-Graphics'!
+FarmingView subclass: #AllView
+	instanceVariableNames: 'textPane buttonArea ackButton player'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'AllView class' category: #'Farm-Graphics'!
+AllView class
 	instanceVariableNames: ''!
 
 !classDefinition: #AssetView category: #'Farm-Graphics'!
@@ -386,6 +396,9 @@ http://farmgame.com/product/woo-single-2/
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
 
+!AllView commentStamp: '<historical>' prior: 0!
+A FarmingGame view which shows a report on all players.!
+
 !AssetView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the status of a player's assets.!
 
@@ -399,7 +412,7 @@ A FarmingGame window which makes it possible for players to reduce debt.!
 A FarmingGame view which makes it possible for farmers to exercise options.!
 
 !YouView commentStamp: '<historical>' prior: 0!
-A FarmingGame view which shows the option which was drawn.!
+A FarmingGame view which shows the current player's status.!
 
 !FarmAsset commentStamp: '<historical>' prior: 0!
 The model for an asset of the farm.!
@@ -1066,22 +1079,6 @@ limit and is out of the game'
 		ifTrue: [GamePopUp inform: self players first identity , ' has won the game by default.' title: 'WE HAVE A WINNER!!'.
 			self disableAll: {'Pay Loan'. 'End Turn'. 'Option'. 'Expense'. 'Fate'. 'Harvest'. 'Move'}.
 			self won: true]! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:37:18'!
-reportAllPlayers
-	| str |
-	str := String new writeStream.
-	self players
-		do: [:pl | str newLine; 
-			nextPutAll: pl identity, ':'; newLine;
-			nextPutAll: pl years asString; 
-			nextPutAll: ' years as a farmer'; newLine; 
-			nextPutAll: '$' , (pl netAssets roundTo: 1) printStringWithCommas; 
-			nextPutAll: ' net assets'; newLine;
-			 nextPutAll: pl options size asString;
-			 nextPutAll: ' options held'; newLine.
-			].
-	^ str contents! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/19/2014 16:20'!
 reportProgress
@@ -2678,7 +2675,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:49:49'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:17:18'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2700,6 +2697,7 @@ buildMorphicWindow
 	model when: #showDraw send: #showDraw: to: self with: #option.
 	model when: #showAssets send: #showAssets to: self.
 	model when: #showYourself send: #showYourself to: self.
+	model when: #showEverybody send: #showEverybody to: self.
 ! !
 
 !FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
@@ -3110,6 +3108,25 @@ showDraw: anObject
 		details: anObject;
 		morphPosition: self windowPosition;
 		morphExtent: 300 @ 220! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 16:19:24'!
+showEverybody
+	"Show window for all player's statistics"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ AllView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: 'All Players';
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				updateEverybody;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 250]! !
 
 !FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 17:12:17'!
 showLoan
@@ -3571,6 +3588,108 @@ viewPosition
 	
 	^ 200@-50! !
 
+!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
+ack
+	"Acknowledge what is in the text pane and close the receiver"
+	
+	self delete! !
+
+!AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
+buildMorphicWindow
+	"Lay out the window for player status"
+	
+	self layoutMorph beColumn.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	layoutMorph
+		addMorph: textPane;
+		addMorph: buttonArea! !
+
+!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
+closeBoxHit
+
+	super closeBoxHit! !
+
+!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
+!AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:08:04'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
+
+!AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:13:08'!
+reportAllPlayers
+	"Answer a report on all players"
+	
+	^ String streamContents: [:str |
+		model players
+			do: [:pl | str newLine; 
+				nextPutAll: pl identity, ':'; newLine;
+				nextPutAll: pl years asString; 
+				nextPutAll: ' years as a farmer'; newLine; 
+				nextPutAll: '$' , (pl netAssets roundTo: 1) printStringWithCommas; 
+				nextPutAll: ' net assets'; newLine;
+				nextPutAll: pl priorOptions size asString;
+				nextPutAll: ' options held'; newLine]]! !
+
+!AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
+startButtons
+	"Set the button for acknowledging an option"
+	
+	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
+	ackButton 
+		morphExtent: 70@20;
+		setBalloonText: 'acknowledge receipt'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: ackButton;
+		padding: #center.
+! !
+
+!AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:11:43'!
+updateEverybody
+	"Show the latest status of all players"
+	
+	textPane model actualContents: self reportAllPlayers ! !
+
+!AllView class methodsFor: 'class initialization' stamp: 'dhn 9/15/2017 16:10:42'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+	
+	aModel when: #itemChange send: #updateEverybody to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
 !AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 10:57:33'!
 assetItem
 	"Answer the value of assetItem"
@@ -3729,12 +3848,13 @@ translate: aName
 	^ 'Livestock'
 ! !
 
-!DrawView methodsFor: 'termination' stamp: 'dhn 9/14/2017 13:34:27'!
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/15/2017 15:33:00'!
 ack
 	"Acknowledge what is in the text pane and close the receiver"
 	
 	model currentPlayer priorOptions: model currentPlayer options copy.
 	model triggerEvent: #optionDrawn.
+	model triggerEvent: #itemChange.
 	self delete! !
 
 !DrawView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:45:20'!
