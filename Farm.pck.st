@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 6:04:22 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 6:47:49 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 80!
+!provides: 'Farm' 1 81!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -3252,7 +3252,7 @@ defaultGoal
 	^ 250000.
 ! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 12/8/2011 10:58'!
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 18:20:04'!
 expenseDesc
 	"Answer the description of each expense."
 	| temp |
@@ -3280,7 +3280,7 @@ PAY $3,000'].
 2 timesRepeat: [temp add:(#interest:->0.1)->'Semi-annual interest due. 
 PAY 10% on Bank Notes on hand'].
 
-2 timesRepeat: [temp add:(#noTractor:->2000)->'Custom hire bill due,
+2 timesRepeat: [temp add:(#noTractor:->2000 negated)->'Custom hire bill due,
 PAY $2,000 if you do not own a Tractor'].
 
 2 timesRepeat: [temp add:(#noHarvester:->2000)->'Custom hire bill due,
@@ -3306,7 +3306,7 @@ PAY $500 per cow'.
 	
 		^temp! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 6/25/2013 13:42'!
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 18:21:16'!
 fatesDesc
 	"Answer the description of each Farmer's Fate."
 	^{
@@ -3329,9 +3329,9 @@ for your best hay to feed their fancy show horses. COLLECT $100 per Hay acre.'.
 
 (#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
 
-(#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
+(#noTractor:->-3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
 
-(#noHarvester:->2500)->'The President slaps on a Grain Embargo while you''re waiting for the custom harvester to show up. 
+(#noHarvester:->-2500)->'The President slaps on a Grain Embargo while you''re waiting for the custom harvester to show up. 
 Instant market collapse. PAY $2,500 if you don''t own your own Harvester'.
 
 (#slaughterCows:->nil)->'A leaking electrical motor at Feed Mill contaminates your load of feed with PCB. 
