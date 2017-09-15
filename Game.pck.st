@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 8 September 2017 at 6:27:05 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 14 September 2017 at 8:12:39 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 157!
+!provides: 'Game' 1 158!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -2131,8 +2131,10 @@ rollStats: aRoll
 	self turns: 1 + self turns. 
 	self mgr triggerEvent: #itemChange! !
 
-!Gamer methodsFor: 'statistics' stamp: 'dhn 4/26/2012 17:52'!
+!Gamer methodsFor: 'statistics' stamp: 'dhn 9/14/2017 18:43:02'!
 tally: anAmount
+	"Answer anAmount after accounting for it"
+	
 	self cash: anAmount + self cash.
 	anAmount > 0 
 		ifTrue: [self inFlow: anAmount + self inFlow]
@@ -2141,6 +2143,7 @@ tally: anAmount
 		ifTrue: [
 		self mgr updatePlayer.
 		self tally: self emergencyLoan].
+	^ anAmount
 ! !
 
 !Gamer methodsFor: 'statistics' stamp: 'dhn 4/25/2012 21:00'!
