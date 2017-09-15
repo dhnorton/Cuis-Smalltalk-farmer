@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 4:37:49 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 6:04:22 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 78!
+!provides: 'Farm' 1 80!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -3014,20 +3014,19 @@ showAssets
 				morphPosition: self windowPosition;
 				morphExtent: 300 @ 220]! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/11/2017 21:45:55'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 17:52:12'!
 showDraw: anObject
 	"Show window with description of an option"
 	| pl win |
 		
 	pl _ model currentPlayer.
 	win _ DrawView openOn: model.
-	win openInWorld: pasteup.
+	win openInHand.
 	win
 		setLabel: ('Option for ', pl identity);
 		setWindowColor: pl color;
 		startButtons;
 		details: anObject;
-		morphPosition: self windowPosition;
 		morphExtent: 300 @ 220! !
 
 !FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 16:19:24'!
@@ -4464,7 +4463,7 @@ rate: anObject
 
 	rate := anObject! !
 
-!Crop methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:41:21'!
+!Crop methodsFor: 'operating' stamp: 'dhn 9/15/2017 17:44:49'!
 reportAsAssetFor: aPlayer 
 	"Answer the status report for a crop"
 	| str |
@@ -4482,8 +4481,7 @@ reportAsAssetFor: aPlayer
 		nextPutAll: self count asString , ' = number of harvests'; newLine;
 		nextPutAll: self missed asString , ' = missed harvests'; newLine.
 	self count = 0
-		ifFalse: [str nextPutAll: (self quality / self count printOn: str fractionDigits: 1) asString
-					, ' = average harvest quality'].
+		ifFalse: [str nextPutAll: ((self quality / self count) printStringFractionDigits: 1), ' = average harvest quality'].
 	^ str contents! !
 
 !Crop methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:41:03'!
@@ -4758,7 +4756,7 @@ initialize
 	super initialize.
 ! !
 
-!Livestock methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:59:15'!
+!Livestock methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 18:03:43'!
 reportAsAssetFor: aPlayer
 	| str |
 	
@@ -4775,7 +4773,7 @@ reportAsAssetFor: aPlayer
 		 nextPutAll: self missed asString , ' = missed harvests'; newLine;		
 		nextPutAll: (self profit: self gross orLoss: self cost); newLine.
 	self count = 0
-		ifFalse: [str nextPutAll: (self quality / self count printOn: str fractionDigits: 1)
+		ifFalse: [str nextPutAll: (self quality / self count printStringFractionDigits: 1)
 					, ' = average harvest quality'].
 	^ str contents! !
 
