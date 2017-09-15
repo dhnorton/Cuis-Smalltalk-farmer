@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 4:22:49 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 4:37:49 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 77!
+!provides: 'Farm' 1 78!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1189,43 +1189,6 @@ setupPlayer: aName color: aColor
 	
 ! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:59'!
-setupToken: aPlayer
-	"Set the token for aPlayer."
-	token := FarmToken new.
-	super setupToken: aPlayer
-! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/20/2014 10:11'!
-showEverybody
-	"List all players."
-	| xw name pane text |
-	name := 'Everybody'.
-	(xw := self windowNamed: name)
-		ifNil: [
-			windows add: ((xw := CustomSystemWindow labelled: 'All Players')
-				removeMenuBox;
-				model: self;
-				layoutPolicy: ProportionalLayout new;
-				refreshMessage: #updateEverybodyIn:;
-				endReceiver: self;
-				endMessage: #deleteWindow: with: name;
-				setWindowColor: currentPlayer tokenColor;
-				extent: 250 @ (50 + (100 * players size));
-				center: self arena center).
-			pane := (PasteUpMorph new).
-			pane addMorph: (text := TextMorph new) fullFrame: (LayoutFrame fractions: (0 @ 0 corner: 1 @ 1)).
-			xw addMorph: pane fullFrame: (LayoutFrame fractions: (0 @ 0 corner: 1 @ 1)).
-			self arena addMorph: xw.
-			text 
-				width: text owner width;
-				margins: 8@8;
-				newContents: self reportAllPlayers.
-			text extension locked: true.
-			xw extension externalName: name]
-		ifNotNil: [xw comeToFront].
-	^ xw! !
-
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/20/2014 09:50'!
 showProgress
 	"Plot all player's net worth vs number of turns."
@@ -1259,36 +1222,6 @@ showProgress
 			xw model reportProgress]
 		ifNotNil: [xw comeToFront].
 ! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/20/2014 10:09'!
-showYourself
-	"Open a window showing a player's statistics."
-	| xw name pane text |
-	name := 'Player'.
-	(xw := self windowNamed: name)
-		ifNil: [
-			windows add: ((xw := CustomSystemWindow labelled: currentPlayer identity , '''s Statistics')
-				removeMenuBox;
-				model: self;
-				layoutPolicy: ProportionalLayout new;
-				refreshMessage: #updatePlayerIn:;
-				endReceiver: self;
-				endMessage: #deleteWindow: with: name;
-				setWindowColor: currentPlayer tokenColor;
-				extent: 375 @ 380;
-				center: self arena center).
-			pane := (PasteUpMorph new).
-			pane addMorph: (text := TextMorph new) fullFrame: (LayoutFrame fractions: (0 @ 0 corner: 1 @ 1)).
-			xw addMorph: pane fullFrame: (LayoutFrame fractions: (0 @ 0 corner: 1 @ 1)).
-			self arena addMorph: xw.
-			text 
-				width: text owner width;
-				margins: 8@8;
-				newContents: self currentPlayer reportYourself.
-			text extension locked: true.
-			xw extension externalName: name]
-		ifNotNil: [xw comeToFront].
-	^ xw! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/4/2017 16:14:59'!
 space1
@@ -1926,12 +1859,6 @@ tractor: quantity
 		amount: Tractor auctionQuantity.
 	^ quantity! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 15:53'!
-updateEverybodyIn: aWindow
-	"Bring window showing all players up to date"
-		((aWindow findA: PasteUpMorph) findA: TextMorph)
-			newContents: self reportAllPlayers! !
-
 !Farm methodsFor: 'operating' stamp: 'dhn 8/31/2017 16:59:12'!
 updateHistory
 	"Change player's history"
@@ -1948,12 +1875,6 @@ updatePlayer
 	"Make the screen show the latest numbers."
 	
 	self triggerEvent: #itemChange! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/17/2014 15:36'!
-updatePlayerIn: aWindow
-	"Bring window showing the current player's statistics up to date"
-		((aWindow findA: PasteUpMorph) findA: TextMorph)
-			newContents: currentPlayer reportYourself! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/19/2014 16:53'!
 updateProgressIn: aWindow
