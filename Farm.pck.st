@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 6:47:49 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 7:55:22 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 81!
+!provides: 'Farm' 1 82!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -70,6 +70,16 @@ FarmingView subclass: #AssetView
 	category: 'Farm-Graphics'!
 !classDefinition: 'AssetView class' category: #'Farm-Graphics'!
 AssetView class
+	instanceVariableNames: ''!
+
+!classDefinition: #AuctionView category: #'Farm-Graphics'!
+FarmingView subclass: #AuctionView
+	instanceVariableNames: 'textPane heading chant buyers cancelButton endButton beginButton buttonsArea currentBid currentBidder begun going'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'AuctionView class' category: #'Farm-Graphics'!
+AuctionView class
 	instanceVariableNames: ''!
 
 !classDefinition: #DrawView category: #'Farm-Graphics'!
@@ -401,6 +411,9 @@ A FarmingGame view which shows a report on all players.!
 
 !AssetView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the status of a player's assets.!
+
+!AuctionView commentStamp: '<historical>' prior: 0!
+An abstract class for auctions.!
 
 !DrawView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the option which was drawn.!
@@ -3767,6 +3780,131 @@ translate: aName
 		detect: [:a | a = aName] ifNone: [^ aName].
 	^ 'Livestock'
 ! !
+
+!AuctionView methodsFor: 'operation' stamp: 'dhn 10/29/2016 19:56:18'!
+beat: aSymbol
+	"Produce the auctioneer's chant; perform aSymbol when limit is exceeded"
+	| limit |
+	
+	limit _ 4.
+	self when: #morphicStep evaluate: [ :delta |
+		self going: self going + 1.
+		self going <= limit 
+			ifTrue: [
+				self going > 1 ifTrue: [
+					chant addFirst: (String streamContents: [:str |
+					str
+						nextPutAll: '...going ';
+						nextPutAll: (self class degree: self going); newLine]).
+				self showChant]]
+			ifFalse: [
+				self stopStepping.
+				self perform: aSymbol.
+				self removeActionsForEvent: #morphicStep]].
+	self startSteppingStepTime: model chantBeat. 	"time between chants"! !
+
+!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 12:12:29'!
+buyers
+	"Answer the value of buyers"
+	
+	^ buyers! !
+
+!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 15:38:10'!
+currentBid
+	"Answer the value of currentBid"
+	
+	currentBid ifNil: [currentBid _ 0].
+	^ currentBid! !
+
+!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 20:53:45'!
+currentBid: anObject
+	"Set the value of currentBid"
+	
+	currentBid _ anObject! !
+
+!AuctionView methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:31:27'!
+going
+	"Answer the value of going"
+	
+	going ifNil: [going _ 0].
+	^ going! !
+
+!AuctionView methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:33:12'!
+going: anObject
+	"Set the value of going"
+	
+	going _ anObject
+! !
+
+!AuctionView methodsFor: 'initialization' stamp: 'dhn 10/27/2016 19:53:59'!
+initialize
+
+	super initialize.
+	begun _ false! !
+
+!AuctionView methodsFor: 'buttons' stamp: 'dhn 9/16/2016 11:36:50'!
+makeBeginButton
+	"Answer the 'Begin Auction' button"
+	
+	beginButton _ GameButtonMorph label: 'Begin' action: #beginAuction state: false model: self.
+	beginButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Assemble the bidders and begin the auction'.
+	^ beginButton! !
+
+!AuctionView methodsFor: 'buttons' stamp: 'dhn 9/17/2016 12:38:21'!
+makeCancelButton
+	"Answer the 'Cancel' button"
+
+	^ (cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self)
+		morphExtent: 70@20;
+		setBalloonText: 'Forget about continuing the auction.'! !
+
+!AuctionView methodsFor: 'buttons' stamp: 'dhn 9/19/2016 14:32:20'!
+makeEndButton
+	"Answer the 'End' button"
+	
+	endButton _ GameButtonMorph label: 'End' action: #endIt state: false model: self.
+	endButton 
+		morphExtent: 70@20;
+		setBalloonText: 'End the auction.'.
+	^ endButton! !
+
+!AuctionView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 12:46:07'!
+setUpBuyers
+	"Answer the layout for the buyers buttons"
+	
+	^ (LayoutMorph newRow)
+		name: #buyers;
+		padding: #center;
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center)! !
+
+!AuctionView methodsFor: 'operation' stamp: 'dhn 9/18/2016 16:16:04'!
+showChant
+	"Write the auction 'transcript' to the text pane"
+	| record |
+
+	record _ String new writeStream.
+	chant do: [:ea | record nextPutAll: ea].
+	textPane model actualContents: record contents! !
+
+!AuctionView methodsFor: 'buttons' stamp: 'dhn 11/13/2016 13:55:05'!
+soldEndButtons
+	"Replace buttons with the End button"
+	
+	buttonsArea
+		removeAllMorphs;
+		addMorph: self makeEndButton;
+		padding: #center! !
+
+!AuctionView class methodsFor: 'data base' stamp: 'dhn 10/29/2016 19:47:56'!
+degree: anIndex
+	"Translate anIndex to auctioneer's chant verbage "
+	
+	^ #(nil 'once' 'twice' 'three times') at: anIndex! !
 
 !DrawView methodsFor: 'termination' stamp: 'dhn 9/15/2017 15:33:00'!
 ack
