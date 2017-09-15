@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 6:44:06 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 15 September 2017 at 7:26:45 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 159!
+!provides: 'Game' 1 160!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -488,10 +488,6 @@ nextPlayer
 !Game methodsFor: 'accessing' stamp: 'dhn 10/2/2016 17:01:38'!
 oldGoal
 	^ self class oldGoal asNumber! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 9/15/2017 18:41:18'!
-outOfAssets
-	^ currentPlayer assets allSatisfy: [:a | a quantity <= 0]! !
 
 !Game methodsFor: 'accessing' stamp: 'dhn 11/4/2011 08:31'!
 outs
@@ -2111,6 +2107,12 @@ outFlow: anObject
 	"Set the value of outFlow"
 
 	outFlow := anObject! !
+
+!Gamer methodsFor: 'operating' stamp: 'dhn 9/15/2017 18:55:12'!
+outOfAssets
+	"Answer whether the receiver is out of assets"
+	
+	^ assets allSatisfy: [:a | a quantity <= 0]! !
 
 !Gamer methodsFor: 'statistics' stamp: 'dhn 4/25/2012 20:55'!
 paidInterest
