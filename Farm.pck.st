@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 16 September 2017 at 8:45:23 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 17 September 2017 at 8:37:30 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 90!
+!provides: 'Farm' 1 94!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1936,10 +1936,41 @@ wonButtonsState
 	self enableAll: {'End Turn'}.
 ! !
 
+!Farm class methodsFor: 'database' stamp: 'dhn 9/17/2017 20:32:42'!
+alternativeTo: aName
+	"Answer an option name which is an alternative to aName"
+
+		^ self assetOption at: aName! !
+
+!Farm class methodsFor: 'database' stamp: 'dhn 9/17/2017 20:32:06'!
+anotherNameFor: aName
+	"Answer an asset name which is an alternative to aName"
+
+		^ self assetOption keyAtValue: aName! !
+
 !Farm class methodsFor: 'database' stamp: 'dhn 9/12/2017 14:35:26'!
 assetList
 	"Answer the list of assets in order suitable for auction."
 	^ #('Hay' 'Grain' 'Fruit' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
+
+!Farm class methodsFor: 'database' stamp: 'dhn 9/17/2017 20:32:25'!
+assetOption
+	"Answer the relationship between asset and option names"
+
+		^ Dictionary new
+			at: #Hay put: #Hay;
+			at: #Wheat put: #Grain;
+			at: #Corn put: #Grain;
+			at: #Cherries put: #Fruit;
+			at: #Apples put: #Fruit;
+			at: #Tractor put: #Tractor;
+			at: #Harvester put: #Harvester;
+			at: #CattleOnFarm put: #Livestock;
+			at: #Ahtanum put: #Ahtanum;
+			at: #Rattlesnake put: #Rattlesnake;
+			at: #Cascade put: #Cascade;
+			at: #Toppenish put: #Toppenish;
+			yourself! !
 
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:18:31'!
 cellsForGame
@@ -2367,7 +2398,7 @@ season
 			color: Color yellow; range: 47 @ 49);
 		yourself! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:15:23'!
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/17/2017 14:29:55'!
 translate: aName
 	"Answer a name suited for auctioning or buying, translated from aName"
 	
@@ -2377,7 +2408,7 @@ translate: aName
 		at: #Fruit put: #Cherries; 	"same as Apples"
 		at: #Tractor put: #Tractor;
 		at: #Harvester put: #Harvester;
-		at: #Livestock put: #CattleOnFarm;
+		at: #CattleOnFarm put: #CattleOnFarm;
 		at: #Ahtanum put: #Ahtanum;
 		at: #Rattlesnake put: #Rattlesnake;
 		at: #Cascade put: #Cascade;
@@ -2642,7 +2673,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/15/2017 21:44:46'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/17/2017 19:48:26'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2666,6 +2697,7 @@ buildMorphicWindow
 	model when: #showYourself send: #showYourself to: self.
 	model when: #showEverybody send: #showEverybody to: self.
 	model when: #showAuctionAssets send: #showAuctionAssets to: self.
+	model when: #showAuctionOptions send: #showAuctionOptions to: self.
 ! !
 
 !FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
@@ -3078,6 +3110,14 @@ showAuctionAssets
 				morphPosition: self windowPosition;
 				morphExtent: 300 @ 220.
 			model triggerEvent: #itemChange]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/17/2017 20:33:22'!
+showAuctionOptions
+	"Show window for auctioning options"
+	| pl |
+
+	pl _ model currentPlayer.
+	pl options do: [:ea | {(pl assets at: (Farm anotherNameFor: ea)) forOptionAuction} print]! !
 
 !FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 17:52:12'!
 showDraw: anObject
@@ -4911,9 +4951,38 @@ openOn: aModel
 	^ win
 ! !
 
-!FarmAsset methodsFor: 'as yet unclassified' stamp: 'dhn 9/23/2014 13:18'!
+!FarmAsset methodsFor: 'operating' stamp: 'dhn 9/17/2017 16:43:54'!
 assetValue
 	^self class price * (self quantity / 2)! !
+
+!FarmAsset methodsFor: 'operating' stamp: 'dhn 9/17/2017 20:36:33'!
+forAssetAuction
+	"Answer the description of the receiver for the asset auction catalog"
+
+	^ String streamContents: [:str |
+		str
+			nextPutAll: description;
+			nextPut: $(;
+			nextPutAll: quantity asString;
+			nextPut: $);
+			yourself]! !
+
+!FarmAsset methodsFor: 'operating' stamp: 'dhn 9/17/2017 20:36:40'!
+forOptionAuction
+	"Answer the description of the receiver for the option auction catalog"
+	| xlate occurs |
+
+	xlate _ (Farm alternativeTo: self class asString).
+	occurs _ owner options occurrencesOf: xlate.
+	^ String streamContents: [:str |
+		str nextPutAll: xlate.
+		occurs > 1
+			ifTrue: [
+			str
+				nextPut: $(;
+				nextPutAll: occurs asString;
+				nextPut: $)].
+		str 	yourself]! !
 
 !FarmAsset methodsFor: 'initialize-release' stamp: 'dhn 9/23/2014 13:18'!
 initialize
@@ -6198,19 +6267,23 @@ salary
 	self triggerEvent: #itemChange
 ! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 08:45'!
-sellAsset: aString for: aNumber 
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/17/2017 20:37:13'!
+sellAsset: aString for: aNumber
+	"Record the sale of the asset named aString at aNumber price"
 	| lot subs |
+
 	self tally: aNumber.
-	subs := (Smalltalk at: aString asSymbol) subclasses.
+	subs _ (assets at: aString) class subclasses.
+	self halt.
 	subs isEmpty
-		ifTrue: [lot := assets at: aString.
+		ifTrue: [
+			lot _ assets at: aString.
 			lot gross: lot gross + aNumber.
 			lot quantity: lot quantity - lot class auctionQuantity]
 		ifFalse: [subs
 				do: [:each | 
 					| n |
-					n := assets at: each name asString.
+					n _ assets at: each name asString.
 					n gross: n gross + aNumber / subs size.
 					n quantity: n quantity - each auctionQuantity]]! !
 
@@ -6219,21 +6292,23 @@ sellOption: aName for: aNumber
 	self tally: aNumber.
 	^ self removeOptionAt: aName! !
 
-!Farmer methodsFor: 'initialize-release' stamp: 'dhn 11/30/2014 09:52'!
+!Farmer methodsFor: 'initialize-release' stamp: 'dhn 9/17/2017 20:37:27'!
 setUpAssets
+	"Answer the assets, current and future, of the receiver"
+
 	^ Dictionary new
-		add: #Hay->(Hay new quantity: 10; cost: 20000);
-		add: #Wheat->(Wheat new quantity: 10; cost: 10000);
-		add: #Corn->(Corn new quantity: 10; cost: 10000);
-		add: #Cherries->Cherries new;
-		add: #Apples->Apples new;
-		add: #CattleOnFarm->CattleOnFarm new;
-		add: #Ahtanum->Ahtanum new;
-		add: #Rattlesnake->Rattlesnake new;
-		add: #Cascade->Cascade new;
-		add: #Toppenish->Toppenish new;
-		add: #Tractor->Tractor new;
-		add: #Harvester->Harvester new;
+		at: #Hay put: (Hay new quantity: 10; cost: 20000; owner: self);
+		at: #Wheat put: ( Wheat new quantity: 10; cost: 10000; owner: self);
+		at: #Corn put: (Corn new quantity: 10; cost: 10000; owner: self);
+		at: #Cherries put: (Cherries new owner: self);
+		at: #Apples put: (Apples new owner: self);
+		at: #CattleOnFarm put: (CattleOnFarm new owner: self);
+		at: #Ahtanum put: (Ahtanum new owner: self);
+		at: #Rattlesnake put: (Rattlesnake new owner: self);
+		at: #Cascade put: (Cascade new owner: self);
+		at: #Toppenish put: (Toppenish new owner: self);
+		at: #Tractor put: (Tractor new owner: self);
+		at: #Harvester put: (Harvester new owner: self);
 		yourself
 	! !
 
