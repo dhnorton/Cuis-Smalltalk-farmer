@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 17 September 2017 at 8:37:30 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 18 September 2017 at 4:32:19 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 94!
+!provides: 'Farm' 1 99!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1029,18 +1029,18 @@ pay: down borrow: balance for: aSymbol amount: qty
 	asset cost: down + balance + asset cost.
 	self updatePlayer! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/14/2017 19:58:22'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/18/2017 15:49:06'!
 payExpense
 	"Account for an expense."
-	| assoc asset expense |
+	| assoc expense class |
 	
 	assoc _ self drawExpense.
 	expense _ assoc key value.
 	GamePopUp inform: assoc value title: 'Expense'.
 	currentPlayer perform: assoc key key with: expense.
 	currentPlayer expenseCount: 1 +  currentPlayer expenseCount.
-	asset _ currentPlayer assets at: (self class harvestSeason at: currentPlayer position).
-	asset cost: asset cost + expense negated.
+	class _ Smalltalk classNamed: (self class harvestSeason at: currentPlayer position).
+	class perform: #expense:for: withArguments: (Array with: expense with: currentPlayer).
 	self triggerEvent: #itemChange.
 	self disableAll: {'Expense'}.
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]! !
@@ -3837,12 +3837,14 @@ startButtons
 		padding: #center.
 ! !
 
-!AssetView methodsFor: 'operating' stamp: 'dhn 9/14/2017 19:22:26'!
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/18/2017 15:53:44'!
 updateStatus
 	"Show the latest status of the selected asset"
-	
-	assetReport _ self reportFor: (self class statusList at: assetItem).
-	textPane model actualContents: assetReport! !
+
+	assetItem isZero 
+		ifFalse: [
+			assetReport _ self reportFor: (self class statusList at: assetItem).
+			textPane model actualContents: assetReport]! !
 
 !AssetView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 15:27:25'!
 openOn: aModel
@@ -4783,11 +4785,11 @@ optionsReport
 		ifTrue: [self optionsReport: (model class translate: (self optionsList at: optionsItem))]
 		ifFalse: ['']! !
 
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:15:56'!
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/17/2017 21:42:41'!
 optionsReport: anAsset
 	"Show the status of anAsset for shopping purposes"
 	
-	^ player optionDescription: (model class translate: anAsset)! !
+	^ player optionDescription: (model class anotherNameFor: anAsset)! !
 
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
 player: anObject
@@ -5060,6 +5062,14 @@ units
 auctionQuantity
 	"Answer the default quantity that can be auctioned"
 	^ 10! !
+
+!Crop class methodsFor: 'expense-related' stamp: 'dhn 9/18/2017 15:25:20'!
+expense: anExpense for: aPlayer
+	"Record  anExpense in aPlayer assets"
+	| asset |
+
+	asset _ aPlayer assets detect: [:a | a description = self printString ] ifNone: [].
+	asset cost: asset cost + anExpense negated! !
 
 !Crop class methodsFor: 'as yet unclassified' stamp: 'dhn 1/13/2014 22:14'!
 lotDescription: aString 
@@ -5368,6 +5378,23 @@ at: aRoll for: aQuantity
 auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 10! !
+
+!Livestock class methodsFor: 'expense-related' stamp: 'dhn 9/18/2017 16:27:31'!
+expense: anExpense for: aPlayer
+	"Record  anExpense in aPlayer assets, apportioning according to head count"
+	| dix col head |
+
+	"cattle-related assets"
+	dix _ aPlayer assets select: [:a | a class inheritsFrom: self].
+
+	"above, with some cattle"
+	col _ dix select: [:ea | ea quantity > 0].
+
+	"total head count"
+	head _ col inject: 0 into: [:a :c | a + c quantity].
+
+	"apportion according to head count"
+	col do: [:ea | ea cost: ea cost + (anExpense negated * ea quantity / head roundTo: 1)]! !
 
 !Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/9/2017 16:03:41'!
 lotQuantity 
