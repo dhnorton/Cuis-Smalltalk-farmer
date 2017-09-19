@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 18 September 2017 at 4:32:19 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 18 September 2017 at 10:10:07 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 99!
+!provides: 'Farm' 1 102!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -891,12 +891,12 @@ harvestAug1
 	self harvest;
 	doAug1! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/6/2017 16:38:32'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/18/2017 21:27:41'!
 harvestCows
 	"Account for income from selling cattle."
 	| income |
 	
-	income _  currentPlayer updateCattleAsset:  currentPlayer roll.
+	income _ Livestock income: currentPlayer roll for: currentPlayer.
 	currentPlayer 
 		tally: income;
 		harvested.
@@ -5058,7 +5058,7 @@ units
 	
 	^ ' acres'! !
 
-!Crop class methodsFor: 'as yet unclassified' stamp: 'dhn 1/11/2014 14:51'!
+!Crop class methodsFor: 'database' stamp: 'dhn 9/18/2017 18:13:26'!
 auctionQuantity
 	"Answer the default quantity that can be auctioned"
 	^ 10! !
@@ -5071,7 +5071,40 @@ expense: anExpense for: aPlayer
 	asset _ aPlayer assets detect: [:a | a description = self printString ] ifNone: [].
 	asset cost: asset cost + anExpense negated! !
 
-!Crop class methodsFor: 'as yet unclassified' stamp: 'dhn 1/13/2014 22:14'!
+!Crop class methodsFor: 'income-related' stamp: 'dhn 9/18/2017 18:20:07'!
+income: aRoll for: aPlayer
+	"Record  income from aRoll in aPlayer's crop"
+	| yield tale normal |
+
+	aPlayer garnish
+		ifTrue: [aPlayer garnishSpiel]
+		ifFalse: [
+			yield _ self at: aRoll for: self quantity.
+			normal _ yield.
+			yield > 0
+				ifTrue: [
+					yield _ 0 max: yield * self factor + (self quantity * self rate).
+					self gross: yield + self gross.
+					self quality: aRoll + self quality.
+					self count: 1 + self count.
+					tale _ String streamContents: [:str |
+						str
+							nextPutAll: 'Crop quality ';
+							nextPutAll: aRoll asString;
+							nextPutAll: ' for ';
+							nextPut: $$;
+							nextPutAll: yield asInteger printStringWithCommas;
+							nextPutAll: '. Factor ';
+							nextPutAll: self factor asString;
+							nextPutAll: '. Rate ';
+							nextPutAll: self rate asString;
+							nextPut: $.; newLine;
+							nextPutAll: 'Normally $';
+							nextPutAll: normal printStringWithCommas;
+							nextPut: $.].
+					GamePopUp inform: tale title: self description, ' quantity ', self quantity asString]]! !
+
+!Crop class methodsFor: 'database' stamp: 'dhn 9/18/2017 18:13:42'!
 lotDescription: aString 
 	^ self auctionQuantity asString , ' Acres of ' , aString! !
 
@@ -5395,6 +5428,51 @@ expense: anExpense for: aPlayer
 
 	"apportion according to head count"
 	col do: [:ea | ea cost: ea cost + (anExpense negated * ea quantity / head roundTo: 1)]! !
+
+!Livestock class methodsFor: 'income-related' stamp: 'dhn 9/18/2017 21:54:13'!
+income: aRoll for: aPlayer
+	"Record the effect of harvesting cattle with  aRoll"
+	| dix col head yield tale factor total |
+
+	total _ 0.
+	aPlayer garnish
+		ifTrue: [GamePopUp inform: 'The IRS is garnishing your income.' title: 'Loss of Income']
+		ifFalse: [
+			"cattle-related assets"
+			dix _ aPlayer assets select: [:a | a class inheritsFrom: self].
+
+			"above, with some cattle"
+			col _ dix select: [:ea | ea quantity > 0].
+
+			"total head count"
+			head _ col inject: 0 into: [:a :c | a + c quantity].
+
+			"determine total income"
+			col do: [:each | 
+				factor _ each factor. 	"an ivar, same for each"
+				yield _ factor * (self at: aRoll for: each quantity).
+				total _ total + yield.
+
+			"credit income to each livestock class"
+				each gross: each gross + yield.
+				each quality: aRoll + each quality.
+				each count: 1 + each count].
+
+			tale _ String streamContents: [:str |
+				str
+					nextPutAll: 'Cow quality ';
+					nextPutAll: aRoll asString;
+					nextPutAll: ' for ';
+					nextPut: $$;
+					nextPutAll: (total roundTo: 1) printStringWithCommas;
+					nextPutAll: '. Factor ';
+					nextPutAll: factor asString; newLine;
+					nextPutAll: 'Normally $';
+					nextPutAll: (total / factor roundTo: 1)  printStringWithCommas;
+					nextPut: $.].
+			GamePopUp inform: tale title: 'Livestock quantity ', head asString].
+
+	^ total! !
 
 !Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/9/2017 16:03:41'!
 lotQuantity 
