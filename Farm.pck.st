@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 18 September 2017 at 10:10:07 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 19 September 2017 at 4:11:36 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 102!
+!provides: 'Farm' 1 104!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -891,12 +891,12 @@ harvestAug1
 	self harvest;
 	doAug1! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/18/2017 21:27:41'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/19/2017 15:46:34'!
 harvestCows
 	"Account for income from selling cattle."
 	| income |
 	
-	income _ Livestock income: currentPlayer roll for: currentPlayer.
+	income _ Livestock income: currentPlayer roll from: #Livestock for: currentPlayer.
 	currentPlayer 
 		tally: income;
 		harvested.
@@ -1507,14 +1507,14 @@ space30
 	currentPlayer bumpWheat: 50.
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/6/2017 16:08:14'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/19/2017 13:46:30'!
 space31
 	"Aug week 1"
 	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer harvestEnabled
 		ifTrue: [
-			self setActionSelectorFor: #Harvest to: {self class harvestAug1. self class harvestNormal}.
+			self setActionSelectorFor: #Harvest to: {self class harvestAug1. self class harvestLivestock}.
 			self setActionSelectorFor: #Expense to: {self class expenseAug1. self class expenseNormal}.
 			self enableAll: {'Harvest'. 'Expense'}]
 		ifFalse: [
@@ -5104,6 +5104,42 @@ income: aRoll for: aPlayer
 							nextPut: $.].
 					GamePopUp inform: tale title: self description, ' quantity ', self quantity asString]]! !
 
+!Crop class methodsFor: 'income-related' stamp: 'dhn 9/19/2017 15:33:48'!
+income: aRoll from: anAsset for: aPlayer
+	"Record  income from aRoll in aPlayer's crop"
+	| asset yield tale normal |
+
+	yield _ 0.
+	aPlayer garnish
+		ifTrue: [aPlayer garnishSpiel]
+		ifFalse: [
+			asset _ aPlayer assets at: anAsset.
+			yield _ self at: aRoll for: asset quantity.
+			normal _ yield.
+			yield > 0
+				ifTrue: [
+					yield _ 0 max: yield * asset factor + (asset quantity * asset rate).
+					asset gross: yield + asset gross.
+					asset quality: aRoll + asset quality.
+					asset count: 1 + asset count.
+					tale _ String streamContents: [:str |
+						str
+							nextPutAll: 'Crop quality ';
+							nextPutAll: aRoll asString;
+							nextPutAll: ' for ';
+							nextPut: $$;
+							nextPutAll: yield asInteger printStringWithCommas;
+							nextPutAll: '. Factor ';
+							nextPutAll: asset factor asString;
+							nextPutAll: '. Rate ';
+							nextPutAll: asset rate asString;
+							nextPut: $.; newLine;
+							nextPutAll: 'Normally $';
+							nextPutAll: normal printStringWithCommas;
+							nextPut: $.].
+					GamePopUp inform: tale title: asset description, ' quantity ', asset quantity asString]].
+		^ yield! !
+
 !Crop class methodsFor: 'database' stamp: 'dhn 9/18/2017 18:13:42'!
 lotDescription: aString 
 	^ self auctionQuantity asString , ' Acres of ' , aString! !
@@ -5429,8 +5465,8 @@ expense: anExpense for: aPlayer
 	"apportion according to head count"
 	col do: [:ea | ea cost: ea cost + (anExpense negated * ea quantity / head roundTo: 1)]! !
 
-!Livestock class methodsFor: 'income-related' stamp: 'dhn 9/18/2017 21:54:13'!
-income: aRoll for: aPlayer
+!Livestock class methodsFor: 'income-related' stamp: 'dhn 9/19/2017 15:49:18'!
+income: aRoll from: anAsset for: aPlayer
 	"Record the effect of harvesting cattle with  aRoll"
 	| dix col head yield tale factor total |
 
@@ -5690,7 +5726,7 @@ appendHistory
 	
 	history addLast: self netAssets! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/17/2014 20:39'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/19/2017 16:08:22'!
 auctionable
 	"Answer a list of owned assets and quantities"
 	| list subs |
@@ -5715,7 +5751,7 @@ bumpWheat: aRate
 	(assets at: #Wheat)
 		rate: aRate + (assets at: #Wheat) rate! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/22/2014 10:13'!
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/19/2017 16:02:02'!
 buyAsset: aString for: aNumber 
 	| lot subs |
 	self tally: aNumber negated.
@@ -5730,7 +5766,7 @@ buyAsset: aString for: aNumber
 					n cost: n cost + aNumber / subs size.
 					n quantity: n quantity + each auctionQuantity]]! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 14:50'!
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/19/2017 16:02:22'!
 buyOption: aName for: aNumber 
 	self tally: aNumber negated.
 	self options addFirst: aName.
@@ -5752,7 +5788,7 @@ cattleBonus: anAsset
 	anAsset yearCount: 3 + anAsset yearCount.
 ! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 23:23'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/19/2017 16:05:48'!
 cowsOnLeases
 	"Answer a collection of cattle numbers on leases"
 	| held temp |
@@ -5923,12 +5959,12 @@ garnish
 garnish: aBoolean
 	garnish := aBoolean.! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 17:31:41'!
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:02:55'!
 garnishSpiel
 	GamePopUp inform: 'The IRS is garnishing your income.' title: 'Loss of Income'.
 ! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/2/2017 20:11:39'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/19/2017 16:07:54'!
 goBackToJan2
 	"Move the token back to Jan 2"
 	
@@ -5964,14 +6000,15 @@ halveHay: anObject
 	(assets at: #Hay)
 		factor: 0.5 * (assets at: #Hay) factor! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 4/26/2012 21:05'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/19/2017 15:25:14'!
 harvest: anAsset 
-	| var yield |
-	var := (1 to: 6) atRandom.
-	yield := self updateAsset: anAsset with: var.
-	^ yield! !
+	"Harvest anAsset"
+	| var |
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 8/31/2017 16:53:02'!
+	var _ (1 to: 6) atRandom.
+	^ (Smalltalk classNamed: anAsset) income: var from: anAsset for: self! !
+
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:03:43'!
 harvestEnabled
 	"Answer true if player has not previosly harvested this season and 	owns the asset."
 	| season asset caseA caseB sum |
@@ -5999,7 +6036,7 @@ harvestEnabled
 			
 	^ caseA and: caseB! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 11/30/2014 16:58'!
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:04:13'!
 harvested
 	"Indicate that the player has harvested this season."
 	| sea |
@@ -6161,7 +6198,7 @@ interest: aRate
 			self avoidedDebt: 1 + self avoidedDebt].
 	^ int! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/16/2014 18:56'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/19/2017 16:05:08'!
 leasesHeld
 	"Answer the cattle leases held by self"
 	| leases |
@@ -6271,7 +6308,7 @@ options: anOrderedCollection
 
 	options := anOrderedCollection! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 11/26/2013 10:55'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/19/2017 16:06:43'!
 playerDebtLimit
 	^ FarmingGame debtLimit! !
 
@@ -6287,7 +6324,7 @@ priorOptions: anOrderedCollection
 
 	priorOptions _ anOrderedCollection! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 14:51'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/19/2017 16:07:22'!
 removeOptionAt: aName
 	^ options
 		remove: aName
@@ -6392,7 +6429,7 @@ sellAsset: aString for: aNumber
 					n gross: n gross + aNumber / subs size.
 					n quantity: n quantity - each auctionQuantity]]! !
 
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 14:50'!
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:01:25'!
 sellOption: aName for: aNumber 
 	self tally: aNumber.
 	^ self removeOptionAt: aName! !
@@ -6457,73 +6494,6 @@ Do you want to inherit?')
 			h cost: 10000 + h cost.
 			h quantity: 10 + h quantity].
 ! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 19:12:09'!
-updateAsset: anAsset with: aRoll 
-	| what amt yield tale fac rat normal |
-	yield := 0.
-	anAsset ~= #Livestock
-		ifTrue: ["not #Livestock"
-			self garnish
-				ifTrue: [self garnishSpiel]
-				ifFalse: [what := assets at: anAsset.
-					amt := what quantity.
-					yield := what class at: aRoll for: amt.
-					normal := yield.
-					yield > 0
-						ifTrue: [fac := what factor.
-							rat := what rate.
-							yield := 0 max: yield * fac + (amt * rat).
-							what gross: yield + what gross.
-							what quality: aRoll + what quality.
-							what count: 1 + what count.
-							tale := 'Crop quality ' , aRoll asString, ' for ' , ('$' , yield asInteger printStringWithCommas) , '. Factor ' , fac asString, '. Rate ' , rat asString, '.
-Normally $' , normal printStringWithCommas , '.'.
-							GamePopUp inform: tale title: anAsset , ' quantity ' , amt asString]]]
-		ifFalse: ["#Livestock"
-			self garnish
-				ifTrue: [self garnishSpiel]
-				ifFalse: [yield := self updateCattleAsset: aRoll]].
-	^ yield! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/9/2017 20:10:16'!
-updateCattleAsset: aRoll
-	"Record the effect of harvesting cattle with  aRoll"
-	| yield tale har fac ttl str q1 q2 eachHerd headCount |
-	
-	ttl _ 0.
-	self garnish
-		ifTrue: [GamePopUp inform: 'The IRS is garnishing your income.' title: 'Loss of Income']
-		ifFalse: [q1 _ self cowsOnLeases.
-			q2 := (assets at: #CattleOnFarm) quantity.
-			headCount _ q1
-						inject: q2
-						into: [:a :b | a + b].
-			0 < headCount
-				ifTrue: [eachHerd _ self leasesHeld add: #CattleOnFarm
-									-> (assets at: #CattleOnFarm);
-								 yourself.
-					eachHerd
-						do: [:each | 
-							fac _ each factor.
-							yield _ fac
-										* (Livestock at: aRoll for: each quantity).
-							ttl _ ttl + yield.
-							each gross: yield + each gross.
-							each quality: aRoll + each quality.
-							each count: 1 + each count]].
-			str _ String new writeStream.
-			str nextPutAll: 'Cow quality ' , aRoll asString, ' for ' , ('$' , ttl asInteger printStringWithCommas);
-				 nextPutAll: '. Factor ' , fac asString;
-				 newLine;
-				 nextPutAll: 'Normally $' , (ttl / fac) asInteger printStringWithCommas , '.'.
-			tale _ str contents.
-			GamePopUp inform: tale title: 'Livestock quantity ' , headCount asString].
-	har _ self mgr buttons submorphs
-				detect: [:n | n label = 'Harvest']
-				ifNone: [].
-	har actionSelector: Farm harvestNormal.
-	^ ttl! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 8/31/2017 16:57:40'!
 updateHistory
