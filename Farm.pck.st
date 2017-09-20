@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 20 September 2017 at 1:23:19 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 20 September 2017 at 2:56:45 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 105!
+!provides: 'Farm' 1 106!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -2302,23 +2302,6 @@ harvestSep1
 	"Answer the actionSelector for the Harvest button when on Sep wk 1."
 	^#harvestSep1! !
 
-!Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 17:15:56'!
-optionMethod
-	"Answer a dictionary of methods which account for the execution of options."
-	
-	^ Dictionary new
-		at: #Tractor put: #tractor:;
-		at: #Harvester put: #harvester:;
-		at: #Fruit put: #fruit:;
-		at: #Grain put: #grain:;
-		at: #Hay put: #hay:;
-		at: #Livestock put: #livestock:;
-		at: #Ahtanum put: #ahtanum:;
-		at: #Rattlesnake put: #rattlesnake:;
-		at: #Cascade put: #cascade:;
-		at: #Toppenish put: #toppenish:;
-		yourself! !
-
 !Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 15:52:22'!
 optionsDesc
 	"Answer a dictionary of things that farmers can purchase."
@@ -3365,7 +3348,7 @@ defaultGoal
 	^ 250000.
 ! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 18:20:04'!
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/20/2017 13:33:45'!
 expenseDesc
 	"Answer the description of each expense."
 	| temp |
@@ -3393,7 +3376,7 @@ PAY $3,000'].
 2 timesRepeat: [temp add:(#interest:->0.1)->'Semi-annual interest due. 
 PAY 10% on Bank Notes on hand'].
 
-2 timesRepeat: [temp add:(#noTractor:->2000 negated)->'Custom hire bill due,
+2 timesRepeat: [temp add:(#noTractor:->2000)->'Custom hire bill due,
 PAY $2,000 if you do not own a Tractor'].
 
 2 timesRepeat: [temp add:(#noHarvester:->2000)->'Custom hire bill due,
@@ -3419,7 +3402,7 @@ PAY $500 per cow'.
 	
 		^temp! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 18:21:16'!
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/20/2017 13:29:04'!
 fatesDesc
 	"Answer the description of each Farmer's Fate."
 	^{
@@ -3440,7 +3423,7 @@ the $10,000 cash to pay Inheritance Tax and small remaining mortgage.'.
 (#horseHay:->100)->'Rich folks from the city bought the neighboring farm and pay you a premium 
 for your best hay to feed their fancy show horses. COLLECT $100 per Hay acre.'.
 
-(#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
+(#noTractor:->-3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
 
 (#noTractor:->-3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
 
@@ -5167,9 +5150,9 @@ auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 5! !
 
-!Fruit class methodsFor: 'as yet unclassified' stamp: 'dhn 9/8/2017 18:02:29'!
+!Fruit class methodsFor: 'as yet unclassified' stamp: 'dhn 9/20/2017 14:43:58'!
 lotQuantity
-	^ 10! !
+	^ 5! !
 
 !Fruit class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:38:55'!
 optionText
