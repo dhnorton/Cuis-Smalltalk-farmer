@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 19 September 2017 at 4:11:36 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 20 September 2017 at 1:23:19 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 104!
+!provides: 'Farm' 1 105!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -324,7 +324,7 @@ Toppenish class
 
 !classDefinition: #Farmer category: #'Farm-Model'!
 Gamer subclass: #Farmer
-	instanceVariableNames: 'offFarm options priorOptions garnish emergencies harvests markets spaceEffect'
+	instanceVariableNames: 'offFarm options priorOptions garnish emergencies harvests markets spaceEffect harvesting'
 	classVariableNames: 'FarmerTest'
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -831,6 +831,19 @@ fates: anObject
 
 	fates := anObject! !
 
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 13:19:24'!
+franchiseEffect: aRoll
+	"Account for a harvest of aRoll quality"
+	| asset income |
+
+	asset _ currentPlayer harvesting.
+	income _ (Smalltalk classNamed: asset) income: aRoll from: asset for: currentPlayer.
+	currentPlayer 
+		tally: income;
+		harvested.
+	self triggerEvent: #itemChange.
+! !
+
 !Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:03'!
 fruit: quantity
 	"Answer the purchased number of acres of fruit; split the cost." 
@@ -871,16 +884,11 @@ grain: quantity
 		amount: Corn auctionQuantity.
 	^ quantity! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/5/2017 20:09:28'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 13:07:12'!
 harvest
 	"Harvest and account for the result."
-	| income |
 	
-	income _ currentPlayer 	harvest: (self class harvestSeason at: currentPlayer position).
-	currentPlayer 
-		tally: income;
-		harvested.
-	self triggerEvent: #itemChange.
+	currentPlayer harvest: (self class harvestSeason at: currentPlayer position).
 	self disableAll: {'Harvest'}.
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
 ! !
@@ -6000,13 +6008,17 @@ halveHay: anObject
 	(assets at: #Hay)
 		factor: 0.5 * (assets at: #Hay) factor! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/19/2017 15:25:14'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/20/2017 13:04:06'!
 harvest: anAsset 
-	"Harvest anAsset"
-	| var |
+	"Answer the result of harvesting anAsset"
+	| bone |
 
-	var _ (1 to: 6) atRandom.
-	^ (Smalltalk classNamed: anAsset) income: var from: anAsset for: self! !
+	harvesting _ anAsset.
+	bone _ DieMorph new openInWorld: mgr world.
+	bone model: mgr.
+	self die: bone.
+	bone adjustTo: mgr token.
+	bone showEffect: bone class faces shuffled! !
 
 !Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:03:43'!
 harvestEnabled
@@ -6043,6 +6055,12 @@ harvested
 	sea := harvests detect: [:ea | ea desc = (self mgr seasonAt: self position) desc] 
 		ifNone: [self halt].
 	sea enabled: false! !
+
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/20/2017 13:17:01'!
+harvesting
+	"Answer the value of harvesting"
+
+	^ harvesting! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 11/30/2014 17:40'!
 harvests
