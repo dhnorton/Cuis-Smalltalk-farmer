@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 20 September 2017 at 2:56:45 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 20 September 2017 at 10:10:57 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 106!
+!provides: 'Farm' 1 107!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -914,17 +914,28 @@ harvestCows
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/27/2014 21:30'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 18:34:56'!
 harvestJul3
 	"Harvest in July Week 3 and then travel."
-	self harvest;
-	 doJul3! !
+
+	self harvestThen: #doJul3! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 10/27/2014 21:31'!
 harvestSep1
 	"Harvest in September Week 1 and then travel."
 	self harvest;
 	 doSep1! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 18:31:51'!
+harvestThen: aSymbol
+	"Harvest and account for the result."
+	
+	currentPlayer 
+		harvest: (self class harvestSeason at: currentPlayer position)
+		then: aSymbol.
+	self disableAll: {'Harvest'}.
+	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
+! !
 
 !Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:26'!
 harvester: quantity 
@@ -3402,7 +3413,7 @@ PAY $500 per cow'.
 	
 		^temp! !
 
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/20/2017 13:29:04'!
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/20/2017 17:18:04'!
 fatesDesc
 	"Answer the description of each Farmer's Fate."
 	^{
@@ -3423,9 +3434,9 @@ the $10,000 cash to pay Inheritance Tax and small remaining mortgage.'.
 (#horseHay:->100)->'Rich folks from the city bought the neighboring farm and pay you a premium 
 for your best hay to feed their fancy show horses. COLLECT $100 per Hay acre.'.
 
-(#noTractor:->-3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
+(#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
 
-(#noTractor:->-3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
+(#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
 
 (#noHarvester:->-2500)->'The President slaps on a Grain Embargo while you''re waiting for the custom harvester to show up. 
 Instant market collapse. PAY $2,500 if you don''t own your own Harvester'.
@@ -6002,6 +6013,18 @@ harvest: anAsset
 	self die: bone.
 	bone adjustTo: mgr token.
 	bone showEffect: bone class faces shuffled! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/20/2017 18:26:37'!
+harvest: anAsset then: aSymbol
+	"Answer the result of harvesting anAsset"
+	| bone |
+
+	harvesting _ anAsset.
+	bone _ DieMorph new openInWorld: mgr world.
+	bone model: mgr.
+	self die: bone.
+	bone adjustTo: mgr token.
+	bone showEffect: bone class faces shuffled then: aSymbol! !
 
 !Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:03:43'!
 harvestEnabled
