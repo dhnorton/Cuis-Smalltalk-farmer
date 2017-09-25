@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 25 September 2017 at 12:28:05 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 25 September 2017 at 5:48:25 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 109!
+!provides: 'Farm' 1 112!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -905,9 +905,10 @@ harvestJul3
 
 	self harvestThen: #doJul3! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/27/2014 21:31'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/25/2017 17:33:35'!
 harvestSep1
 	"Harvest in September Week 1 and then travel."
+	self halt.
 	self harvest;
 	 doSep1! !
 
@@ -1412,12 +1413,12 @@ space23
 		triggerEvent: #itemChange;
 		enableHarvestButtons ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/5/2017 20:11:01'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/25/2017 17:20:14'!
 space24
 	"Jun week 3"
 	
 	self disableAll: {'Move'. 'Fate'}.
-	currentPlayer halveCherries: self.
+	currentPlayer halveCherries: 0.5.
 	currentPlayer ifFruit
 		ifTrue: [self enableHarvestButtons] 
 		ifFalse: [| a |
@@ -2301,7 +2302,7 @@ expenseSep1
 	"Answer the actionSelector for the Expense button when on Sep wk 1."
 	^#expenseSep1! !
 
-!Farm class methodsFor: 'database' stamp: 'dhn 9/25/2017 11:56:47'!
+!Farm class methodsFor: 'database' stamp: 'dhn 9/25/2017 16:38:01'!
 fatesDesc
 	"Answer the description of each Farmer's Fate."
 	^{
@@ -2341,30 +2342,30 @@ Your orchard is quarantined and you lose a lucrative export contract. PAY $500 p
 (#goDirectly:->3)->'Drought year!! Go back to the second week of January. 
 Do not collect your $5,000 year''s wages.'.
 
-(#oilLease:->nil)->'Oil company pays you $100 per acre for Oil and Gas lease on your farm.'.
+(#oilLease:->100)->'Oil company pays you $100 per acre for Oil and Gas lease on your farm.'.
 
 (#boostWheat:->2000)->'Russian sale boosts wheat prices. COLLECT $2,000'.
 
-(#wheatWeeds:->nil)->'Windy spring, didn''t get your wheat sprayed. 
+(#wheatWeeds:->0.5)->'Windy spring, didn''t get your wheat sprayed. 
 Weeds cut your wheat crop in half throughout this year.'.
 
 (#truckerStrike:->1000)->'Truckers strike delays Fruit in transport, lots of spoilage. 
 PAY $1,000 per Fruit acre.'.
 
-(#halveCherries:->nil)->'Some TV talk show host''s worries about the "dangers" of the primary bug control spray 
+(#halveCherries:->0.5)->'Some TV talk show host''s worries about the "dangers" of the primary bug control spray 
 you use on your cherries causes a National cherry market collapse. 
 Cut your cherry crop in half if you haven''t already harvested this year.'.
 
 (#disasterPmt:->100)->'Federal Crop Disaster payment saves your bacon. COLLECT $100 per grain acre.'.
 
-(#tally:->(7000 negated))->'Income taxes due. PAY $7,000'.
+(#tally:->(-7000))->'Income taxes due. PAY $7,000'.
 
 (#tally:->1000)->'Marketing Co-op holds out for higher price. Processor gives in. COLLECT $1,000'.
 
 (#customHire:->2000)->'Custom hire out with your Harvester. 
 COLLECT $2,000 from each player who has none.'.
 
-(#calfWeights:->nil)->'Sharp management, production testing and your computer record system cause your calf weaning weights to soar. 
+(#calfWeights:->1.5)->'Sharp management, production testing and your computer record system cause your calf weaning weights to soar. 
 RECEIVE a 50% bonus in your Livestock Harvest check each of the next two years.'.
 	}.! !
 
@@ -5646,47 +5647,49 @@ addOption: anObject
 	anObject notNil ifTrue: [self options addFirst: anObject].
 ! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 1/15/2014 17:29'!
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 16:46:18'!
 allocateFruitCost: anAmount
+	"Allocate anAmount cost for fruit"
 	| f1 f2 amt |
-	amt := anAmount // 2.
-	f1 := assets at: #Cherries.
+
+	amt _ anAmount // 2.
+	f1 _ assets at: #Cherries.
 	f1 quantity > 0
-		ifTrue: [f1 cost: amt + f1 cost.
+		ifTrue: [
+			f1 cost: amt + f1 cost.
 			self  tally: amt negated].
-	f2 := assets at: #Apples.
+	f2 _ assets at: #Apples.
 	f2 quantity > 0
-		ifTrue: [f2 cost: amt + f2 cost.
+		ifTrue: [
+			f2 cost: amt + f2 cost.
 			self  tally: amt negated].
 ! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 12/15/2013 20:16'!
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 14:53:41'!
 allocateHarvesterLease: anAmount 
 	"When a player incurs anAmount for not owning a harvester, parcel
 	anAmount out to those who do."
 	| col |
-	col := self mgr players
-				select: [:pl | pl ifHarvester].
-	col
-		do: [:pl | 
-			| machine |
-			machine := pl assets at: #Harvester.
-			machine gross: machine gross + (anAmount // col size).
-			pl tally: anAmount // col size]! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 12/15/2013 20:20'!
+	col _ self mgr players select: [:pl | pl ifHarvester].
+	col do: [:pl | 
+		| machine |
+		machine _ pl assets at: #Harvester.
+		machine gross: machine gross + (anAmount // col size).
+		pl tally: anAmount // col size]! !
+
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 14:48:43'!
 allocateTractorLease: anAmount 
-	"When a player incurs anAmount for not owning a harvester, parcel
+	"When a player incurs anAmount for not owning a tractor, parcel
 	anAmount out to those who do."
 	| col |
-	col := self mgr players
-				select: [:pl | pl ifTractor].
-	col
-		do: [:pl | 
-			| machine |
-			machine := pl assets at: #Tractor.
-			machine gross: machine gross + (anAmount // col size).
-			pl tally: anAmount // col size]! !
+
+	col _ self mgr players select: [:pl | pl ifTractor].
+	col do: [:pl | 
+		| machine |
+		machine _ pl assets at: #Tractor.
+		machine gross: machine gross + (anAmount // col size).
+		pl tally: anAmount // col size]! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 8/31/2017 16:59:05'!
 appendHistory
@@ -5709,8 +5712,10 @@ auctionable
 						ifFalse: [list add: each , '(' , (assets at: subs first asString) quantity asString , ')']]].
 	^ list! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 1/15/2014 17:30'!
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 16:01:09'!
 boostWheat: anAmount
+	"Account for a boost of anAmount in wheat income"
+
 	(assets at: #Wheat) gross: anAmount + (assets at: #Wheat) gross.
 	self tally: anAmount! !
 
@@ -5740,69 +5745,74 @@ buyOption: aName for: aNumber
 	self options addFirst: aName.
 ! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/23/2014 12:48'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:43:08'!
 calfWeights: aParm
+	"Record the effect of aParm increase in livestock income over the next 2 years"
 	| eachHerd |
-	eachHerd := assets
-				select: [:ea | ea class inheritsFrom: Livestock].
-	eachHerd
-		do: [:each | self cattleBonus: each]
+
+	eachHerd _ assets select: [:ea | ea class inheritsFrom: Livestock].
+	eachHerd do: [:each | 
+		each factor: aParm.
+		"yearCount increased by 3 so that factor will be in effect for the NEXT 2 years"
+		each yearCount: 3 + each yearCount]
 ! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 12/6/2011 11:47'!
-cattleBonus: anAsset
-	anAsset factor: 1.5.
-	"yearCount increased by 3 so that factor will be in effect for the NEXT 2 years"
-	anAsset yearCount: 3 + anAsset yearCount.
-! !
-
-!Farmer methodsFor: 'accessing' stamp: 'dhn 9/19/2017 16:05:48'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/25/2017 15:07:50'!
 cowsOnLeases
 	"Answer a collection of cattle numbers on leases"
 	| held temp |
-	held := self leasesHeld.
+
+	held _ self leasesHeld.
 	held isEmpty
 		ifTrue: [^ #(0 )]
-		ifFalse: [temp := OrderedCollection new.
-			 held valuesDo:
-				 [:item | 
-					temp add: (assets at: item value class name) quantity;
-						 yourself].
+		ifFalse: [
+			temp _ OrderedCollection new.
+			held valuesDo: [:item | 
+				temp add: (assets at: item value class name) quantity;
+				yourself].
 			^ temp]! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/15/2014 17:31'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:32:35'!
 customHire: anAmount 
+	"Collect anAmount from each player who does not have a harvester"
 	| cnt ttl |
+
 	(assets at: #Harvester) quantity > 0
 		ifFalse: [^ nil].
-	cnt := 0.
+	cnt _ 0.
 	mgr players
-		do: [:pl | pl ~= self
-				ifTrue: [(pl assets at: #Harvester) quantity = 0
-						ifTrue: [cnt := cnt + 1.
+		do: [:pl | 
+			pl ~= self
+				ifTrue: [
+					(pl assets at: #Harvester) quantity = 0
+						ifTrue: [
+							cnt _ cnt + 1.
 							pl tally: anAmount negated.
 							(pl assets at: #Harvester)
 								cost: (pl assets at: #Harvester) cost + anAmount]]].
-	ttl := anAmount * cnt.
+	ttl _ anAmount * cnt.
 	self tally: ttl.
-	(assets at: #Harvester) 
-		gross: (assets at: #Harvester) gross + ttl! !
+	(assets at: #Harvester) gross: (assets at: #Harvester) gross + ttl! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/15/2014 17:32'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:55:58'!
 cutworms: anAmount 
+	"Allocate anAmount per acre for cutworm damage"
 	| a1 a2 |
-	a1 := anAmount * (assets at: #Cherries) quantity // 2.
-	a2 := anAmount * (assets at: #Apples) quantity // 2.
+
+	a1 _ anAmount * (assets at: #Cherries) quantity // 2.
+	a2 _ anAmount * (assets at: #Apples) quantity // 2.
 	self allocateFruitCost: a1 + a2! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/15/2014 17:33'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 17:02:39'!
 disasterPmt: aParm 
+	"Allocate a disaster payment of aParm per acre for grain"
 	| amt |
-	amt := (assets at: #Wheat) quantity * aParm.
-	(assets at: #Wheat)
-		gross: amt / 2 + (assets at: #Wheat) gross.
-	(assets at: #Corn)
-		gross: amt / 2 + (assets at: #Corn) gross.
+
+	amt _ (assets at: #Wheat) quantity * aParm.
+
+	(assets at: #Wheat) gross: amt / 2 + (assets at: #Wheat) gross.
+	(assets at: #Corn) gross: amt / 2 + (assets at: #Corn) gross.
+
 	self tally: amt! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:33'!
@@ -5923,9 +5933,11 @@ garnish
 	garnish ifNil: [garnish := false].
 	^ garnish! !
 
-!Farmer methodsFor: 'accessing' stamp: 'dhn 9/24/2011 21:55'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/25/2017 16:56:20'!
 garnish: aBoolean
-	garnish := aBoolean.! !
+	"Set the value of garnish"
+
+	garnish _ aBoolean! !
 
 !Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:02:55'!
 garnishSpiel
@@ -5939,16 +5951,19 @@ goBackToJan2
 	GamePopUp inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
 	self mgr token jan2MoveFrom: position! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 10/2/2013 21:05'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/25/2017 15:14:23'!
 goDirectly: aPosition 
+	"Move backward to Jan 2"
+
 	self goBackToJan2.
 	self mgr disableAll: {'Move'. 'Expense'. 'Fate'. 'Harvest'}.
 	self mgr enableAll: {'End Turn'}! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:37'!
-halveCherries: anObject 
-	(assets at: #Cherries)
-		factor: 0.5 * (assets at: #Cherries) factor! !
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/25/2017 16:21:31'!
+halveCherries: aRate 
+	"Reduce cherry harvest by aRate"
+
+	(assets at: #Cherries) factor: aRate * (assets at: #Cherries) factor! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 1/23/2014 12:50'!
 halveCows
@@ -6059,55 +6074,60 @@ hasHarvester
 			^ true].
 	^ false! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/17/2014 22:08'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 15:09:56'!
 heldCalves: anAmount 
+	"Allocate anAmount for holding some calves"
 	| q1 q2 eachHerd headCount portion ix |
-	q1 := self cowsOnLeases.
-	q2 := (assets at: #CattleOnFarm) quantity.
-	headCount := q1
-				inject: q2
-				into: [:a :b | a + b].
+
+	q1 _ self cowsOnLeases.
+	q2 _ (assets at: #CattleOnFarm) quantity.
+	headCount _ q1 inject: q2 into: [:a :b | a + b].
 	headCount > 0
 		ifTrue: [self tally: anAmount.
-			eachHerd := self leasesHeld add: #CattleOnFarm
+			eachHerd _ self leasesHeld add: #CattleOnFarm
 							-> (assets at: #CattleOnFarm);
 						 yourself.
-			portion := anAmount * ((q1 asOrderedCollection add: q2;
+			portion _ anAmount * ((q1 asOrderedCollection add: q2;
 							 yourself) / headCount).
-			ix := 0.
+			ix _ 0.
 			eachHerd
 				do: [:each | each gross: each gross
-							+ (portion at: (ix := ix + 1))]] ! !
+							+ (portion at: (ix _ ix + 1))]] ! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/15/2014 17:56'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:58:46'!
 helens: anObject 
+	"Account for Natural Disaster"
 	| rolls r amt |
-	amt := 500 * (assets at: #Hay) quantity.
+
+	amt _ 500 * (assets at: #Hay) quantity.
 	self tally: amt.
-	(assets at: #Hay)
-		gross: amt + (assets at: #Hay) gross.
-	rolls := OrderedCollection new.
+	(assets at: #Hay) gross: amt + (assets at: #Hay) gross.
+	rolls _ OrderedCollection new.
 	self mgr players
-		do: [:pl | pl ~= self
-				ifTrue: [r := (1 to: 2) atRandom.
+		do: [:pl | 
+			pl ~= self
+				ifTrue: [
+					r _ (1 to: 2) atRandom.
 					rolls addLast: r.
 					"to facilitate testing"
 					r = 1
-						ifTrue: [amt := 100 * (pl assets at: #Hay) quantity.
+						ifTrue: [
+							amt _ 100 * (pl assets at: #Hay) quantity.
 							pl tally: amt negated.
-							(pl assets at: #Hay)
-								cost: (pl assets at: #Hay) cost + amt]]].
+							(pl assets at: #Hay) cost: (pl assets at: #Hay) cost + amt]]].
 	^ rolls! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/15/2014 17:57'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 14:38:50'!
 horseHay: anAmount 
+	"Receive anAmount per acre for horse hay"
 	| qty gross |
-	qty := (assets at: #Hay) quantity.
+
+	qty _ (assets at: #Hay) quantity.
 	0 < qty
-		ifTrue: [gross := anAmount * qty.
+		ifTrue: [
+			gross _ anAmount * qty.
 			self tally: gross.
-			(assets at: #Hay)
-				gross: gross + (assets at: #Hay) gross]! !
+			(assets at: #Hay) gross: gross + (assets at: #Hay) gross]! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:57'!
 ifCows
@@ -6197,13 +6217,15 @@ leasesHeld
 	^ leases select: [:each | 0 < (each quantity)].
 ! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/15/2014 17:58'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 15:12:33'!
 maggotFly: anAmount 
+	"Allocate anAmount per fruit acre for maggot fly"
 	| q1 q2 c1 c2 |
-	q1 := (assets at: #Cherries) quantity // 2.
-	q2 := (assets at: #Apples) quantity // 2.
-	c1 := anAmount * q1.
-	c2 := anAmount * q2.
+
+	q1 _ (assets at: #Cherries) quantity // 2.
+	q2 _ (assets at: #Apples) quantity // 2.
+	c1 _ anAmount * q1.
+	c2 _ anAmount * q2.
 	self allocateFruitCost: c1 + c2! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 11/23/2014 12:02'!
@@ -6215,24 +6237,28 @@ missedCattleHarvest
 		do: [:each | each missed: each missed + 1].
 ! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/15/2014 18:00'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 14:53:48'!
 noHarvester: anAmount 
+	"Account for whether a player owns a harvester"
+
 	0 < (assets at: #Harvester) quantity
-		ifTrue: [(assets at: #Harvester)
-				costAvoided: anAmount + (assets at: #Harvester) costAvoided]
-		ifFalse: [self tally: anAmount negated.
-			(assets at: #Harvester)
-				cost: anAmount + (assets at: #Harvester) cost.
+		ifTrue: [
+			(assets at: #Harvester) costAvoided: anAmount + (assets at: #Harvester) costAvoided]
+		ifFalse: [
+			self tally: anAmount negated.
+			(assets at: #Harvester) cost: anAmount + (assets at: #Harvester) cost.
 			self allocateHarvesterLease: anAmount]! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/15/2014 18:00'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 14:49:05'!
 noTractor: anAmount 
+	"Account for whether the receiver has a tractor"
+	
 	0 < (assets at: #Tractor) quantity
-		ifTrue: [(assets at: #Tractor)
-				costAvoided: anAmount + (assets at: #Tractor) costAvoided]
-		ifFalse: [self tally: anAmount negated.
-			(assets at: #Tractor)
-				cost: anAmount + (assets at: #Tractor) cost.
+		ifTrue: [
+			(assets at: #Tractor) costAvoided: anAmount + (assets at: #Tractor) costAvoided]
+		ifFalse: [
+			self tally: anAmount negated.
+			(assets at: #Tractor) cost: anAmount + (assets at: #Tractor) cost.
 			self allocateTractorLease: anAmount]! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 12/7/2011 16:16'!
@@ -6247,23 +6273,23 @@ offFarm: anObject
 
 	offFarm := anObject! !
 
-!Farmer methodsFor: 'accessing' stamp: 'dhn 1/15/2014 18:01'!
-oilBucksFor: aSymbol 
-	| delta |
-	delta := 100 * (assets at: aSymbol) quantity.
-	(assets at: aSymbol)
-		gross: delta + (assets at: aSymbol) gross.
-	^ (assets at: aSymbol) quantity! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 1/19/2012 18:51'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 15:56:45'!
 oilLease: aParm 
-	| acres col |
-	acres := 0.
-	col := {#Hay. #Cherries. #Wheat.}. 
-	"Cherries and Wheat account for Apples and Corn"
-	col
-		do: [:a | acres := acres + (self oilBucksFor: a)].
-	self tally: 100 * acres! !
+	"Allocate lease payment of aParm per acre from oil company"
+	| acres qty delta |
+
+	acres _ 0.
+	assets do: [:a | 
+		(a inheritsFrom: Crop)
+			ifTrue: [
+				qty _ ((a inheritsFrom: Fruit) or: [a inheritsFrom: Grain])
+					ifTrue: [(assets at: a) quantity // 2]
+					ifFalse: [(assets at: a) quantity].
+				delta _ aParm * qty.
+				(assets at: a) gross: delta + (assets at: a) gross.
+				acres _ acres + qty]].
+
+	self tally: aParm * acres! !
 
 !Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 11:56:30'!
 optionDescription: aString 
@@ -6444,9 +6470,11 @@ setUpAssets
 		yourself
 	! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 11/23/2014 12:05'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 14:55:58'!
 slaughterCows: aParm
-	(assets at: #CattleOnFarm) quantity: 0.
+	"Slaughter all livestock at farm"
+
+	(assets at: #CattleOnFarm) quantity: 0
 ! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 09:44:03'!
@@ -6462,12 +6490,14 @@ spaceEffect: anObject
 	spaceEffect _ anObject
 ! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 11/23/2014 12:06'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:19:19'!
 truckerStrike: aParm 
+	"Allocate the cost of a strike on fruit at aParm per acre"
 	| amt1 amt2 |
-	amt1 := aParm * (assets at: #Cherries) quantity // 2.
-	amt2 := aParm * (assets at: #Apples) quantity // 2.
-	self allocateFruitCost: amt1 + amt2.
+
+	amt1 _ aParm * (assets at: #Cherries) quantity // 2.
+	amt2 _ aParm * (assets at: #Apples) quantity // 2.
+	self allocateFruitCost: amt1 + amt2
 ! !
 
 !Farmer methodsFor: 'fate-related' stamp: 'dhn 8/30/2017 17:41:14'!
@@ -6491,10 +6521,11 @@ updateHistory
 	
 	history at: history size put: self netAssets! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 11/23/2014 12:06'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:03:37'!
 wheatWeeds: aParm 
-	(assets at: #Wheat)
-		factor: 0.5 * (assets at: #Wheat) factor.
+	"Reduce wheat yield by aParm"
+
+	(assets at: #Wheat) factor: aParm * (assets at: #Wheat) factor.
 ! !
 
 !Farmer methodsFor: 'expense-related' stamp: 'dhn 1/15/2014 18:23'!
