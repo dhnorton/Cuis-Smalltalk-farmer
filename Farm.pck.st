@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 20 September 2017 at 10:10:57 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 24 September 2017 at 8:33:01 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 107!
+!provides: 'Farm' 1 108!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -899,21 +899,6 @@ harvestAug1
 	self harvest;
 	doAug1! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/19/2017 15:46:34'!
-harvestCows
-	"Account for income from selling cattle."
-	| income |
-	
-	income _ Livestock income: currentPlayer roll from: #Livestock for: currentPlayer.
-	currentPlayer 
-		tally: income;
-		harvested.
-	self triggerEvent: #itemChange.
-	self disableAll: {'Harvest'}.
-	self setActionSelectorFor: #Harvest to: {self class harvestNormal}.
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
-! !
-
 !Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 18:34:56'!
 harvestJul3
 	"Harvest in July Week 3 and then travel."
@@ -1526,14 +1511,14 @@ space30
 	currentPlayer bumpWheat: 50.
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/19/2017 13:46:30'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/24/2017 19:09:58'!
 space31
 	"Aug week 1"
 	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer harvestEnabled
 		ifTrue: [
-			self setActionSelectorFor: #Harvest to: {self class harvestAug1. self class harvestLivestock}.
+			self setActionSelectorFor: #Harvest to: {self class harvestAug1. self class harvestNormal}.
 			self setActionSelectorFor: #Expense to: {self class expenseAug1. self class expenseNormal}.
 			self enableAll: {'Harvest'. 'Expense'}]
 		ifFalse: [
@@ -1594,7 +1579,7 @@ space36
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/6/2017 16:44:46'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/24/2017 19:47:23'!
 space37
 	"Harvest Moon"
 	
@@ -1604,9 +1589,7 @@ space37
 	currentPlayer ifCows
 		ifTrue: [
 			currentPlayer harvestEnabled
-				ifTrue: [
-					self setActionSelectorFor: #Harvest to: {self class harvestLivestock. self class harvestNormal}.
-					self enableAll: {'Harvest'. 'Expense'}]
+				ifTrue: [self enableAll: {'Harvest'. 'Expense'}]
 				ifFalse: [self enableAll: {'End Turn'}]]
 		ifFalse: [
 			currentPlayer missedCattleHarvest.
@@ -1615,7 +1598,7 @@ space37
 		ifTrue: [self wonButtonsState]
 		ifFalse: [(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]]! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/6/2017 15:21:53'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/24/2017 19:50:45'!
 space38
 	"Sep week 3"
 	
@@ -1624,14 +1607,12 @@ space38
 	currentPlayer ifCows
 		ifTrue: [
 			currentPlayer harvestEnabled
-				ifTrue: [
-					self setActionSelectorFor: #Harvest to: {self class harvestLivestock. self class harvestNormal}.
-					self enableAll: {'Harvest'. 'Expense'}]
+				ifTrue: [self enableAll: {'Harvest'. 'Expense'}]
 		ifFalse: [currentPlayer missedCattleHarvest]].
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) 	ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/6/2017 16:46:23'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/24/2017 19:56:41'!
 space39
 	"Sep week 4"
 	
@@ -1643,9 +1624,7 @@ space39
 	currentPlayer ifCows
 		ifTrue: [
 			currentPlayer harvestEnabled
-				ifTrue: [
-					self setActionSelectorFor: #Harvest to: {self class harvestLivestock. self class harvestNormal}.
-					self enableAll: {'Harvest'. 'Expense'}]
+				ifTrue: [self enableAll: {'Harvest'. 'Expense'}]
 				ifFalse: [self enableAll: {'End Turn'}]]
 		ifFalse: [currentPlayer missedCattleHarvest].
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
@@ -1662,7 +1641,7 @@ space4
 	self enableAll: {'End Turn'}.
 	self triggerEvent: #itemChange! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/6/2017 16:47:01'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 9/24/2017 19:57:19'!
 space40
 	"Oct week 1"
 	
@@ -1672,9 +1651,7 @@ space40
 	currentPlayer ifCows
 		ifTrue: [
 			currentPlayer harvestEnabled
-				ifTrue: [
-					self setActionSelectorFor: #Harvest to: {self class harvestLivestock. self class harvestNormal}.
-					self enableAll: {'Harvest'. 'Expense'}]
+				ifTrue: [self enableAll: {'Harvest'. 'Expense'}]
 				ifFalse: [self enableAll: {'End Turn'}]]
 		ifFalse: [currentPlayer missedCattleHarvest].
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
@@ -2279,11 +2256,6 @@ harvestAug1
 harvestJul3
 	"Answer the actionSelector for the Harvest button when on Jul wk 3."
 	^#harvestJul3! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:22'!
-harvestLivestock
-	"Answer the actionSelector for the Harvest button when cattle are involved."
-	^#harvestCows! !
 
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:40'!
 harvestNormal
