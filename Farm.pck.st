@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 24 September 2017 at 8:33:01 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 25 September 2017 at 12:28:05 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 108!
+!provides: 'Farm' 1 109!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -958,7 +958,7 @@ initialButtonState
 	self enableAll: {'Option'}.
 	self disableAll: {'End Turn'. 'Expense'. 'Fate'. 'Harvest'}! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/8/2017 15:51:51'!
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/25/2017 11:58:06'!
 initialize
 
 	super initialize.
@@ -966,9 +966,9 @@ initialize
 	spaces _ self setUpSpaces.
 	availableOptions _ self class optionsNames shuffled.
 	exercisedOptions _ OrderedCollection new.
-	fates _ FarmingGame fatesDesc asOrderedCollection shuffled.
+	fates _ self class fatesDesc asOrderedCollection shuffled.
 	drawnFates _ OrderedCollection new.
-	expenses _ FarmingGame expenseDesc asOrderedCollection shuffled.
+	expenses _ self class expenseDesc asOrderedCollection shuffled.
 	drawnExpenses _ OrderedCollection new.
 	leases _ self setUpLeases.
 	windowCount _ 0.
@@ -2232,6 +2232,60 @@ expenseAug1
 	"Answer the actionSelector for the Expense button when on Aug wk 1."
 	^#expenseAug1! !
 
+!Farm class methodsFor: 'database' stamp: 'dhn 9/25/2017 11:56:23'!
+expenseDesc
+	"Answer the description of each expense."
+	| temp |
+	temp := OrderedCollection new.
+	
+2 timesRepeat: [temp add:(#tally:->500 negated)->'Equipment breakdown,
+PAY $500'].
+
+2 timesRepeat: [temp add:(#tally:->1000 negated)->'Equipment in the shop. The delay costs.
+	
+PAY $1,000'].
+
+2 timesRepeat: [temp add:(#tally:->500 negated)->'Parts bill due,
+PAY $500'].
+
+2 timesRepeat: [temp add:(#tally:->1000 negated)->'Fuel bill due,
+PAY $1,000'].
+
+2 timesRepeat: [temp add:(#fertilizer:->100)->'Fertilizer bill due,
+PAY $100 per acre'].
+
+2 timesRepeat: [temp add:(#tally:->3000 negated)->'Seed bill due,
+PAY $3,000'].
+
+2 timesRepeat: [temp add:(#interest:->0.1)->'Semi-annual interest due. 
+PAY 10% on Bank Notes on hand'].
+
+2 timesRepeat: [temp add:(#noTractor:->2000)->'Custom hire bill due,
+PAY $2,000 if you do not own a Tractor'].
+
+2 timesRepeat: [temp add:(#noHarvester:->2000)->'Custom hire bill due,
+PAY $2,000 if you do not own a Harvester'].
+
+temp add:(#tally:->1500 negated)->'Farm real estate taxes due,
+PAY $1,500'.
+	
+temp add:(#tally:->1500 negated)->'Farmer''s insurance due,
+PAY $1,500'.
+	
+temp add:(#tally:->500 negated)->'Monthly electric bill due for irrigation pumping,
+PAY $500'.
+	
+temp add:(#wireWorms:->100)->'Wire worms infect Grain acreage,
+PAY $100 per grain acre to fumigate'.
+	
+temp add:(#ifCows:->500)->'Veterinary bill due,
+PAY $500 if you own cows'.
+	
+temp add:(#feedBill:->500)->'Feed bill due,
+PAY $500 per cow'.
+	
+		^temp! !
+
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:36'!
 expenseJul3
 	"Answer the actionSelector for the Expense button when on Jul wk 3."
@@ -2246,6 +2300,73 @@ expenseNormal
 expenseSep1
 	"Answer the actionSelector for the Expense button when on Sep wk 1."
 	^#expenseSep1! !
+
+!Farm class methodsFor: 'database' stamp: 'dhn 9/25/2017 11:56:47'!
+fatesDesc
+	"Answer the description of each Farmer's Fate."
+	^{
+(#interest:->0.1)->'Banks raise interest rates. PAY 10% of outstanding loan balance as additional interest'.
+
+(#garnish:->true)->'IRS garnishes your income after finding errors on your tax return. 
+For the rest of the year, draw OPERATING EXPENSE cards during Harvests but do not receive Harvest check.'.
+
+(#helens:->nil)->'Natural Disaster - Mt. St. Helens blows. You are luckily out of the Ash Path. 
+Your ash-free hay jumps in price. COLLECT $500 per Hay acre. 
+Other players may have been hit and must pay $100 per acre to clean up mess.'.
+
+(#cutworms:->300)->'Cutworms eat sprouting Fruit buds. EPA bans control spray. PAY $300 per Fruit acre'.
+
+(#uncleBert:->nil)->'Uncle Bert dies and leaves you 10 acres of Hay, if you can raise 
+the $10,000 cash to pay Inheritance Tax and small remaining mortgage.'.
+
+(#horseHay:->100)->'Rich folks from the city bought the neighboring farm and pay you a premium 
+for your best hay to feed their fancy show horses. COLLECT $100 per Hay acre.'.
+
+(#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
+
+(#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
+
+(#noHarvester:->-2500)->'The President slaps on a Grain Embargo while you''re waiting for the custom harvester to show up. 
+Instant market collapse. PAY $2,500 if you don''t own your own Harvester'.
+
+(#slaughterCows:->nil)->'A leaking electrical motor at Feed Mill contaminates your load of feed with PCB. 
+State Ag Inspector requires you to slaughter cows on your farm (not on leased land) 
+with no reimbursement.'.
+
+(#heldCalves:->2000)->'Held some of your calves and the market jumped. COLLECT $2,000 if you have cows.'.
+
+(#maggotFly:->500)->'The Apple Maggot Fly, cousin of the dreaded Medfly, is found in an insect trap in your orchard. 
+Your orchard is quarantined and you lose a lucrative export contract. PAY $500 per Fruit acre.'.
+
+(#goDirectly:->3)->'Drought year!! Go back to the second week of January. 
+Do not collect your $5,000 year''s wages.'.
+
+(#oilLease:->nil)->'Oil company pays you $100 per acre for Oil and Gas lease on your farm.'.
+
+(#boostWheat:->2000)->'Russian sale boosts wheat prices. COLLECT $2,000'.
+
+(#wheatWeeds:->nil)->'Windy spring, didn''t get your wheat sprayed. 
+Weeds cut your wheat crop in half throughout this year.'.
+
+(#truckerStrike:->1000)->'Truckers strike delays Fruit in transport, lots of spoilage. 
+PAY $1,000 per Fruit acre.'.
+
+(#halveCherries:->nil)->'Some TV talk show host''s worries about the "dangers" of the primary bug control spray 
+you use on your cherries causes a National cherry market collapse. 
+Cut your cherry crop in half if you haven''t already harvested this year.'.
+
+(#disasterPmt:->100)->'Federal Crop Disaster payment saves your bacon. COLLECT $100 per grain acre.'.
+
+(#tally:->(7000 negated))->'Income taxes due. PAY $7,000'.
+
+(#tally:->1000)->'Marketing Co-op holds out for higher price. Processor gives in. COLLECT $1,000'.
+
+(#customHire:->2000)->'Custom hire out with your Harvester. 
+COLLECT $2,000 from each player who has none.'.
+
+(#calfWeights:->nil)->'Sharp management, production testing and your computer record system cause your calf weaning weights to soar. 
+RECEIVE a 50% bonus in your Livestock Harvest check each of the next two years.'.
+	}.! !
 
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:13:27'!
 harvestAug1
@@ -3324,133 +3445,6 @@ cellColor
 debtLimit
 	"Answer the debt limit for a player to stay in the game."
 	^ -50000! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/26/2014 12:39'!
-defaultGoal
-	"Answer the default winning net asset goal"
-	^ 250000.
-! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/20/2017 13:33:45'!
-expenseDesc
-	"Answer the description of each expense."
-	| temp |
-	temp := OrderedCollection new.
-	
-2 timesRepeat: [temp add:(#tally:->500 negated)->'Equipment breakdown,
-PAY $500'].
-
-2 timesRepeat: [temp add:(#tally:->1000 negated)->'Equipment in the shop. The delay costs.
-	
-PAY $1,000'].
-
-2 timesRepeat: [temp add:(#tally:->500 negated)->'Parts bill due,
-PAY $500'].
-
-2 timesRepeat: [temp add:(#tally:->1000 negated)->'Fuel bill due,
-PAY $1,000'].
-
-2 timesRepeat: [temp add:(#fertilizer:->100)->'Fertilizer bill due,
-PAY $100 per acre'].
-
-2 timesRepeat: [temp add:(#tally:->3000 negated)->'Seed bill due,
-PAY $3,000'].
-
-2 timesRepeat: [temp add:(#interest:->0.1)->'Semi-annual interest due. 
-PAY 10% on Bank Notes on hand'].
-
-2 timesRepeat: [temp add:(#noTractor:->2000)->'Custom hire bill due,
-PAY $2,000 if you do not own a Tractor'].
-
-2 timesRepeat: [temp add:(#noHarvester:->2000)->'Custom hire bill due,
-PAY $2,000 if you do not own a Harvester'].
-
-temp add:(#tally:->1500 negated)->'Farm real estate taxes due,
-PAY $1,500'.
-	
-temp add:(#tally:->1500 negated)->'Farmer''s insurance due,
-PAY $1,500'.
-	
-temp add:(#tally:->500 negated)->'Monthly electric bill due for irrigation pumping,
-PAY $500'.
-	
-temp add:(#wireWorms:->100)->'Wire worms infect Grain acreage,
-PAY $100 per grain acre to fumigate'.
-	
-temp add:(#ifCows:->500)->'Veterinary bill due,
-PAY $500 if you own cows'.
-	
-temp add:(#feedBill:->500)->'Feed bill due,
-PAY $500 per cow'.
-	
-		^temp! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/20/2017 17:18:04'!
-fatesDesc
-	"Answer the description of each Farmer's Fate."
-	^{
-(#interest:->0.1)->'Banks raise interest rates. PAY 10% of outstanding loan balance as additional interest'.
-
-(#garnish:->true)->'IRS garnishes your income after finding errors on your tax return. 
-For the rest of the year, draw OPERATING EXPENSE cards during Harvests but do not receive Harvest check.'.
-
-(#helens:->nil)->'Natural Disaster - Mt. St. Helens blows. You are luckily out of the Ash Path. 
-Your ash-free hay jumps in price. COLLECT $500 per Hay acre. 
-Other players may have been hit and must pay $100 per acre to clean up mess.'.
-
-(#cutworms:->300)->'Cutworms eat sprouting Fruit buds. EPA bans control spray. PAY $300 per Fruit acre'.
-
-(#uncleBert:->nil)->'Uncle Bert dies and leaves you 10 acres of Hay, if you can raise 
-the $10,000 cash to pay Inheritance Tax and small remaining mortgage.'.
-
-(#horseHay:->100)->'Rich folks from the city bought the neighboring farm and pay you a premium 
-for your best hay to feed their fancy show horses. COLLECT $100 per Hay acre.'.
-
-(#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
-
-(#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
-
-(#noHarvester:->-2500)->'The President slaps on a Grain Embargo while you''re waiting for the custom harvester to show up. 
-Instant market collapse. PAY $2,500 if you don''t own your own Harvester'.
-
-(#slaughterCows:->nil)->'A leaking electrical motor at Feed Mill contaminates your load of feed with PCB. 
-State Ag Inspector requires you to slaughter cows on your farm (not on leased land) 
-with no reimbursement.'.
-
-(#heldCalves:->2000)->'Held some of your calves and the market jumped. COLLECT $2,000 if you have cows.'.
-
-(#maggotFly:->500)->'The Apple Maggot Fly, cousin of the dreaded Medfly, is found in an insect trap in your orchard. 
-Your orchard is quarantined and you lose a lucrative export contract. PAY $500 per Fruit acre.'.
-
-(#goDirectly:->3)->'Drought year!! Go back to the second week of January. 
-Do not collect your $5,000 year''s wages.'.
-
-(#oilLease:->nil)->'Oil company pays you $100 per acre for Oil and Gas lease on your farm.'.
-
-(#boostWheat:->2000)->'Russian sale boosts wheat prices. COLLECT $2,000'.
-
-(#wheatWeeds:->nil)->'Windy spring, didn''t get your wheat sprayed. 
-Weeds cut your wheat crop in half throughout this year.'.
-
-(#truckerStrike:->1000)->'Truckers strike delays Fruit in transport, lots of spoilage. 
-PAY $1,000 per Fruit acre.'.
-
-(#halveCherries:->nil)->'Some TV talk show host''s worries about the "dangers" of the primary bug control spray 
-you use on your cherries causes a National cherry market collapse. 
-Cut your cherry crop in half if you haven''t already harvested this year.'.
-
-(#disasterPmt:->100)->'Federal Crop Disaster payment saves your bacon. COLLECT $100 per grain acre.'.
-
-(#tally:->(7000 negated))->'Income taxes due. PAY $7,000'.
-
-(#tally:->1000)->'Marketing Co-op holds out for higher price. Processor gives in. COLLECT $1,000'.
-
-(#customHire:->2000)->'Custom hire out with your Harvester. 
-COLLECT $2,000 from each player who has none.'.
-
-(#calfWeights:->nil)->'Sharp management, production testing and your computer record system cause your calf weaning weights to soar. 
-RECEIVE a 50% bonus in your Livestock Harvest check each of the next two years.'.
-	}.! !
 
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 16:55'!
 goal
