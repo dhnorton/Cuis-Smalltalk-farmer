@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 25 September 2017 at 5:48:25 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 26 September 2017 at 12:11:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 112!
+!provides: 'Farm' 1 113!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -1034,18 +1034,18 @@ pay: down borrow: balance for: aSymbol amount: qty
 	asset cost: down + balance + asset cost.
 	self updatePlayer! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/18/2017 15:49:06'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/26/2017 08:23:51'!
 payExpense
 	"Account for an expense."
-	| assoc expense class |
+	| assoc expense value class |
 	
 	assoc _ self drawExpense.
 	expense _ assoc key value.
 	GamePopUp inform: assoc value title: 'Expense'.
-	currentPlayer perform: assoc key key with: expense.
+	value _ currentPlayer perform: assoc key key with: expense.
 	currentPlayer expenseCount: 1 +  currentPlayer expenseCount.
 	class _ Smalltalk classNamed: (self class harvestSeason at: currentPlayer position).
-	class perform: #expense:for: withArguments: (Array with: expense with: currentPlayer).
+	class perform: #expense:for: withArguments: (Array with: value with: currentPlayer).
 	self triggerEvent: #itemChange.
 	self disableAll: {'Expense'}.
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]! !
@@ -2233,56 +2233,56 @@ expenseAug1
 	"Answer the actionSelector for the Expense button when on Aug wk 1."
 	^#expenseAug1! !
 
-!Farm class methodsFor: 'database' stamp: 'dhn 9/25/2017 11:56:23'!
+!Farm class methodsFor: 'database' stamp: 'dhn 9/26/2017 10:31:59'!
 expenseDesc
 	"Answer the description of each expense."
 	| temp |
 	temp := OrderedCollection new.
 	
-2 timesRepeat: [temp add:(#tally:->500 negated)->'Equipment breakdown,
+2 timesRepeat: [temp add:(#tally:->-500)->'Equipment breakdown,
 PAY $500'].
 
-2 timesRepeat: [temp add:(#tally:->1000 negated)->'Equipment in the shop. The delay costs.
+2 timesRepeat: [temp add:(#tally:->-1000)->'Equipment in the shop. The delay costs.
 	
 PAY $1,000'].
 
-2 timesRepeat: [temp add:(#tally:->500 negated)->'Parts bill due,
+2 timesRepeat: [temp add:(#tally:->-500)->'Parts bill due,
 PAY $500'].
 
-2 timesRepeat: [temp add:(#tally:->1000 negated)->'Fuel bill due,
+2 timesRepeat: [temp add:(#tally:->-1000)->'Fuel bill due,
 PAY $1,000'].
 
-2 timesRepeat: [temp add:(#fertilizer:->100)->'Fertilizer bill due,
+2 timesRepeat: [temp add:(#fertilizer:->-100)->'Fertilizer bill due,
 PAY $100 per acre'].
 
-2 timesRepeat: [temp add:(#tally:->3000 negated)->'Seed bill due,
+2 timesRepeat: [temp add:(#tally:->-3000)->'Seed bill due,
 PAY $3,000'].
 
 2 timesRepeat: [temp add:(#interest:->0.1)->'Semi-annual interest due. 
 PAY 10% on Bank Notes on hand'].
 
-2 timesRepeat: [temp add:(#noTractor:->2000)->'Custom hire bill due,
+2 timesRepeat: [temp add:(#noTractor:->-2000)->'Custom hire bill due,
 PAY $2,000 if you do not own a Tractor'].
 
-2 timesRepeat: [temp add:(#noHarvester:->2000)->'Custom hire bill due,
+2 timesRepeat: [temp add:(#noHarvester:->-2000)->'Custom hire bill due,
 PAY $2,000 if you do not own a Harvester'].
 
-temp add:(#tally:->1500 negated)->'Farm real estate taxes due,
+temp add:(#tally:->-1500)->'Farm real estate taxes due,
 PAY $1,500'.
 	
-temp add:(#tally:->1500 negated)->'Farmer''s insurance due,
+temp add:(#tally:->-1500)->'Farmer''s insurance due,
 PAY $1,500'.
 	
-temp add:(#tally:->500 negated)->'Monthly electric bill due for irrigation pumping,
+temp add:(#tally:->-500)->'Monthly electric bill due for irrigation pumping,
 PAY $500'.
 	
-temp add:(#wireWorms:->100)->'Wire worms infect Grain acreage,
+temp add:(#wireWorms:->-100)->'Wire worms infect Grain acreage,
 PAY $100 per grain acre to fumigate'.
 	
-temp add:(#ifCows:->500)->'Veterinary bill due,
+temp add:(#ifCows:->-500)->'Veterinary bill due,
 PAY $500 if you own cows'.
 	
-temp add:(#feedBill:->500)->'Feed bill due,
+temp add:(#feedBill:->-500)->'Feed bill due,
 PAY $500 per cow'.
 	
 		^temp! !
@@ -2302,7 +2302,7 @@ expenseSep1
 	"Answer the actionSelector for the Expense button when on Sep wk 1."
 	^#expenseSep1! !
 
-!Farm class methodsFor: 'database' stamp: 'dhn 9/25/2017 16:38:01'!
+!Farm class methodsFor: 'database' stamp: 'dhn 9/26/2017 09:30:09'!
 fatesDesc
 	"Answer the description of each Farmer's Fate."
 	^{
@@ -2323,9 +2323,9 @@ the $10,000 cash to pay Inheritance Tax and small remaining mortgage.'.
 (#horseHay:->100)->'Rich folks from the city bought the neighboring farm and pay you a premium 
 for your best hay to feed their fancy show horses. COLLECT $100 per Hay acre.'.
 
-(#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
+(#noTractor:->-3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
 
-(#noTractor:->3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
+(#noTractor:->-3000)->'Custom hire bill due. If you have no Tractor PAY $3,000'.
 
 (#noHarvester:->-2500)->'The President slaps on a Grain Embargo while you''re waiting for the custom harvester to show up. 
 Instant market collapse. PAY $2,500 if you don''t own your own Harvester'.
@@ -5647,7 +5647,7 @@ addOption: anObject
 	anObject notNil ifTrue: [self options addFirst: anObject].
 ! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 16:46:18'!
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:18:14'!
 allocateFruitCost: anAmount
 	"Allocate anAmount cost for fruit"
 	| f1 f2 amt |
@@ -5663,6 +5663,7 @@ allocateFruitCost: anAmount
 		ifTrue: [
 			f2 cost: amt + f2 cost.
 			self  tally: amt negated].
+	mgr triggerEvent: #itemChange
 ! !
 
 !Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 14:53:41'!
@@ -5712,17 +5713,20 @@ auctionable
 						ifFalse: [list add: each , '(' , (assets at: subs first asString) quantity asString , ')']]].
 	^ list! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 16:01:09'!
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:13:51'!
 boostWheat: anAmount
 	"Account for a boost of anAmount in wheat income"
 
 	(assets at: #Wheat) gross: anAmount + (assets at: #Wheat) gross.
-	self tally: anAmount! !
+	self tally: anAmount.
+	mgr triggerEvent: #itemChange! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:30'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:09:57'!
 bumpWheat: aRate 
-	(assets at: #Wheat)
-		rate: aRate + (assets at: #Wheat) rate! !
+	"Change the rate for harvesting wheat by aRate per acre"
+
+	(assets at: #Wheat) rate: aRate + (assets at: #Wheat) rate.
+	mgr triggerEvent: #itemChange! !
 
 !Farmer methodsFor: 'expense-related' stamp: 'dhn 9/19/2017 16:02:02'!
 buyAsset: aString for: aNumber 
@@ -5745,7 +5749,7 @@ buyOption: aName for: aNumber
 	self options addFirst: aName.
 ! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:43:08'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:15:36'!
 calfWeights: aParm
 	"Record the effect of aParm increase in livestock income over the next 2 years"
 	| eachHerd |
@@ -5754,7 +5758,8 @@ calfWeights: aParm
 	eachHerd do: [:each | 
 		each factor: aParm.
 		"yearCount increased by 3 so that factor will be in effect for the NEXT 2 years"
-		each yearCount: 3 + each yearCount]
+		each yearCount: 3 + each yearCount].
+	mgr triggerEvent: #itemChange
 ! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 9/25/2017 15:07:50'!
@@ -5772,7 +5777,7 @@ cowsOnLeases
 				yourself].
 			^ temp]! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:32:35'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:17:14'!
 customHire: anAmount 
 	"Collect anAmount from each player who does not have a harvester"
 	| cnt ttl |
@@ -5792,7 +5797,8 @@ customHire: anAmount
 								cost: (pl assets at: #Harvester) cost + anAmount]]].
 	ttl _ anAmount * cnt.
 	self tally: ttl.
-	(assets at: #Harvester) gross: (assets at: #Harvester) gross + ttl! !
+	(assets at: #Harvester) gross: (assets at: #Harvester) gross + ttl.
+	mgr triggerEvent: #itemChange! !
 
 !Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:55:58'!
 cutworms: anAmount 
@@ -5803,7 +5809,7 @@ cutworms: anAmount
 	a2 _ anAmount * (assets at: #Apples) quantity // 2.
 	self allocateFruitCost: a1 + a2! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 17:02:39'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:18:43'!
 disasterPmt: aParm 
 	"Allocate a disaster payment of aParm per acre for grain"
 	| amt |
@@ -5813,25 +5819,32 @@ disasterPmt: aParm
 	(assets at: #Wheat) gross: amt / 2 + (assets at: #Wheat) gross.
 	(assets at: #Corn) gross: amt / 2 + (assets at: #Corn) gross.
 
-	self tally: amt! !
+	self tally: amt.
+	mgr triggerEvent: #itemChange! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:33'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:19:52'!
 doubleCorn
-	(assets at: #Corn)
-		factor: 2 * (assets at: #Corn) factor! !
+	"Increase the factor for harvesting corn"
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:33'!
+	(assets at: #Corn) factor: 2 * (assets at: #Corn) factor.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:20:52'!
 doubleCorn: anObject 
+self halt: 'how did we get here?'.
 	(assets at: #Corn)
 		factor: 2 * (assets at: #Corn) factor! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:34'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:02:58'!
 doubleHay
-	(assets at: #Hay)
-		factor: 2 * (assets at: #Hay) factor! !
+	"Increase the factor for hay"
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:34'!
+	(assets at: #Hay) factor: 2 * (assets at: #Hay) factor.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:21:23'!
 doubleHay: anObject 
+self halt: 'how did we get here?'.
 	(assets at: #Hay)
 		factor: 2 * (assets at: #Hay) factor! !
 
@@ -5862,70 +5875,60 @@ emergencies: anObject
 
 	emergencies := anObject! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 8/29/2017 21:30:41'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:25:54'!
 emergencyLoan
+	"Account for an emergency loan"
 	| loan str |
-	str := String new writeStream.
+
+	str _ String new writeStream.
 	str nextPutAll: self identity;
 		nextPutAll: ' is out of money.'; newLine;
 		nextPutAll: self identity;
 		nextPutAll: ' will receive $4,000 cash and a bank note for $5,000.'.
 	GamePopUp inform: str contents title: 'Emergency Loan'.
-	loan := 5000 negated.
+	loan _ 5000 negated.
 	self debt: loan + self debt.
 	self interestPd: 1000 + self interestPd.
 	self paidInterest: 1 + self paidInterest.
 	self emergencies: 1 + self emergencies.
-	^(loan + 1000) negated! !
+	mgr triggerEvent: #itemChange.
+	^ (loan + 1000) negated! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 1/24/2014 12:18'!
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:28:00'!
 feedBill: anAmount 
-	| eachQuantity penalty eachHerd total portion ix |
-	eachHerd := assets
-				select: [:ea | ea class inheritsFrom: Livestock].
-	eachQuantity := OrderedCollection new.
-	eachHerd
-		do: [:ea | eachQuantity add: ea quantity].
-	total := eachQuantity
-				inject: 0
-				into: [:a :c | a + c].
-	total > 0
-		ifTrue: [penalty := anAmount * total.
-			self tally: penalty negated.
-			portion := penalty * (eachQuantity / total).
-			ix := 0.
-			eachHerd
-				do: [:each | each cost: each cost
-							+ (portion at: (ix := ix + 1))]]! !
+	"Account for a feed bill of anAmount per cow"
+	| penalty total |
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 1/15/2014 17:35'!
-fertilizeFruit: anAmount 
-	| p1 p2 |
-	p1 := anAmount * (assets at: #Cherries) quantity // 2.
-	(assets at: #Cherries)
-		cost: p1 + (assets at: #Cherries) cost.
-	p2 := anAmount * (assets at: #Apples) quantity // 2.
-	(assets at: #Apples)
-		cost: p2 + (assets at: #Apples) cost.
-	^ p1 + p2! !
+	total _ 0.
+	assets do: [:ea | 
+		(ea class inheritsFrom: Livestock)
+			ifTrue: [total _ total + ea quantity]].
+	^ total > 0
+		ifTrue: [
+			penalty _ anAmount * total.
+			self tally: penalty.
+			mgr triggerEvent: #itemChange.
+			penalty]
+		ifFalse: [0]! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 1/15/2014 17:37'!
-fertilizer: anAmount 
-	| penalty ttl |
-	ttl := 0.
-	penalty := anAmount * (assets at: #Hay) quantity.
-	ttl := ttl + penalty.
-	(assets at: #Hay)
-		cost: penalty + (assets at: #Hay) cost.
-	penalty := anAmount * (assets at: #Wheat) quantity.
-	ttl := ttl + penalty.
-	(assets at: #Wheat)
-		cost: penalty / 2 + (assets at: #Wheat) cost.
-	(assets at: #Corn)
-		cost: penalty / 2 + (assets at: #Corn) cost.
-	penalty := self fertilizeFruit: anAmount.
-	ttl := ttl + penalty.
-	self tally: ttl negated! !
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:28:59'!
+fertilizer: aRate
+	"Account for fertilizer at aRate per acre" 
+	| p1 p2 p3 p4 p5 |
+
+	p1 _ aRate * (assets at: #Hay) quantity.
+	(assets at: #Hay) cost: p1 negated + (assets at: #Hay) cost.
+	p2 _ aRate * (assets at: #Wheat) quantity.
+	(assets at: #Wheat) cost: p2 negated / 2 + (assets at: #Wheat) cost.
+	p3 _ aRate * (assets at: #Wheat) quantity.
+	(assets at: #Corn) cost: p3 negated / 2 + (assets at: #Corn) cost.
+	p4 _ aRate * (assets at: #Cherries) quantity.
+	(assets at: #Cherries) cost: p4 negated / 2 + (assets at: #Cherries) cost.
+	p5 _ aRate * (assets at: #Cherries) quantity.
+	(assets at: #Apples) cost: p5 negated / 2 + (assets at: #Apples) cost.
+	self tally: (p1 + p2 + p3 + p4 + p5).
+	mgr triggerEvent: #itemChange.
+	^ 0 	"no further cost allocation is needed" ! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 9/25/2011 10:38'!
 garnish
@@ -5933,11 +5936,12 @@ garnish
 	garnish ifNil: [garnish := false].
 	^ garnish! !
 
-!Farmer methodsFor: 'accessing' stamp: 'dhn 9/25/2017 16:56:20'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/26/2017 11:30:01'!
 garnish: aBoolean
 	"Set the value of garnish"
 
-	garnish _ aBoolean! !
+	garnish _ aBoolean.
+	mgr triggerEvent: #itemChange! !
 
 !Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:02:55'!
 garnishSpiel
@@ -5959,27 +5963,32 @@ goDirectly: aPosition
 	self mgr disableAll: {'Move'. 'Expense'. 'Fate'. 'Harvest'}.
 	self mgr enableAll: {'End Turn'}! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/25/2017 16:21:31'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:30:50'!
 halveCherries: aRate 
 	"Reduce cherry harvest by aRate"
 
-	(assets at: #Cherries) factor: aRate * (assets at: #Cherries) factor! !
+	(assets at: #Cherries) factor: aRate * (assets at: #Cherries) factor.
+	mgr triggerEvent: #itemChange! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/23/2014 12:50'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:37:18'!
 halveCows
-	| eachHerd |
-	eachHerd := assets
-				select: [:ea | ea class inheritsFrom: Livestock].
-	eachHerd
-		do: [:each | each factor: 0.5 * each factor]! !
+	"Adjust the factor for harvesting cattle"
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:38'!
+	assets do: [:each | 
+		(each class inheritsFrom: Livestock)
+			ifTrue: [each factor: 0.5 * each factor]].
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 10:03:03'!
 halveHay
-	(assets at: #Hay)
-		factor: 0.5 * (assets at: #Hay) factor! !
+	"Change the factor for hay"
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:39'!
+	(assets at: #Hay) factor: 0.5 * (assets at: #Hay) factor.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:38:07'!
 halveHay: anObject 
+self halt: 'how did we get here?'.
 	(assets at: #Hay)
 		factor: 0.5 * (assets at: #Hay) factor! !
 
@@ -6054,8 +6063,9 @@ harvests
 	"Answer the value of harvests"
 	^ harvests! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:39'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:39:54'!
 hasFruit
+self halt: 'how did we get here?'.
 	self ifFruit
 		ifTrue: [self tally: 500 negated.
 			(assets at: #Cherries)
@@ -6074,7 +6084,7 @@ hasHarvester
 			^ true].
 	^ false! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 15:09:56'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:42:11'!
 heldCalves: anAmount 
 	"Allocate anAmount for holding some calves"
 	| q1 q2 eachHerd headCount portion ix |
@@ -6092,9 +6102,10 @@ heldCalves: anAmount
 			ix _ 0.
 			eachHerd
 				do: [:each | each gross: each gross
-							+ (portion at: (ix _ ix + 1))]] ! !
+							+ (portion at: (ix _ ix + 1))]].
+	mgr triggerEvent: #itemChange! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:58:46'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:43:07'!
 helens: anObject 
 	"Account for Natural Disaster"
 	| rolls r amt |
@@ -6115,9 +6126,10 @@ helens: anObject
 							amt _ 100 * (pl assets at: #Hay) quantity.
 							pl tally: amt negated.
 							(pl assets at: #Hay) cost: (pl assets at: #Hay) cost + amt]]].
+	mgr triggerEvent: #itemChange.
 	^ rolls! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 14:38:50'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:43:23'!
 horseHay: anAmount 
 	"Receive anAmount per acre for horse hay"
 	| qty gross |
@@ -6127,7 +6139,8 @@ horseHay: anAmount
 		ifTrue: [
 			gross _ anAmount * qty.
 			self tally: gross.
-			(assets at: #Hay) gross: gross + (assets at: #Hay) gross]! !
+			(assets at: #Hay) gross: gross + (assets at: #Hay) gross].
+	mgr triggerEvent: #itemChange! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:57'!
 ifCows
@@ -6139,27 +6152,20 @@ ifCows
 				inject: q2
 				into: [:a :b | a + b])! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 20:35'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 10:16:35'!
 ifCows: anAmount 
-	| q1 q2 eachHerd headCount portion ix |
-	q1 := self cowsOnLeases.
-	q2 := (assets at: #CattleOnFarm) quantity.
-	headCount := q1
-				inject: q2
-				into: [:a :b | a + b].
-	0 < headCount
-		ifTrue: [self tally: anAmount negated.
-			eachHerd := self leasesHeld add: #CattleOnFarm
-							-> (assets at: #CattleOnFarm);
-						 yourself.
-			portion := anAmount * ((q1 asOrderedCollection add: q2;
-							 yourself) / headCount).
-			portion select: [:a | a > 0].	
-			ix := 0.
-			eachHerd
-				do: [:each | each cost: each cost
-							+ (portion at: (ix := ix + 1))]].
-	^ headCount! !
+	"Account for veterinary expense of anAmount"
+	| total |
+
+	total _ 0.
+	assets do: [:ea | 
+		(ea class inheritsFrom: Livestock)
+			ifTrue: [total _ total + ea quantity]].
+	^ total > 0
+		ifTrue: [
+			self tally: anAmount.
+			anAmount]
+		ifFalse: [0]! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:57'!
 ifFruit
@@ -6169,8 +6175,9 @@ ifFruit
 ifHarvester
 	^ 0 < (assets at: #Harvester) quantity! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:58'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:46:28'!
 ifHarvester: anAmount 
+self halt: 'how did we get here?'.
 	self IfHarvester
 		ifTrue: [self tally: anAmount.
 			(assets at: #Harvester)
@@ -6192,7 +6199,7 @@ initialize
 	options _ OrderedCollection new.
 	history _ OrderedCollection with: self netAssets! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/14/2017 18:40:56'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:47:55'!
 interest: aRate
 	"Answer the amount of interest = debt * aRate"
 	| int |
@@ -6206,14 +6213,15 @@ interest: aRate
 		ifFalse: [
 			int _ 0.
 			self avoidedDebt: 1 + self avoidedDebt].
-	^ int! !
+	mgr triggerEvent: #itemChange.
+	^ int negated! !
 
-!Farmer methodsFor: 'accessing' stamp: 'dhn 9/19/2017 16:05:08'!
+!Farmer methodsFor: 'accessing' stamp: 'dhn 9/26/2017 11:50:07'!
 leasesHeld
 	"Answer the cattle leases held by self"
 	| leases |
-	leases := assets
-				select: [:ea | ea class inheritsFrom: CattleOnLease].
+
+	leases _ assets select: [:ea | ea class inheritsFrom: CattleOnLease].
 	^ leases select: [:each | 0 < (each quantity)].
 ! !
 
@@ -6228,38 +6236,46 @@ maggotFly: anAmount
 	c2 _ anAmount * q2.
 	self allocateFruitCost: c1 + c2! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 11/23/2014 12:02'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:56:25'!
 missedCattleHarvest
-	| eachHerd |
-	eachHerd := assets
-				select: [:ea | ea class inheritsFrom: Livestock].
-	eachHerd
-		do: [:each | each missed: each missed + 1].
-! !
+	"Record that a harvest was missed for livestock assets"
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 14:53:48'!
+	assets do: [:each | 
+		(each class inheritsFrom: Livestock)
+			ifTrue: [each missed: each missed + 1]].
+	mgr triggerEvent: #itemChanged! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:59:48'!
 noHarvester: anAmount 
 	"Account for whether a player owns a harvester"
 
-	0 < (assets at: #Harvester) quantity
+	^ 0 < (assets at: #Harvester) quantity
 		ifTrue: [
-			(assets at: #Harvester) costAvoided: anAmount + (assets at: #Harvester) costAvoided]
+			(assets at: #Harvester) costAvoided: anAmount negated + (assets at: #Harvester) costAvoided.
+			mgr triggerEvent: #itemChange.
+			0]
 		ifFalse: [
-			self tally: anAmount negated.
-			(assets at: #Harvester) cost: anAmount + (assets at: #Harvester) cost.
-			self allocateHarvesterLease: anAmount]! !
+			self tally: anAmount.
+			(assets at: #Harvester) cost: anAmount negated + (assets at: #Harvester) cost.
+			self allocateHarvesterLease: anAmount negated.
+			mgr triggerEvent: #itemChange.
+			anAmount]! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 14:49:05'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:00:25'!
 noTractor: anAmount 
 	"Account for whether the receiver has a tractor"
 	
-	0 < (assets at: #Tractor) quantity
+	^ 0 < (assets at: #Tractor) quantity
 		ifTrue: [
-			(assets at: #Tractor) costAvoided: anAmount + (assets at: #Tractor) costAvoided]
+			(assets at: #Tractor) costAvoided: anAmount negated + (assets at: #Tractor) costAvoided.
+			mgr triggerEvent: #itemChange.
+			0]
 		ifFalse: [
-			self tally: anAmount negated.
-			(assets at: #Tractor) cost: anAmount + (assets at: #Tractor) cost.
-			self allocateTractorLease: anAmount]! !
+			self tally: anAmount.
+			(assets at: #Tractor) cost: anAmount negated + (assets at: #Tractor) cost.
+			self allocateTractorLease: anAmount negated.
+			mgr triggerEvent: #itemChange.
+			anAmount]! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 12/7/2011 16:16'!
 offFarm
@@ -6273,21 +6289,22 @@ offFarm: anObject
 
 	offFarm := anObject! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 15:56:45'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:02:25'!
 oilLease: aParm 
 	"Allocate lease payment of aParm per acre from oil company"
 	| acres qty delta |
 
 	acres _ 0.
 	assets do: [:a | 
-		(a inheritsFrom: Crop)
+		(a class inheritsFrom: Crop)
 			ifTrue: [
-				qty _ ((a inheritsFrom: Fruit) or: [a inheritsFrom: Grain])
-					ifTrue: [(assets at: a) quantity // 2]
-					ifFalse: [(assets at: a) quantity].
+				qty _ ((a class inheritsFrom: Fruit) or: [a class inheritsFrom: Grain])
+					ifTrue: [a quantity // 2]
+					ifFalse: [a quantity].
 				delta _ aParm * qty.
-				(assets at: a) gross: delta + (assets at: a) gross.
+				a gross: delta + a gross.
 				acres _ acres + qty]].
+	mgr triggerEvent: #itemChange.
 
 	self tally: aParm * acres! !
 
@@ -6425,7 +6442,7 @@ salary
 	self triggerEvent: #itemChange
 ! !
 
-!Farmer methodsFor: 'income-related' stamp: 'dhn 9/17/2017 20:37:13'!
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/26/2017 12:04:18'!
 sellAsset: aString for: aNumber
 	"Record the sale of the asset named aString at aNumber price"
 	| lot subs |
@@ -6443,7 +6460,8 @@ sellAsset: aString for: aNumber
 					| n |
 					n _ assets at: each name asString.
 					n gross: n gross + aNumber / subs size.
-					n quantity: n quantity - each auctionQuantity]]! !
+					n quantity: n quantity - each auctionQuantity]].
+	mgr triggerEvent: #itemChange! !
 
 !Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:01:25'!
 sellOption: aName for: aNumber 
@@ -6470,11 +6488,12 @@ setUpAssets
 		yourself
 	! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 14:55:58'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:05:20'!
 slaughterCows: aParm
 	"Slaughter all livestock at farm"
 
-	(assets at: #CattleOnFarm) quantity: 0
+	(assets at: #CattleOnFarm) quantity: 0.
+	mgr triggerEvent: #itemChange
 ! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 09:44:03'!
@@ -6500,7 +6519,7 @@ truckerStrike: aParm
 	self allocateFruitCost: amt1 + amt2
 ! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 8/30/2017 17:41:14'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:07:20'!
 uncleBert: aParm 
 	"Answer whether player wishes to inherit hay"
 	
@@ -6512,7 +6531,8 @@ Do you want to inherit?')
 			h _ assets at: #Hay.
 			"inherited hay comes cheaper"
 			h cost: 10000 + h cost.
-			h quantity: 10 + h quantity].
+			h quantity: 10 + h quantity.
+			mgr triggerEvent: #itemChange].
 ! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 8/31/2017 16:57:40'!
@@ -6521,20 +6541,26 @@ updateHistory
 	
 	history at: history size put: self netAssets! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:03:37'!
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:07:50'!
 wheatWeeds: aParm 
 	"Reduce wheat yield by aParm"
 
 	(assets at: #Wheat) factor: aParm * (assets at: #Wheat) factor.
+	mgr triggerEvent: #itemChange
 ! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 1/15/2014 18:23'!
-wireWorms: anAmount 
-	| penalty |
-	penalty := anAmount * (assets at: #Wheat) quantity.
-	(assets at: #Wheat)
-		cost: penalty + (assets at: #Wheat) cost.
-	self tally: penalty negated! !
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 12:08:22'!
+wireWorms: aRate
+	"Account for grain damage of aRate per acre" 
+	| p1 p2 ttl |
+
+	p1 _ aRate * (assets at: #Wheat) quantity // 2.
+	(assets at: #Wheat) cost: p1 negated + (assets at: #Wheat) cost.
+	p2 _ aRate * (assets at: #Corn) quantity // 2.
+	(assets at: #Corn) cost: p2 negated + (assets at: #Corn) cost.
+	self tally: (ttl _ p1 + p2).
+	mgr triggerEvent: #itemChange.
+	^ ttl! !
 
 !Farmer class methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 11:13'!
 called: aName
