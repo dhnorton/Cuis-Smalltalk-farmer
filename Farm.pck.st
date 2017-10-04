@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3168] on 26 September 2017 at 12:11:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3190] on 3 October 2017 at 8:07:18 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 113!
+!provides: 'Farm' 1 114!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -130,6 +130,16 @@ FarmingView subclass: #YouView
 	category: 'Farm-Graphics'!
 !classDefinition: 'YouView class' category: #'Farm-Graphics'!
 YouView class
+	instanceVariableNames: ''!
+
+!classDefinition: #FarmTheme category: #'Farm-Graphics'!
+Theme subclass: #FarmTheme
+	instanceVariableNames: 'model'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'FarmTheme class' category: #'Farm-Graphics'!
+FarmTheme class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmAsset category: #'Farm-Model'!
@@ -2769,7 +2779,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/17/2017 19:48:26'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 10/3/2017 11:08:51'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2781,6 +2791,8 @@ buildMorphicWindow
 	board color:  (Color r: 0.986 g: 0.986 b: 0.986).
 	pasteup addMorph: board.
 	model world: pasteup.
+	FarmTheme beCurrent.
+	Theme current model: model.
 	
 	model when: #quitGame send: #delete to: self.
 	model when: #itemChange send: #displayNumbers to: self.
@@ -4921,6 +4933,31 @@ openOn: aModel
 	
 	^ win
 ! !
+
+!FarmTheme methodsFor: 'colors' stamp: 'dhn 10/3/2017 11:02:51'!
+defaultWindowColor
+
+	^ model currentPlayer color! !
+
+!FarmTheme methodsFor: 'colors' stamp: 'dhn 10/3/2017 11:41:45'!
+menu
+
+	Display depth <= 2 ifTrue: [^ Color white].
+	^ model currentPlayer
+		ifNotNil: [(model currentPlayer color) alpha: 0.63]
+		ifNil: [Color r: 0.75 g: 0.75 b: 0.75 alpha: 0.93]! !
+
+!FarmTheme methodsFor: 'accessing' stamp: 'dhn 10/3/2017 11:02:25'!
+model
+	"Answer the value of model"
+
+	^ model! !
+
+!FarmTheme methodsFor: 'accessing' stamp: 'dhn 10/3/2017 11:02:25'!
+model: anObject
+	"Set the value of model"
+
+	model _ anObject! !
 
 !FarmAsset methodsFor: 'operating' stamp: 'dhn 9/17/2017 16:43:54'!
 assetValue
