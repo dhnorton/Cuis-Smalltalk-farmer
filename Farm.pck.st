@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3190] on 3 October 2017 at 8:07:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3190] on 9 October 2017 at 10:33:06 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 114!
+!provides: 'Farm' 1 115!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -682,17 +682,34 @@ drawExpense
 	^ self drawCard: (self expenses) discard: (self drawnExpenses).
 ! !
 
-!Farm methodsFor: 'fates' stamp: 'dhn 9/5/2017 20:08:52'!
+!Farm methodsFor: 'fates' stamp: 'dhn 10/9/2017 10:32:57'!
 drawFate
 	"Draw a farmer's fate card, account for it, and place it in the discard pile."
-	| assoc |
+	"Special case: inheritance from Uncle Bert"
+	| assoc tale response |
 	
 	assoc _ self drawCard: self fates discard: self drawnFates.
 	self triggerEvent: #itemChange.
-	GamePopUp inform: assoc value title: 'Farmer''s Fate'.
-	currentPlayer perform: assoc key key withArguments: {assoc key value}.
-	self triggerEvent: #itemChange.
 	self disableAll: {'Fate'}.
+	assoc key key = #uncleBert:
+		ifTrue: [
+			tale _ String streamContents: [:str |
+				str
+					nextPutAll: assoc value; newLine;
+					nextPutAll: 'Do you want to inherit?'].
+			response _ PopUpMenu confirm: tale trueChoice: 'yes' falseChoice: 'no'.
+			response
+				ifTrue: [| h |
+					currentPlayer tally: 10000 negated.
+					h _ currentPlayer assets at: #Hay.
+					"inherited hay comes cheaper"
+					h cost: 10000 + h cost.
+					h quantity: 10 + h quantity.
+					self triggerEvent: #itemChange]]
+		ifFalse: [
+			GamePopUp inform: assoc value title: 'Farmer''s Fate'.
+			currentPlayer perform: assoc key key withArguments: {assoc key value}].
+	self triggerEvent: #itemChange.
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'})	ifTrue: [self enableAll: {'End Turn'}]
 ! !
 
