@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3190] on 9 October 2017 at 10:33:06 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3190] on 9 October 2017 at 10:50:57 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 115!
+!provides: 'Farm' 1 116!
 !requires: 'Game' 1 154 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
@@ -3244,18 +3244,19 @@ showAuctionOptions
 	pl _ model currentPlayer.
 	pl options do: [:ea | {(pl assets at: (Farm anotherNameFor: ea)) forOptionAuction} print]! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 17:52:12'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 10/9/2017 10:48:06'!
 showDraw: anObject
 	"Show window with description of an option"
 	| pl win |
 		
 	pl _ model currentPlayer.
 	win _ DrawView openOn: model.
-	win openInHand.
+	win openInWorld: pasteup.
 	win
 		setLabel: ('Option for ', pl identity);
 		setWindowColor: pl color;
 		startButtons;
+		morphPosition: self windowPosition;
 		details: anObject;
 		morphExtent: 300 @ 220! !
 
