@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3190] on 9 October 2017 at 2:14:19 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3190] on 10 October 2017 at 12:43:10 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 1!
+!provides: 'Farm' 1 6!
 !requires: 'Game' 1 1 nil!
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions fates drawnFates expenses drawnExpenses leases plotWindow moveButton latestPlayer windowCount'
+	instanceVariableNames: 'availableOptions exercisedOptions fates drawnFates expenses drawnExpenses leases plotWindow moveButton latestPlayer windowCount endFlag'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -564,11 +564,11 @@ disableAll: aCollection
 	
 	(self buttonsNamed: aCollection) do: [:ea | ea disableButton]! !
 
-!Farm methodsFor: 'buttons' stamp: 'dhn 9/5/2017 12:53:16'!
+!Farm methodsFor: 'buttons' stamp: 'dhn 10/9/2017 17:27:11'!
 disabledAll: aCollection
 	"Answer true if all buttons in aCollection are disabled"
 	| ans |
-	
+
 	ans _ true.
 	(self buttonsNamed: aCollection) do: [:ea | ans _ ans and: ea enabled not].
 	^ ans! !
@@ -596,14 +596,14 @@ doAuction
 		
 	ans ifNotNil: [self triggerEvent: ans]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/8/2017 14:59:36'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:23:20'!
 doAug1
 	"Move the player to February Week 4 after his landing on August  Week 1."
-	
+
+	self disableAll: {'End Turn'}.
 	(self disabledAll: {'Harvest'. 'Expense'})
 		ifTrue: [
 			GamePopUp inform: 'You will advance to 4th week in February.' title: 'Farming like a Pro'.
-			self disableAll: {'End Turn'}.
 			token feb4MoveFrom: currentPlayer position]! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 9/5/2017 12:58:51'!
@@ -626,7 +626,7 @@ doOptionAuction
 	self disableAll: {'End Turn'}.
 ! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/6/2017 16:37:19'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:53:04'!
 doSep1
 	"Move the player to November Week 3 after his landing on September Week 1."
 	
@@ -640,7 +640,7 @@ doSep1
 				ifFalse: [| a |
 					a := currentPlayer assets at: #Apples.
 					a missed: a missed + 1.
-					self enableAll: {'End Turn'}].
+					self endTurnCheck].
 			self setActionSelectorFor: #Harvest to: {self class harvestNormal}.
 			self setActionSelectorFor: #Expense to: {self class expenseNormal}.
 			self updatePlayer]! !
@@ -682,7 +682,7 @@ drawExpense
 	^ self drawCard: (self expenses) discard: (self drawnExpenses).
 ! !
 
-!Farm methodsFor: 'fates' stamp: 'dhn 10/9/2017 10:32:57'!
+!Farm methodsFor: 'fates' stamp: 'dhn 10/9/2017 17:02:41'!
 drawFate
 	"Draw a farmer's fate card, account for it, and place it in the discard pile."
 	"Special case: inheritance from Uncle Bert"
@@ -710,16 +710,17 @@ drawFate
 			GamePopUp inform: assoc value title: 'Farmer''s Fate'.
 			currentPlayer perform: assoc key key withArguments: {assoc key value}].
 	self triggerEvent: #itemChange.
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'})	ifTrue: [self enableAll: {'End Turn'}]
+	self endTurnCheck
 ! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/10/2017 18:15:53'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/10/2017 10:52:17'!
 drawOptionQuietly: aBoolean 
 	"Answer an option, drawn from those available if possible; however,
 	 resupply first from exercised options, if any; failing that,
 	resupply from a new 'deck' of options."
 	| otb |
 	
+	endFlag _ false.
 	self availableOptions isEmpty
 		ifTrue: [exercisedOptions isEmpty
 			ifTrue: [availableOptions _ self class optionsNames shuffled]
@@ -754,13 +755,7 @@ drawnFates: anObject
 
 	drawnFates := anObject! !
 
-!Farm methodsFor: 'buttons' stamp: 'dhn 9/6/2017 16:16:50'!
-enableAll: aCollection
-	"Enable each button named in aCollection"
-	
-	(self buttonsNamed: aCollection) do: [:ea | ea enableButton]! !
-
-!Farm methodsFor: 'operating' stamp: 'dhn 9/6/2017 17:32:19'!
+!Farm methodsFor: 'operating' stamp: 'dhn 10/9/2017 17:52:41'!
 enableHarvestButtons
 	"Enable buttons according to the state of the player"
 	
@@ -769,11 +764,22 @@ enableHarvestButtons
 					currentPlayer garnish
 						ifTrue: [
 							currentPlayer harvested.
-							self enableAll: {'End Turn'}]
+							self endTurnCheck]
 						ifFalse: [self enableAll: {'Harvest'. 'Expense'}]]
-				ifFalse: [(self disabledAll: {'Harvest'. 'Fate'. 'Expense'})
-							ifTrue: [self enableAll: {'End Turn'}]]
+				ifFalse: [self endTurnCheck]
 ! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 10/10/2017 10:13:51'!
+endFlag
+	"Answer the value of endFlag"
+	
+	^ endFlag! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 10/10/2017 10:15:13'!
+endFlag: aBool
+	"Set the value of endFlag"
+	
+	endFlag _ aBool! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/31/2017 17:16:55'!
 endTurn
@@ -805,6 +811,14 @@ endTurn
 						ifTrue: [self wonButtonsState]
 						ifFalse: [self enableAll: {'Move'. 'Stats'}.
 							self disableAll: {'End Turn'}]]]! !
+
+!Farm methodsFor: 'operating' stamp: 'dhn 10/10/2017 10:21:34'!
+endTurnCheck
+	"Enable the End Turn button if certain conditions are met"
+	| btns |
+
+	btns _ self disabledAll: {'Harvest'. 'Fate'. 'Expense'}.
+	(btns and: [endFlag]) ifTrue: [self enableAll: {'End Turn'}]! !
 
 !Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:01:09'!
 exercisedOptions
@@ -911,14 +925,13 @@ grain: quantity
 		amount: Corn auctionQuantity.
 	^ quantity! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 13:07:12'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/10/2017 12:18:30'!
 harvest
 	"Harvest and account for the result."
-	
+
 	currentPlayer harvest: (self class harvestSeason at: currentPlayer position).
-	self disableAll: {'Harvest'}.
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
-! !
+	self
+		disableAll: {'Harvest'}! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 10/27/2014 21:28'!
 harvestAug1
@@ -939,16 +952,15 @@ harvestSep1
 	self harvest;
 	 doSep1! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 18:31:51'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/10/2017 12:39:12'!
 harvestThen: aSymbol
 	"Harvest and account for the result."
 	
 	currentPlayer 
 		harvest: (self class harvestSeason at: currentPlayer position)
 		then: aSymbol.
-	self disableAll: {'Harvest'}.
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
-! !
+	self
+		disableAll: {'Harvest'}! !
 
 !Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:26'!
 harvester: quantity 
@@ -1050,6 +1062,13 @@ moveButton: anObject
 	
 	^ moveButton _ anObject! !
 
+!Farm methodsFor: 'operating' stamp: 'dhn 10/10/2017 10:19:18'!
+nextPlayer
+	"Begin the next player's turn in Farming Game"
+
+	super nextPlayer.
+	endFlag _ true! !
+
 !Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 21:40'!
 pay: down borrow: balance for: aSymbol amount: qty
 	"Account for the down payment and loan balance to purchase the asset named in aSymbol." 
@@ -1061,7 +1080,7 @@ pay: down borrow: balance for: aSymbol amount: qty
 	asset cost: down + balance + asset cost.
 	self updatePlayer! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/26/2017 08:23:51'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:04:34'!
 payExpense
 	"Account for an expense."
 	| assoc expense value class |
@@ -1074,8 +1093,9 @@ payExpense
 	class _ Smalltalk classNamed: (self class harvestSeason at: currentPlayer position).
 	class perform: #expense:for: withArguments: (Array with: value with: currentPlayer).
 	self triggerEvent: #itemChange.
-	self disableAll: {'Expense'}.
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]! !
+	self
+		disableAll: {'Expense'};
+		endTurnCheck! !
 
 !Farm methodsFor: 'loan' stamp: 'dhn 9/1/2017 13:37:11'!
 paymentChoices
@@ -1099,11 +1119,11 @@ plotWindow: anObject
 	"Set the value of plotWindow."
 	plotWindow := anObject! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:46'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/9/2017 17:51:58'!
 queryWin: aBool
 	"Change state of buttons according to whether a win has occurred."
 		aBool ifTrue: [self wonButtonsState]
-		ifFalse: [self enableAll: {'End Turn'}]! !
+		ifFalse: [self endTurnCheck]! !
 
 !Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 21:47'!
 rattlesnake: quantity 
@@ -1283,7 +1303,7 @@ showProgress
 		ifNotNil: [xw comeToFront].
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/4/2017 16:14:59'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:51:28'!
 space1
 	"Christmas Vacation"
 	
@@ -1294,9 +1314,9 @@ space1
 	currentPlayer offFarm: 1000 + self currentPlayer offFarm.
 	self triggerEvent: #itemChange.
 	currentPlayer salary.
-	self enableAll: {'End Turn'}! !
+	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:43:03'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:51:19'!
 space10
 	"Mar week 1"
 	
@@ -1305,16 +1325,16 @@ space10
 	( currentPlayer assets at: #Wheat)
 		cost: 2000 + ( currentPlayer assets at: #Wheat) cost.
 	self triggerEvent: #itemChange.
-	self enableAll: {'End Turn'}! !
+	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:42:29'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:51:09'!
 space11
 	"Mar week 2"
 	
 	self disableAll: {'Move'}.
 	currentPlayer tally: 500 negated.
 	self triggerEvent: #itemChange.
-	self enableAll: {'End Turn'}! !
+	self endTurnCheck! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/3/2017 13:58:45'!
 space12
@@ -1325,7 +1345,7 @@ space12
 	self triggerEvent: #itemChange.
 	token jan2MoveFrom: currentPlayer position! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:46:32'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:51:01'!
 space13
 	"Mar week 4"
 	
@@ -1334,42 +1354,42 @@ space13
 		ifTrue: [
 			currentPlayer tally: 2000 negated.
 			self triggerEvent: #itemChange].
-	self enableAll: {'End Turn'}! !
+	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:51:31'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:50:51'!
 space14
 	"Apr week 1"
 	
 	self disableAll: {'Move'}.
 	currentPlayer addOption: (self drawOptionQuietly: false).
 	self triggerEvent: #itemChange.
-	self enableAll: {'End Turn'}! !
+	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:34:01'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:50:39'!
 space15
 	"Spring Planting"
 	
 	self disableAll: {'Move'}.
 	currentPlayer doubleCorn.
-	self enableAll: {'End Turn'}! !
+	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:48:59'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:50:27'!
 space16
 	"Apr week 3"
 	
 	self disableAll: {'Move'}.
 	currentPlayer tally: 500 negated.
 	self triggerEvent: #itemChange.
-	self enableAll: {'End Turn'}! !
+	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:49:32'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:50:08'!
 space17
 	"Apr week 4"
 	
 	self disableAll: {'Move'}.
 	currentPlayer tally: 1000 negated.
 	self triggerEvent: #itemChange.
-	self enableAll: {'End Turn'}! !
+	self endTurnCheck! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:49:56'!
 space18
@@ -1380,7 +1400,7 @@ space18
 	self triggerEvent: #itemChange.
 	self queryWin: self won! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:50:19'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:49:54'!
 space19
 	"May week 2"
 	
@@ -1389,7 +1409,7 @@ space19
 	(currentPlayer assets at: #Corn)
 		cost: 500 + (currentPlayer assets at: #Corn) cost.
 	self triggerEvent: #itemChange.
-	self enableAll: {'End Turn'}! !
+	self endTurnCheck! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:17:12'!
 space2
@@ -1440,7 +1460,7 @@ space23
 		triggerEvent: #itemChange;
 		enableHarvestButtons ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/25/2017 17:20:14'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:05:10'!
 space24
 	"Jun week 3"
 	
@@ -1451,23 +1471,24 @@ space24
 		ifFalse: [| a |
 			a _ currentPlayer assets at: #Cherries.
 			a missed: a missed + 1].
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
+	self endTurnCheck
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/5/2017 20:11:39'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:06:07'!
 space25
 	"Jun week 4"
-	
+
 	self disableAll: {'Move'}.
 	currentPlayer ifFruit
 		ifTrue: [self enableHarvestButtons]
 		ifFalse: [| a |
 			a _ currentPlayer assets at: #Cherries.
 			a missed: a missed + 1].
-	self enableAll: {'Fate'}.
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]! !
+	self
+		enableAll: {'Fate'};
+		endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/5/2017 20:12:15'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:06:40'!
 space26
 	"Independence Day"
 	
@@ -1477,7 +1498,7 @@ space26
 		ifFalse: [| a |
 			a _ currentPlayer assets at: #Cherries.
 			a missed: a missed + 1].
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
+	self endTurnCheck
 ! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:40:11'!
@@ -1502,7 +1523,7 @@ space28
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/6/2017 17:49:12'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:49:35'!
 space29
 	"Jul week 3"
 	
@@ -1515,7 +1536,7 @@ space29
 			self setActionSelectorFor: #Expense to: {self class expenseJul3. self class harvestNormal}.
 			self enableAll: {'Harvest'. 'Expense'}]
 		ifFalse: [
-			self enableAll: {'End Turn'}.
+			self endTurnCheck.
 			self doJul3]! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:18:52'!
@@ -1539,7 +1560,7 @@ space30
 	currentPlayer bumpWheat: 50.
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/24/2017 19:09:58'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:49:23'!
 space31
 	"Aug week 1"
 	
@@ -1550,7 +1571,7 @@ space31
 			self setActionSelectorFor: #Expense to: {self class expenseAug1. self class expenseNormal}.
 			self enableAll: {'Harvest'. 'Expense'}]
 		ifFalse: [
-			self enableAll: {'End Turn'}.
+			self endTurnCheck.
 			self doAug1]! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/4/2017 15:43:00'!
@@ -1607,7 +1628,7 @@ space36
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/24/2017 19:47:23'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:48:58'!
 space37
 	"Harvest Moon"
 	
@@ -1618,15 +1639,15 @@ space37
 		ifTrue: [
 			currentPlayer harvestEnabled
 				ifTrue: [self enableAll: {'Harvest'. 'Expense'}]
-				ifFalse: [self enableAll: {'End Turn'}]]
+				ifFalse: [self endTurnCheck]]
 		ifFalse: [
 			currentPlayer missedCattleHarvest.
-			self enableAll: {'End Turn'}].
+			self endTurnCheck].
 	self won
 		ifTrue: [self wonButtonsState]
-		ifFalse: [(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]]! !
+		ifFalse: [self endTurnCheck]! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/24/2017 19:50:45'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:07:56'!
 space38
 	"Sep week 3"
 	
@@ -1637,10 +1658,9 @@ space38
 			currentPlayer harvestEnabled
 				ifTrue: [self enableAll: {'Harvest'. 'Expense'}]
 		ifFalse: [currentPlayer missedCattleHarvest]].
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) 	ifTrue: [self enableAll: {'End Turn'}]
-! !
+	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/24/2017 19:56:41'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:47:25'!
 space39
 	"Sep week 4"
 	
@@ -1653,12 +1673,11 @@ space39
 		ifTrue: [
 			currentPlayer harvestEnabled
 				ifTrue: [self enableAll: {'Harvest'. 'Expense'}]
-				ifFalse: [self enableAll: {'End Turn'}]]
+				ifFalse: [self endTurnCheck]]
 		ifFalse: [currentPlayer missedCattleHarvest].
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
-! !
+	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:20:04'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:47:10'!
 space4
 	"Jan week 3"
 	self disableAll: {'Move'}.
@@ -1666,10 +1685,10 @@ space4
 	self triggerEvent: #itemChange.
 	currentPlayer passedGo
 		ifTrue: [currentPlayer salary].
-	self enableAll: {'End Turn'}.
+	self endTurnCheck.
 	self triggerEvent: #itemChange! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/24/2017 19:57:19'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:46:51'!
 space40
 	"Oct week 1"
 	
@@ -1680,10 +1699,9 @@ space40
 		ifTrue: [
 			currentPlayer harvestEnabled
 				ifTrue: [self enableAll: {'Harvest'. 'Expense'}]
-				ifFalse: [self enableAll: {'End Turn'}]]
+				ifFalse: [self endTurnCheck]]
 		ifFalse: [currentPlayer missedCattleHarvest].
-	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]
-! !
+	self endTurnCheck! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:45:54'!
 space41
@@ -1706,7 +1724,7 @@ space42
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/5/2017 20:20:55'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:08:58'!
 space43
 	"Oct week 4"
 	
@@ -1719,9 +1737,9 @@ space43
 		ifFalse: [| a |
 			a _ currentPlayer assets at: #Apples.
 			a missed: a missed + 1.
-			(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [self enableAll: {'End Turn'}]]! !
+			self endTurnCheck]! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:52:50'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:46:17'!
 space44
 	"Nov week 1"
 	
@@ -1735,9 +1753,9 @@ space44
 		ifFalse: [| a |
 			a := currentPlayer assets at: #Apples.
 			a missed: a missed + 1.
-			self enableAll: {'End Turn'}]! !
+			self endTurnCheck]! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:58:00'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:46:03'!
 space45
 	"Nov week 2"
 	
@@ -1751,9 +1769,9 @@ space45
 		ifFalse: [| a |
 			a := currentPlayer assets at: #Apples.
 			a missed: a missed + 1.
-			self enableAll: {'End Turn'}]! !
+			self endTurnCheck]! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:58:33'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:45:44'!
 space46
 	"Nov week 3"
 	
@@ -1767,7 +1785,7 @@ space46
 		ifFalse: [| a |
 			a := currentPlayer assets at: #Apples.
 			a missed: a missed + 1.
-			self enableAll: {'End Turn'}]! !
+			self endTurnCheck]! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 16:59:26'!
 space47
@@ -1800,7 +1818,7 @@ space49
 	self enableHarvestButtons
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:20:55'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:45:12'!
 space5
 	"Jan week 4"
 	
@@ -1809,7 +1827,7 @@ space5
 	currentPlayer passedGo
 		ifTrue: [currentPlayer salary].
 	currentPlayer doubleHay.
-	self enableAll: {'End Turn'}.
+	self endTurnCheck.
 	self triggerEvent: #itemChange! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:16:45'!
@@ -1840,7 +1858,7 @@ space8
 	self disableAll: {'Move'}.
 	token springMove! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:53:00'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:44:47'!
 space9
 	"Feb week 4"
 	
@@ -1848,7 +1866,7 @@ space9
 	currentPlayer
 		addOption: (self drawOptionQuietly: false).
 	self triggerEvent: #itemChange.
-	self enableAll: {'End Turn'}! !
+	self endTurnCheck! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:58:25'!
 spaces
@@ -2601,7 +2619,7 @@ initialize
 
 	self addMorphFront: labelArea! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:38:48'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 10/10/2017 11:38:27'!
 jan2MoveFrom: aPosition
 	"Animate relocation of self when player must go BACK to Jan. 2 from aPosition"
 	| oldPos newPos index n posns limit i final |
@@ -2630,7 +2648,6 @@ jan2MoveFrom: aPosition
 				self removeActionsForEvent: #morphicStep.
 				arrow delete.
 				model currentPlayer position: final.
-				model enableAll: {'End Turn'}.
 				model doSpace.
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
@@ -2671,7 +2688,7 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/14/2017 19:04:16'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 10/9/2017 17:43:57'!
 moonMove
 	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
 	| oldPos newPos index n posns limit i final |
@@ -2706,7 +2723,7 @@ moonMove
 				model currentPlayer ifCows
 					ifTrue: [model currentPlayer harvestEnabled
 							ifTrue: [model enableAll: {'Harvest'. 'Expense'}]]
-					ifFalse: [model enableAll: {'End Turn'}].
+					ifFalse: [model endTurnCheck].
 				model doSpace.
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
@@ -2796,7 +2813,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 10/3/2017 11:08:51'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 10/9/2017 18:00:30'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2818,12 +2835,19 @@ buildMorphicWindow
 	model when: #showToken send: #showToken to: self.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
 	model when: #showDraw send: #showDraw: to: self with: #option.
+	model when: #optionDrawn send: #checkEnd to: self.
 	model when: #showAssets send: #showAssets to: self.
 	model when: #showYourself send: #showYourself to: self.
 	model when: #showEverybody send: #showEverybody to: self.
 	model when: #showAuctionAssets send: #showAuctionAssets to: self.
 	model when: #showAuctionOptions send: #showAuctionOptions to: self.
 ! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 10/9/2017 18:02:37'!
+checkEnd
+	"Enable End Turn after an option is acknowledged"
+
+	model endTurnCheck! !
 
 !FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
 describe
@@ -3244,7 +3268,7 @@ showAuctionOptions
 	pl _ model currentPlayer.
 	pl options do: [:ea | {(pl assets at: (Farm anotherNameFor: ea)) forOptionAuction} print]! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 10/9/2017 10:48:06'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 10/9/2017 15:36:33'!
 showDraw: anObject
 	"Show window with description of an option"
 	| pl win |
@@ -3252,6 +3276,7 @@ showDraw: anObject
 	pl _ model currentPlayer.
 	win _ DrawView openOn: model.
 	win openInWorld: pasteup.
+	model disableAll: {'End Turn'}.
 	win
 		setLabel: ('Option for ', pl identity);
 		setWindowColor: pl color;
@@ -4064,7 +4089,7 @@ assetAuctionList
 		ifNotNil: [player auctionable]
 		ifNil: [OrderedCollection new]! !
 
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:39:06'!
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/9/2017 17:53:58'!
 assetSold
 	"Record the sale; enable End button"
 	| seller purchase recipient |
@@ -4092,7 +4117,7 @@ assetSold
 			(model availableOptions at: purchase description) owner: recipient].
 	model currentPlayer cash < 0 ifFalse: [
 		model updateHistory.
-		model enableAll: {'End Turn'}].
+		model endTurnCheck].
 	model updatePlayer! !
 
 !AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
@@ -4145,12 +4170,12 @@ buyerButtons
 			setBalloonText: 'bidder')].
 	buyers addAllMorphs: col reversed! !
 
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 9/16/2017 11:48:25'!
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:44'!
 closeBoxHit
 
 	model enableAll: {'Auction'}.
 	model moveButton enabled
-		ifFalse: [begun ifFalse: [model enableAll: {'End Turn'}]].
+		ifFalse: [begun ifFalse: [model endTurnCheck]].
 	super closeBoxHit! !
 
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 18:09:43'!
@@ -4167,12 +4192,12 @@ details
 				self showChant.
 				beginButton disableButton]]! !
 
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 9/15/2017 21:56:02'!
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:26'!
 endIt
 	
 	model enableAll: {'Auction'}.
 	model moveButton enabled
-		ifFalse: [begun ifFalse: [model enableAll: {'End Turn'}]].
+		ifFalse: [begun ifFalse: [model endTurnCheck]].
 	self delete! !
 
 !AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
@@ -4319,11 +4344,12 @@ openOn: aModel
 	^ win
 ! !
 
-!DrawView methodsFor: 'termination' stamp: 'dhn 9/15/2017 15:33:00'!
+!DrawView methodsFor: 'termination' stamp: 'dhn 10/10/2017 10:28:46'!
 ack
 	"Acknowledge what is in the text pane and close the receiver"
-	
+
 	model currentPlayer priorOptions: model currentPlayer options copy.
+	model endFlag: true.
 	model triggerEvent: #optionDrawn.
 	model triggerEvent: #itemChange.
 	self delete! !
@@ -5128,7 +5154,7 @@ income: aRoll for: aPlayer
 							nextPut: $.].
 					GamePopUp inform: tale title: self description, ' quantity ', self quantity asString]]! !
 
-!Crop class methodsFor: 'income-related' stamp: 'dhn 9/19/2017 15:33:48'!
+!Crop class methodsFor: 'income-related' stamp: 'dhn 10/10/2017 12:27:36'!
 income: aRoll from: anAsset for: aPlayer
 	"Record  income from aRoll in aPlayer's crop"
 	| asset yield tale normal |
@@ -5161,7 +5187,8 @@ income: aRoll from: anAsset for: aPlayer
 							nextPutAll: 'Normally $';
 							nextPutAll: normal printStringWithCommas;
 							nextPut: $.].
-					GamePopUp inform: tale title: asset description, ' quantity ', asset quantity asString]].
+					GamePopUp inform: tale title: asset description, ' quantity ', asset quantity asString.
+					aPlayer mgr endTurnCheck]].
 		^ yield! !
 
 !Crop class methodsFor: 'database' stamp: 'dhn 9/18/2017 18:13:42'!
@@ -5489,7 +5516,7 @@ expense: anExpense for: aPlayer
 	"apportion according to head count"
 	col do: [:ea | ea cost: ea cost + (anExpense negated * ea quantity / head roundTo: 1)]! !
 
-!Livestock class methodsFor: 'income-related' stamp: 'dhn 9/19/2017 15:49:18'!
+!Livestock class methodsFor: 'income-related' stamp: 'dhn 10/10/2017 12:26:52'!
 income: aRoll from: anAsset for: aPlayer
 	"Record the effect of harvesting cattle with  aRoll"
 	| dix col head yield tale factor total |
@@ -5530,7 +5557,8 @@ income: aRoll from: anAsset for: aPlayer
 					nextPutAll: 'Normally $';
 					nextPutAll: (total / factor roundTo: 1)  printStringWithCommas;
 					nextPut: $.].
-			GamePopUp inform: tale title: 'Livestock quantity ', head asString].
+			GamePopUp inform: tale title: 'Livestock quantity ', head asString.
+			aPlayer mgr endTurnCheck].
 
 	^ total! !
 
@@ -6010,13 +6038,12 @@ goBackToJan2
 	GamePopUp inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
 	self mgr token jan2MoveFrom: position! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/25/2017 15:14:23'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 10/10/2017 11:38:40'!
 goDirectly: aPosition 
 	"Move backward to Jan 2"
 
 	self goBackToJan2.
-	self mgr disableAll: {'Move'. 'Expense'. 'Fate'. 'Harvest'}.
-	self mgr enableAll: {'End Turn'}! !
+	self mgr disableAll: {'Move'. 'Expense'. 'Fate'. 'Harvest'}! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:30:50'!
 halveCherries: aRate 
