@@ -1,49 +1,9 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 7:43:30 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 7:48:11 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 7!
+!provides: 'Farm' 1 8!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
 
-
-!classDefinition: #Farm category: #'Farm-Model'!
-Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions fates drawnFates expenses drawnExpenses leases plotWindow moveButton latestPlayer windowCount endFlag'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Model'!
-!classDefinition: 'Farm class' category: #'Farm-Model'!
-Farm class
-	instanceVariableNames: ''!
-
-!classDefinition: #FarmToken category: #'Farm-Graphics'!
-Token subclass: #FarmToken
-	instanceVariableNames: 'doubled'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'FarmToken class' category: #'Farm-Graphics'!
-FarmToken class
-	instanceVariableNames: ''!
-
-!classDefinition: #FarmButton category: #'Farm-Graphics'!
-GameButtonMorph subclass: #FarmButton
-	instanceVariableNames: 'deferred'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'FarmButton class' category: #'Farm-Graphics'!
-FarmButton class
-	instanceVariableNames: ''!
-
-!classDefinition: #FarmingGame category: #'Farm-Graphics'!
-GameBoard subclass: #FarmingGame
-	instanceVariableNames: 'seasons namesCache numbersArea othersArea seasonsArea'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'FarmingGame class' category: #'Farm-Graphics'!
-FarmingGame class
-	instanceVariableNames: ''!
 
 !classDefinition: #FarmingView category: #'Farm-Graphics'!
 SystemWindow subclass: #FarmingView
@@ -75,18 +35,8 @@ FarmingView subclass: #AssetView
 AssetView class
 	instanceVariableNames: ''!
 
-!classDefinition: #AuctionView category: #'Farm-Graphics'!
-FarmingView subclass: #AuctionView
-	instanceVariableNames: 'textPane heading chant buyers cancelButton endButton beginButton buttonsArea currentBid currentBidder begun going player list'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'AuctionView class' category: #'Farm-Graphics'!
-AuctionView class
-	instanceVariableNames: ''!
-
 !classDefinition: #AuctionAsset category: #'Farm-Graphics'!
-AuctionView subclass: #AuctionAsset
+FarmingView subclass: #AuctionAsset
 	instanceVariableNames: 'asset auctionList assetAuctionItem assetAuctionReport'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -145,8 +95,28 @@ Theme subclass: #FarmTheme
 FarmTheme class
 	instanceVariableNames: ''!
 
+!classDefinition: #Field category: #'Farm-Model'!
+Object subclass: #Field
+	instanceVariableNames: 'heading description label'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Model'!
+!classDefinition: 'Field class' category: #'Farm-Model'!
+Field class
+	instanceVariableNames: ''!
+
+!classDefinition: #Farm category: #'Farm-Model'!
+ProtoObject subclass: #Farm
+	instanceVariableNames: 'availableOptions exercisedOptions fates drawnFates expenses drawnExpenses leases plotWindow moveButton latestPlayer windowCount endFlag'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Model'!
+!classDefinition: 'Farm class' category: #'Farm-Model'!
+Farm class
+	instanceVariableNames: ''!
+
 !classDefinition: #FarmAsset category: #'Farm-Model'!
-Asset subclass: #FarmAsset
+ProtoObject subclass: #FarmAsset
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -335,36 +305,6 @@ CattleOnLease subclass: #Toppenish
 Toppenish class
 	instanceVariableNames: ''!
 
-!classDefinition: #Farmer category: #'Farm-Model'!
-Gamer subclass: #Farmer
-	instanceVariableNames: 'offFarm options priorOptions garnish emergencies harvests markets spaceEffect harvesting'
-	classVariableNames: 'FarmerTest'
-	poolDictionaries: ''
-	category: 'Farm-Model'!
-!classDefinition: 'Farmer class' category: #'Farm-Model'!
-Farmer class
-	instanceVariableNames: ''!
-
-!classDefinition: #FarmSeason category: #'Farm-Model'!
-Season subclass: #FarmSeason
-	instanceVariableNames: 'enabled'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Model'!
-!classDefinition: 'FarmSeason class' category: #'Farm-Model'!
-FarmSeason class
-	instanceVariableNames: ''!
-
-!classDefinition: #Field category: #'Farm-Model'!
-Object subclass: #Field
-	instanceVariableNames: 'heading description label'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Model'!
-!classDefinition: 'Field class' category: #'Farm-Model'!
-Field class
-	instanceVariableNames: ''!
-
 !classDefinition: #FarmAuctioneer category: #'Farm-Model'!
 ProtoObject subclass: #FarmAuctioneer
 	instanceVariableNames: ''
@@ -375,6 +315,26 @@ ProtoObject subclass: #FarmAuctioneer
 FarmAuctioneer class
 	instanceVariableNames: ''!
 
+!classDefinition: #FarmSeason category: #'Farm-Model'!
+ProtoObject subclass: #FarmSeason
+	instanceVariableNames: 'enabled'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Model'!
+!classDefinition: 'FarmSeason class' category: #'Farm-Model'!
+FarmSeason class
+	instanceVariableNames: ''!
+
+!classDefinition: #Farmer category: #'Farm-Model'!
+ProtoObject subclass: #Farmer
+	instanceVariableNames: 'offFarm options priorOptions garnish emergencies harvests markets spaceEffect harvesting'
+	classVariableNames: 'FarmerTest'
+	poolDictionaries: ''
+	category: 'Farm-Model'!
+!classDefinition: 'Farmer class' category: #'Farm-Model'!
+Farmer class
+	instanceVariableNames: ''!
+
 !classDefinition: #FarmAuctionList category: #'Farm-Graphics'!
 ProtoObject subclass: #FarmAuctionList
 	instanceVariableNames: 'optionButton player assetButton showingAssets lot'
@@ -383,6 +343,16 @@ ProtoObject subclass: #FarmAuctionList
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmAuctionList class' category: #'Farm-Graphics'!
 FarmAuctionList class
+	instanceVariableNames: ''!
+
+!classDefinition: #FarmButton category: #'Farm-Graphics'!
+ProtoObject subclass: #FarmButton
+	instanceVariableNames: 'deferred'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'FarmButton class' category: #'Farm-Graphics'!
+FarmButton class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmPlot category: #'Farm-Graphics'!
@@ -405,26 +375,26 @@ ProtoObject subclass: #FarmRelation
 FarmRelation class
 	instanceVariableNames: ''!
 
+!classDefinition: #FarmToken category: #'Farm-Graphics'!
+ProtoObject subclass: #FarmToken
+	instanceVariableNames: 'doubled'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'FarmToken class' category: #'Farm-Graphics'!
+FarmToken class
+	instanceVariableNames: ''!
 
-!Farm commentStamp: '<historical>' prior: 0!
-The model for FarmingGame!
+!classDefinition: #FarmingGame category: #'Farm-Graphics'!
+ProtoObject subclass: #FarmingGame
+	instanceVariableNames: 'seasons namesCache numbersArea othersArea seasonsArea'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'FarmingGame class' category: #'Farm-Graphics'!
+FarmingGame class
+	instanceVariableNames: ''!
 
-!FarmToken commentStamp: '<historical>' prior: 0!
-The game piece for a farmer - a player in the Farming Game.!
-
-!FarmButton commentStamp: '<historical>' prior: 0!
-A button which can have its action selector changed.!
-
-!FarmingGame commentStamp: '<historical>' prior: 0!
-Manage the visual effects of the Farming Game.
-
-Start the game from the New morph... window or in a workspace do:
-
-	FarmingGame start.
-
-http://farmgame.com/product/woo-single-2/
-
-!
 
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
@@ -434,9 +404,6 @@ A FarmingGame view which shows a report on all players.!
 
 !AssetView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the status of a player's assets.!
-
-!AuctionView commentStamp: '<historical>' prior: 0!
-An abstract class for auctions.!
 
 !AuctionAsset commentStamp: '<historical>' prior: 0!
 A FarmingGame window which makes it possible for players to raise cash by selling assets.!
@@ -452,6 +419,12 @@ A FarmingGame view which makes it possible for farmers to exercise options.!
 
 !YouView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the current player's status.!
+
+!Field commentStamp: '<historical>' prior: 0!
+A JobSite describes the attributes of a space on the game board!
+
+!Farm commentStamp: '<historical>' prior: 0!
+The model for FarmingGame!
 
 !FarmAsset commentStamp: '<historical>' prior: 0!
 The model for an asset of the farm.!
@@ -507,15 +480,1364 @@ The model for the Rattlesnake Ridge lease.!
 !Toppenish commentStamp: '<historical>' prior: 0!
 The model for the Toppenish Ridge lease.!
 
+!FarmSeason commentStamp: '<historical>' prior: 0!
+The model for a season of the year on the farm.!
+
 !Farmer commentStamp: '<historical>' prior: 0!
 A player in the Farming Game.
 !
 
-!FarmSeason commentStamp: '<historical>' prior: 0!
-The model for a season of the year on the farm.!
+!FarmButton commentStamp: '<historical>' prior: 0!
+A button which can have its action selector changed.!
 
-!Field commentStamp: '<historical>' prior: 0!
-A JobSite describes the attributes of a space on the game board!
+!FarmToken commentStamp: '<historical>' prior: 0!
+The game piece for a farmer - a player in the Farming Game.!
+
+!FarmingGame commentStamp: '<historical>' prior: 0!
+Manage the visual effects of the Farming Game.
+
+Start the game from the New morph... window or in a workspace do:
+
+	FarmingGame start.
+
+http://farmgame.com/product/woo-single-2/
+
+!
+
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
+aboutToBeGrabbedBy: aHand
+	"The receiver is being grabbed by a hand.
+	Perform necessary adjustments (if any) and return the actual morph
+	that should be added to the hand.
+	Answer nil to reject the drag."
+	"This message is sent to the dragged morph, not to the owner.
+	It is included here just for reference."
+
+	^self "Grab me"! !
+
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
+justDroppedInto: newOwnerMorph event: anEvent 
+	"This message is sent to a dropped morph after it has been dropped on -- and been accepted by -- a drop-sensitive morph"
+	"This message is sent to the dragged morph, not to the owner.
+	It is included here just for reference."
+
+	^super justDroppedInto: newOwnerMorph event: anEvent ! !
+
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
+justGrabbedFrom: formerOwner
+	"The receiver was just grabbed from its former owner and is now attached to the hand."
+	"This message is sent to the dragged morph, not to the owner.
+	It is included here just for reference."! !
+
+!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
+wantsToBeDroppedInto: aMorph
+	"Return true if it's okay to drop the receiver into aMorph. This check is symmetric to #wantsDroppedMorph:event: to give both parties a chance of figuring out whether they like each other."
+	"This message is sent to the dragged morph, not to the owner.
+	It is included here just for reference."
+
+	^true! !
+
+!FarmingView methodsFor: 'initialization' stamp: 'dhn 9/7/2017 12:18:32'!
+removeWindowMenu
+	"Remove the button in the title bar which brings up the window menu"
+	
+	(self findDeepSubmorphThat: [:s | s balloonText = 'window menu'] ifAbsent: [^ nil]) delete! !
+
+!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/7/2017 12:18:32'!
+open: aModel label: aString
+	"Answer a view on aModel"
+	|  window |
+	
+	window _ self new.
+	window
+		model: aModel;
+		buildMorphicWindow.
+	aString ifNotNil: [ window setLabel: aString ].
+	^ window! !
+
+!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/8/2017 19:58:36'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel label: ''.
+	win removeWindowMenu.
+	
+	^ win
+! !
+
+!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/7/2017 12:18:32'!
+viewPosition
+	"Answer the basic position for instances of this class"
+	
+	^ 200@-50! !
+
+!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
+ack
+	"Acknowledge what is in the text pane and close the receiver"
+	
+	self delete! !
+
+!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
+closeBoxHit
+
+	super closeBoxHit! !
+
+!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
+!AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
+buildMorphicWindow
+	"Lay out the window for player status"
+	
+	self layoutMorph beColumn.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	layoutMorph
+		addMorph: textPane;
+		addMorph: buttonArea! !
+
+!AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
+startButtons
+	"Set the button for acknowledging an option"
+	
+	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
+	ackButton 
+		morphExtent: 70@20;
+		setBalloonText: 'acknowledge receipt'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: ackButton;
+		padding: #center.
+! !
+
+!AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:08:04'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
+
+!AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:13:08'!
+reportAllPlayers
+	"Answer a report on all players"
+	
+	^ String streamContents: [:str |
+		model players
+			do: [:pl | str newLine; 
+				nextPutAll: pl identity, ':'; newLine;
+				nextPutAll: pl years asString; 
+				nextPutAll: ' years as a farmer'; newLine; 
+				nextPutAll: '$' , (pl netAssets roundTo: 1) printStringWithCommas; 
+				nextPutAll: ' net assets'; newLine;
+				nextPutAll: pl priorOptions size asString;
+				nextPutAll: ' options held'; newLine]]! !
+
+!AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:11:43'!
+updateEverybody
+	"Show the latest status of all players"
+	
+	textPane model actualContents: self reportAllPlayers ! !
+
+!AllView class methodsFor: 'class initialization' stamp: 'dhn 9/15/2017 16:10:42'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+	
+	aModel when: #itemChange send: #updateEverybody to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 10:57:33'!
+assetItem
+	"Answer the value of assetItem"
+
+	assetItem ifNil: [assetItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ assetItem! !
+
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 11:22:59'!
+assetItem: anObject
+	"Set the value of assetItem"
+	
+	(assetItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [
+			assetReport _ self reportFor: (self class statusList at: anObject)]
+		ifFalse: [
+			assetReport _ '']].
+	textPane model actualContents: assetReport.
+	self changed: #assetItem 	"makes deselection of the list happen"! !
+
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 10:56:47'!
+assetList
+	"Answer the asset list for a player"
+	
+	^ self class statusList! !
+
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/14/2017 15:16:50'!
+reportFor: aName
+	"Answer the status report for anAsset"
+	| property asset col |
+	
+	property _ player assets at: aName ifAbsent: [^ 'No such asset named ', aName].
+	asset _ self class translate: aName.
+	col _ (player harvests) select: [:ea | ea assetName = asset].
+	
+	^ String streamContents: [:str |
+		str 
+			nextPutAll: property description,':'; newLine;
+			nextPutAll: (property reportAsAssetFor: player); newLine.
+		col ifNotEmpty: [
+			col do: [:ea | 
+				ea enabled ifFalse: [str nextPutAll: ea desc, ' - done.'; newLine]]]]! !
+
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/18/2017 15:53:44'!
+updateStatus
+	"Show the latest status of the selected asset"
+
+	assetItem isZero 
+		ifFalse: [
+			assetReport _ self reportFor: (self class statusList at: assetItem).
+			textPane model actualContents: assetReport]! !
+
+!AssetView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 10:59:32'!
+buildMorphicWindow
+	"Lay out the window for asset status"
+	| rightPane |
+	
+	self layoutMorph beRow.
+	list _ (PluggableListMorph
+		model: self
+		listGetter: #assetList
+		indexGetter: #assetItem
+		indexSetter: #assetItem:
+		mainView: self
+		menuGetter: nil
+		keystrokeAction: nil)
+			name: #assets.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'asset status'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	rightPane _ LayoutMorph newColumn.
+	rightPane
+		name: 'right pane';
+		addMorph: textPane;
+		addMorph: buttonArea.
+	
+	self layoutMorph
+		addMorph: list proportionalWidth: 0.35;
+		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
+! !
+
+!AssetView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 10:43:31'!
+startButtons
+	"Set the button for acknowledging an asset status report"
+	| btn |
+	
+	btn _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
+	btn 
+		morphExtent: 70@20;
+		setBalloonText: 'quit'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: btn;
+		padding: #center.
+! !
+
+!AssetView methodsFor: 'termination' stamp: 'dhn 9/12/2017 20:55:38'!
+closeBoxHit
+
+	super closeBoxHit! !
+
+!AssetView methodsFor: 'termination' stamp: 'dhn 9/13/2017 11:36:23'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
+!AssetView methodsFor: 'access' stamp: 'dhn 9/13/2017 10:46:58'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
+
+!AssetView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 15:27:25'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+			
+	aModel when: #itemChange send: #updateStatus to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!AssetView class methodsFor: 'class initialization' stamp: 'dhn 9/13/2017 10:55:29'!
+statusList
+	"Answer the list of assets in order suitable for the list in the window"
+	
+	^ #('Hay' 'Corn' 'Wheat' 'Apples' 'Cherries' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
+
+!AssetView class methodsFor: 'operation' stamp: 'dhn 9/12/2017 15:32:57'!
+translate: aName
+	"Answer a name suited for status reporting, translated from aName"
+	
+	{'CattleOnFarm'. 'Ahtanum'. 'Rattlesnake'. 'Cascade'. 'Toppenish'}
+		detect: [:a | a = aName] ifNone: [^ aName].
+	^ 'Livestock'
+! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 12:37:01'!
+assetAuctionItem
+	"Answer the value of assetAuctionItem"
+
+	assetAuctionItem ifNil: [assetAuctionItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ assetAuctionItem! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 19:53:09'!
+assetAuctionItem: anObject
+	"Set the value of assetAuctionItem"
+	| enab |
+	
+	(assetAuctionItem _ anObject) ifNotNil: [
+		anObject isZero 
+			ifTrue: [
+				chant _ OrderedCollection with: ''.
+				enab _ false]
+			ifFalse: [
+				self openingFor: assetAuctionItem.
+				enab _ true].
+		self showChant.
+		self beginButton: enab.
+		self changed: #assetAuctionItem]! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 12:07:07'!
+assetAuctionList
+	"Answer a list for the asset auction window"
+	
+	^ player
+		ifNotNil: [player auctionable]
+		ifNil: [OrderedCollection new]! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/9/2017 17:53:58'!
+assetSold
+	"Record the sale; enable End button"
+	| seller purchase recipient |
+	
+	cancelButton disableButton.
+	endButton enableButton.
+	buyers removeAllMorphs.
+	chant addFirst: (String streamContents: [:str |
+		str
+			nextPutAll: 'SOLD!! to ';
+			nextPutAll: currentBidder;
+			nextPutAll: ' for $';
+			nextPutAll: self currentBid printStringWithCommas; newLine]).
+	self showChant.
+	seller _ model currentPlayer.
+	seller sellAsset: asset description for: currentBid.
+	currentBidder = self class bankName
+		ifTrue: [recipient _ currentBidder]
+		ifFalse: [
+			recipient _ model players detect: [:pl | pl identity = currentBidder] ifNone: [].
+			recipient tally: currentBid negated.
+			purchase _ recipient assets at: asset description.
+			purchase cost: purchase cost + currentBid.
+			purchase quantity: purchase quantity + 1.
+			(model availableOptions at: purchase description) owner: recipient].
+	model currentPlayer cash < 0 ifFalse: [
+		model updateHistory.
+		model endTurnCheck].
+	model updatePlayer! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 11:43:51'!
+beginAuction
+	"Show the bid increments and let the bidding begin"
+	
+	self 
+		soldEndButtons;
+		beat: #assetSold;
+		buyerButtons;
+		auctionList: self class bidIncrement;
+		assetAuctionItem: 1;
+		changed: #assetAuctionList.
+	heading contents: 'Bid Increment'.
+	begun _ true
+! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 18:09:43'!
+details
+	"Set the contents of the chant pane"
+	
+	self assetAuctionItem > 0
+		ifTrue: [
+			self openingFor: self assetAuctionItem.
+			beginButton enableButton]
+		ifFalse: [
+			begun ifFalse: [
+				chant _ ''.
+				self showChant.
+				beginButton disableButton]]! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:42:27'!
+offer: aName
+	"Record a bid by aName"
+	
+	assetAuctionItem > 0 
+		ifTrue: [
+			currentBid _ currentBid + (self class bidBump at: assetAuctionItem).
+			currentBidder _ aName.
+			chant addFirst: (String streamContents: [:str |
+				str
+					nextPut: $$;
+					nextPutAll: self currentBid printStringWithCommas;
+					nextPutAll: ' was bid.'; newLine]).
+			self showChant.
+			self going: 0.
+			buyers submorphsDo: [:ea | ea enableButton].
+			(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton]
+		ifFalse: [
+			buyers submorphsDo: [:ea | ea enableButton].
+			(buyers findDeepSubmorphThat: [:mm | mm label = currentBidder] ifAbsent: [^ self]) disableButton]! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:17:04'!
+openingFor: anItem
+	"Form the opening bid for anItem"
+	| listItem item opening xlation |
+	
+	{assetAuctionItem} print.
+	listItem _ self assetAuctionList at: anItem.
+	item _ (listItem findTokens: '()' keep: ($A to:$Z), ($a to: $z)) first.
+	xlation _ model class translate: item.
+	asset _ player assets at: xlation asSymbol ifAbsent: [self halt].
+	opening _ (asset class price * asset class lotQuantity) // 2.
+	self currentBid: opening.
+	currentBidder _ self class bankName.
+	chant _ OrderedCollection new.
+	chant addFirst: (String streamContents: [:string |
+		string
+			nextPutAll: 'The opening bid for ';
+			nextPutAll: item;
+			nextPutAll: ' by ';
+			nextPutAll: self class bankName;
+			nextPutAll: ' will be for ';
+			nextPut: $$;
+			nextPutAll: opening printStringWithCommas;
+			nextPutAll: ' (half the list price).'; newLine])! !
+
+!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
+auctionList: anObject
+	"Set the value of auctionList"
+	
+	auctionList _ anObject! !
+
+!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
+getList
+	"Update the list of assets"
+	
+	self assetAuctionItem: 0.
+	list updateList! !
+
+!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 10/1/2016 15:33:53'!
+buildMorphicWindow
+	"Lay out the window for auctioning an asset"
+	
+	buttonsArea _ (LayoutMorph newRow)
+		name: #buttons;
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+			
+	self layoutMorph
+		addMorph: buttonsArea;
+		addMorph: self setUpMidRow;
+		addMorph: (buyers _ self setUpBuyers)! !
+
+!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 9/15/2017 22:03:39'!
+setUpMidRow
+	"Answer the layout for the middle row of the Job Auction window"
+	| row leftPane headingArea |
+	
+	list _ (PluggableListMorph
+		model: self
+		listGetter: #assetAuctionList
+		indexGetter: #assetAuctionItem
+		indexSetter: #assetAuctionItem:
+		mainView: self
+		menuGetter: nil
+		keystrokeAction: nil)
+			name: #catalog;
+			layoutSpec: (LayoutSpec 
+				proportionalWidth: 1.0
+				proportionalHeight: 0.9
+				minorDirectionPadding: #center).
+
+	heading _ ((StringMorph contents: 'Assets') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 10)).
+	headingArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.1
+			minorDirectionPadding: #center);
+		name: 'heading area';
+		padding: #left.
+	headingArea addMorph: heading.
+
+	
+	leftPane _ (LayoutMorph newColumn)
+		name: 'left pane';
+		addMorph: headingArea;
+		addMorph: list.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'chant'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 0.6
+			proportionalHeight: 1.0
+			minorDirectionPadding: #center).
+
+	row _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.7
+			minorDirectionPadding: #center).
+	row
+		name: 'mid row';
+		addMorph: leftPane proportionalWidth: 0.4;
+		addAdjusterAndMorph: textPane layoutSpec: (LayoutSpec useAll).
+		
+	^ row
+	
+
+! !
+
+!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 3/18/2017 20:18:17'!
+buyerButtons
+	"Set bidding buttons for the players"
+	| col |
+	
+	col _ OrderedCollection new.
+	model players do: [:ea |
+		col add: ((BidderButton label: ea identity action: #offer: state: true model: self)
+			morphExtent: 70@30;
+			color: ea color;
+			setBalloonText: 'bidder')].
+	buyers addAllMorphs: col reversed! !
+
+!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 9/20/2016 13:16:38'!
+startButtons
+	"Set the initial buttons for asset auction"
+	
+	buttonsArea
+		removeAllMorphs;
+		addMorph: self makeBeginButton;
+		addMorph: self makeCancelButton;
+		padding: #center
+! !
+
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:44'!
+closeBoxHit
+
+	model enableAll: {'Auction'}.
+	model moveButton enabled
+		ifFalse: [begun ifFalse: [model endTurnCheck]].
+	super closeBoxHit! !
+
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:26'!
+endIt
+	
+	model enableAll: {'Auction'}.
+	model moveButton enabled
+		ifFalse: [begun ifFalse: [model endTurnCheck]].
+	self delete! !
+
+!AuctionAsset class methodsFor: 'data base' stamp: 'dhn 9/15/2017 20:38:56'!
+bankName
+	^ 'First Friendly Bank'! !
+
+!AuctionAsset class methodsFor: 'class initialization' stamp: 'dhn 9/16/2017 11:50:18'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel label: 'Asset Auction'.
+	win removeWindowMenu.
+			
+	aModel when: #itemChange send: #getList to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!DrawView methodsFor: 'termination' stamp: 'dhn 10/10/2017 10:28:46'!
+ack
+	"Acknowledge what is in the text pane and close the receiver"
+
+	model currentPlayer priorOptions: model currentPlayer options copy.
+	model endFlag: true.
+	model triggerEvent: #optionDrawn.
+	model triggerEvent: #itemChange.
+	self delete! !
+
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 20:13:44'!
+closeBoxHit
+
+	super closeBoxHit! !
+
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 17:05:16'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
+!DrawView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:45:20'!
+buildMorphicWindow
+	"Lay out the window for the drawn option"
+	
+	self layoutMorph beColumn.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	layoutMorph
+		addMorph: textPane;
+		addMorph: buttonArea! !
+
+!DrawView methodsFor: 'initialization' stamp: 'dhn 9/12/2017 09:32:37'!
+startButtons
+	"Set the button for acknowledging an option"
+	
+	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
+	ackButton 
+		morphExtent: 70@20;
+		setBalloonText: 'acknowledge receipt'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: ackButton;
+		padding: #center.
+! !
+
+!DrawView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 17:57:56'!
+details: aString
+	"Set the content of the text pane"
+	
+	textPane model actualContents: aString! !
+
+!DrawView class methodsFor: 'class initialization' stamp: 'dhn 9/10/2017 16:56:28'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!LoanView methodsFor: 'initialization' stamp: 'dhn 9/14/2017 11:07:48'!
+buildMorphicWindow
+	"Lay out the window for paying down debt"
+	| list1 rightPane |
+	
+	self layoutMorph beRow.
+	list1 _ (PluggableListMorph
+		model: self
+		listGetter: #loanList
+		indexGetter: #loanItem
+		indexSetter: #loanItem:
+		mainView: self
+		menuGetter: nil
+		keystrokeAction: nil)
+			name: #'payment size'.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+	model when: #payButton: send: #payButton: to: self with: #state.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'item description'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	rightPane _ LayoutMorph newColumn.
+	rightPane
+		name: 'right pane';
+		addMorph: buttonArea;
+		addMorph: textPane.
+	
+	self layoutMorph
+		addMorph: list1 proportionalWidth: 0.35;
+		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
+! !
+
+!LoanView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 16:30:09'!
+startButtons
+	"Set the Loan Payment buttons"
+	
+	payButton _ GameButtonMorph label: 'Pay' action: #pay state: false model: self.
+	payButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Make the selected payment.'.
+		
+	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
+	cancelButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Forget about reducing debt.'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: payButton;
+		addMorph: cancelButton;
+		padding: #center.
+! !
+
+!LoanView methodsFor: 'termination' stamp: 'dhn 9/12/2016 17:01:31'!
+closeBoxHit
+
+	model 
+		loanItem: nil;
+		enableAll: {'Pay Loan'}.
+	super closeBoxHit! !
+
+!LoanView methodsFor: 'termination' stamp: 'dhn 9/14/2017 11:48:54'!
+endIt
+	"Close the receiver"
+	
+	model enableAll: {'Pay Loan'}.
+	self delete! !
+
+!LoanView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 11:48:00'!
+details
+	"Set the loan report in the textPane"
+	
+	textPane model actualContents: (self loanReportFor: self loanItem)	"note that the textPane model differs from the model for this view"! !
+
+!LoanView methodsFor: 'accessing' stamp: 'dhn 9/16/2016 14:57:28'!
+payButton: aBool
+	"Change Pay button state according to aBool"
+	
+	aBool
+		ifTrue: [payButton enableButton]
+		ifFalse: [payButton disableButton]! !
+
+!LoanView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:14:36'!
+player: anObject
+	"Set the value of player to anObject"
+	
+	player _ anObject! !
+
+!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:00:58'!
+loanItem
+	"Answer the value of loanItem"
+
+	loanItem ifNil: [loanItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ loanItem! !
+
+!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:21:30'!
+loanItem: anObject
+	"Set the value of loanItem and loanReport"
+	| enab |
+	
+	(loanItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [
+			loanReport _ self loanReportFor: anObject.
+			enab _ true]
+		ifFalse: [
+			loanReport _ ''.
+			enab _ false].
+		textPane model actualContents: loanReport.
+		self payButton: enab.
+		model triggerEvent: #itemChange.
+		self changed: #loanItem]! !
+
+!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:04:20'!
+loanList
+	"Answer possible loan payment amounts"
+	| list |
+	
+	list _ OrderedCollection new.
+	1 to: 50 do: [:n | 
+		list add: (String streamContents: [:str |
+			str 
+				nextPut: $$;
+				nextPutAll: (n * self class paymentIncrement) printStringWithCommas;
+				newLine])].
+	^ list! !
+
+!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:06:35'!
+loanReportFor: anInteger
+	"Answer the effect on cash and debt of a payment selected by anInteger"
+	| pmt enab |
+
+	anInteger > 0
+		ifTrue: [
+			enab _ true.
+			pmt _ anInteger * self class paymentIncrement min: player debt negated.
+			^ (String streamContents: [:string |
+				string 
+					nextPutAll: 'By making this payment, ', player identity, ' would have:';
+					newLine; newLine;
+					nextPut: $$;
+					nextPutAll: (player debt + pmt) negated asInteger printStringWithCommas, ' in debt and';
+					newLine;
+					nextPut: $$;
+					nextPutAll: (player cash - pmt) asInteger printStringWithCommas , ' in cash and';
+					newLine;
+					nextPutAll: '$' , player playerDebtLimit value negated  printStringWithCommas , ' debt limit.'])]
+		ifFalse: [
+			enab _ false.
+			^ ''].
+	self payButton: enab.
+	self triggerEvent: #itemChange.
+	self changed: #loanItem! !
+
+!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 13:38:30'!
+pay
+	"Make payment on the loan"
+	| index payment |
+	
+	index _ loanItem.
+	self loanItem: 0. 	"avoid multiples via contact bounce"
+	payment _ index * self class paymentIncrement min: player debt negated.
+	player debt: player debt + payment.
+	player cash: player cash - payment.
+	model updatePlayer.
+	(player playerDebtLimit value <= player debt and: [model moveButton enabled not])
+		ifTrue: [model updateHistory].
+	self details! !
+
+!LoanView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:59'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel label: 'Purchases'.
+	win removeWindowMenu.
+			
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!LoanView class methodsFor: 'database' stamp: 'dhn 9/14/2017 11:12:09'!
+paymentIncrement
+	"Answer the payment increment for displaying loan payment choices"
+	
+	^ 1000! !
+
+!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 14:18:31'!
+buildMorphicWindow
+	"Lay out the window for purchases"
+	| rightPane |
+	
+	self layoutMorph beRow.
+	list _ (PluggableListMorph
+		model: self
+		listGetter: #optionsList
+		indexGetter: #optionsItem
+		indexSetter: #optionsItem:
+		mainView: self
+		menuGetter: nil
+		keystrokeAction: nil)
+			name: #catalog.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'item description'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	rightPane _ LayoutMorph newColumn.
+	rightPane
+		name: 'right pane';
+		addMorph: buttonArea;
+		addMorph: textPane.
+	
+	self layoutMorph
+		addMorph: list proportionalWidth: 0.35;
+		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
+! !
+
+!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 10:20:02'!
+startButtons
+	"Set the buttons for buying assets"
+	
+	buyButton _ GameButtonMorph label: 'Buy' action: #buy state: false model: self.
+	buyButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Make the purchase.'.
+		
+	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
+	cancelButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Forget about shopping for now.'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: buyButton;
+		addMorph: cancelButton;
+		padding: #center.
+! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 15:12:22'!
+buy
+	"Purchase an asset"
+	| key method amt |
+	
+	(model seasonAt: player position) enabled
+		ifTrue: [self buyButton: false] 		"can buy only in Winter"
+		ifFalse: [
+			key _ self optionsList at: self optionsItem.
+			method _ self class optionMethod at: key.
+			amt _ (Smalltalk classNamed: key) lotQuantity.
+			model perform: method withArguments: {amt}.
+	
+			"remove option from player"
+			player options: (self optionsList remove: key; yourself).
+			player priorOptions: player options copy.
+			model triggerEvent: #itemChange.
+	
+			"put the option in the 'discard pile' "
+			model exercisedOptions add: key.
+	
+			"remove option from the shopping window list"
+			list updateList.
+	
+			"de-select the list in the shopping window"
+			self optionsItem: 0.
+	
+			"disable the 'Buy' button"
+			self buyButton: false.
+	
+			"update the text pane"
+			self details]! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:22:04'!
+buyButton: aBool
+	"Change buy button state according to aBool"
+	
+	aBool
+		ifTrue: [
+			(model seasonAt: model currentPlayer position) enabled
+				ifFalse: [buyButton enableButton]]
+		ifFalse: [buyButton disableButton]! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:26:01'!
+details
+	"Set the content of the text pane"
+	
+	textPane model actualContents: 
+		(player priorOptions
+			ifEmpty: ['']
+			ifNotEmpty: [self optionsReport])! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 09:41:12'!
+getList
+	"Update the list of options"
+	
+	self optionsItem: 0.
+	list updateList! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:15:42'!
+list
+	"Answer the value of list"
+	
+	^ list! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:16:32'!
+list: aCollection
+	"Set the value of list"
+	
+	list _ aCollection! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
+
+!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:25'!
+closeBoxHit
+
+	model enableAll: {'Purchase'}.
+	super closeBoxHit! !
+
+!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:41'!
+endIt
+	"Close the receiver"
+	
+	model enableAll: {'Purchase'}.
+	self delete! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:13:20'!
+optionsItem
+	"Answer the value of optionsItem"
+
+	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ optionsItem! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/14/2017 12:00:01'!
+optionsItem: anObject
+	"Set the value of optionsItem and optionsReport"
+	| key option enab |
+	
+	(optionsItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [
+			key _ self optionsList at: anObject.
+			option _ self class optionsDesc at: key.
+			optionsReport _ self optionsReport: key.
+			option singleOwner not
+				ifTrue: [enab _ true]
+				ifFalse: [enab _ option owner isNil]]
+		ifFalse: [
+			optionsReport _ ''.
+			enab _ false].
+		self buyButton: enab].
+	textPane model actualContents: optionsReport.
+	self changed: #optionsItem 	"makes deselection of the list happen"! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/14/2017 13:29:18'!
+optionsList
+	"Answer the shopping list for a player"
+	
+	^ (player 
+		ifNotNil: [player priorOptions]
+		ifNil: [OrderedCollection new])! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:21:40'!
+optionsList: aList
+	"Set the shopping list for a player"
+	
+	player options: aList! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:16:50'!
+optionsReport
+	"Answer the report on the selected option"
+
+	^ optionsItem > 0
+		ifTrue: [self optionsReport: (model class translate: (self optionsList at: optionsItem))]
+		ifFalse: ['']! !
+
+!OptionsView methodsFor: 'operation' stamp: 'dhn 9/17/2017 21:42:41'!
+optionsReport: anAsset
+	"Show the status of anAsset for shopping purposes"
+	
+	^ player optionDescription: (model class anotherNameFor: anAsset)! !
+
+!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:33'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+			
+	aModel when: #optionDrawn send: #getList to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!OptionsView class methodsFor: 'database' stamp: 'dhn 9/13/2017 16:05:53'!
+optionMethod
+	"Answer a dictionary of methods which account for the execution of options."
+	
+	^ Dictionary new
+		at: #Tractor put: #tractor:;
+		at: #Harvester put: #harvester:;
+		at: #Fruit put: #fruit:;
+		at: #Grain put: #grain:;
+		at: #Hay put: #hay:;
+		at: #Livestock put: #livestock:;
+		at: #Ahtanum put: #ahtanum:;
+		at: #Rattlesnake put: #rattlesnake:;
+		at: #Cascade put: #cascade:;
+		at: #Toppenish put: #toppenish:;
+		yourself! !
+
+!OptionsView class methodsFor: 'database' stamp: 'dhn 9/13/2017 14:15:14'!
+optionsDesc
+	"Answer a dictionary of things that farmers can purchase."
+	
+	^ Dictionary new
+		at: #Tractor put: Tractor new;
+		at: #Harvester put: Harvester new;
+		at: #Fruit put: Fruit new;
+		at: #Grain put: Grain new;
+		at: #Hay put: Hay new;
+		at: #Livestock put: Livestock new;
+		at: #Ahtanum put: Ahtanum new;
+		at: #Rattlesnake put: Rattlesnake new;
+		at: #Cascade put: Cascade new;
+		at: #Toppenish put: Toppenish new;
+		yourself! !
+
+!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:44:00'!
+ack
+	"Acknowledge what is in the text pane and close the receiver"
+	
+	self delete! !
+
+!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:34:54'!
+closeBoxHit
+
+	super closeBoxHit! !
+
+!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:34:54'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
+!YouView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:44:33'!
+buildMorphicWindow
+	"Lay out the window for player status"
+	
+	self layoutMorph beColumn.
+			
+	buttonArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	buttonArea
+		name: #buttons;
+		padding: #center.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.85
+			minorDirectionPadding: #center).
+
+	layoutMorph
+		addMorph: textPane;
+		addMorph: buttonArea! !
+
+!YouView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:34:54'!
+startButtons
+	"Set the button for acknowledging an option"
+	
+	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
+	ackButton 
+		morphExtent: 70@20;
+		setBalloonText: 'acknowledge receipt'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: ackButton;
+		padding: #center.
+! !
+
+!YouView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 14:36:00'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
+
+!YouView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 14:40:37'!
+updatePerformance
+	"Show the latest status of the current player"
+	
+	textPane model actualContents: player reportYourself ! !
+
+!YouView class methodsFor: 'class initialization' stamp: 'dhn 9/15/2017 14:46:49'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+	
+	aModel when: #itemChange send: #updatePerformance to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!FarmTheme methodsFor: 'colors' stamp: 'dhn 10/3/2017 11:02:51'!
+defaultWindowColor
+
+	^ model currentPlayer color! !
+
+!FarmTheme methodsFor: 'colors' stamp: 'dhn 10/3/2017 11:41:45'!
+menu
+
+	Display depth <= 2 ifTrue: [^ Color white].
+	^ model currentPlayer
+		ifNotNil: [(model currentPlayer color) alpha: 0.63]
+		ifNil: [Color r: 0.75 g: 0.75 b: 0.75 alpha: 0.93]! !
+
+!FarmTheme methodsFor: 'accessing' stamp: 'dhn 10/3/2017 11:02:25'!
+model
+	"Answer the value of model"
+
+	^ model! !
+
+!FarmTheme methodsFor: 'accessing' stamp: 'dhn 10/3/2017 11:02:25'!
+model: anObject
+	"Set the value of model"
+
+	model _ anObject! !
+
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 10/21/2014 20:11'!
+describe
+	"Answer a string which describes the field"
+	^ String new writeStream
+		nextPutAll: self heading;
+		nextPutAll: self description;
+		contents	! !
+
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:58:29'!
+describeMarket
+	"Answer a string containing the market name"
+	^ label, Character newLine	! !
+
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:26:00'!
+heading: string1 with: string2
+	"Set the heading to string1, newLine, string2"
+	| str |
+	
+	str := String new writeStream.
+	str nextPutAll: string1; newLine;
+		nextPutAll: string2.
+	self heading: str contents! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
+description
+	"Answer the description for the cell of this site"
+	^ description! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 8/29/2017 21:34:55'!
+description: anObject
+	"Set the description for the cell of this site"
+	| str |
+	
+	str _ String new writeStream.
+	str newLine; newLine; nextPutAll: anObject.
+	description _ str contents! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
+heading
+	"Answer the short heading describing this site"
+	^ heading! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
+heading: anObject
+	"Set the short heading describing this site"
+	heading := anObject! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:54:42'!
+label
+	"Answer the value of label"
+
+	^ label! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:55:38'!
+label: anObject
+	"Set the value of label"
+
+	label _ anObject! !
 
 !Farm methodsFor: 'initialize-release' stamp: 'dhn 10/27/2014 20:26'!
 addTestPlayer: aString
@@ -2560,2496 +3882,6 @@ season
 			color: Color yellow; range: 47 @ 49);
 		yourself! !
 
-!FarmToken methodsFor: 'accessing' stamp: 'dhn 8/31/2017 15:21:13'!
-doubled
-	"Answer the value of doubled"
-
-	^ doubled! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:37:41'!
-feb4MoveFrom: aPosition
-	"Animate relocation of self when player moves ahead to Feb 4 from aPosition"
-	| oldPos newPos index n posns limit i final |
-	
-	final _ 9.
-	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
-	oldPos _ index atWrap: aPosition.
-	model positionBoardTo: oldPos.
-	self position: 1.
-	newPos _ final + 1.
-	posns _ OrderedCollection new.
-	n _ oldPos.
-	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
-	posns _ posns asArray.
-	model positionBoardTo: posns first.
-	
-	self arrowRight.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer 
-					position: final;
-					years: 1 + model currentPlayer years;
-					salary.
-				model
-					setActionSelectorFor: #Harvest to: {model class harvestNormal};
-					setActionSelectorFor: #Expense to: {model class expenseNormal};
-					doSpace.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 10/10/2017 11:38:27'!
-jan2MoveFrom: aPosition
-	"Animate relocation of self when player must go BACK to Jan. 2 from aPosition"
-	| oldPos newPos index n posns limit i final |
-	
-	final _ 3.
-	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
-	oldPos _ index atWrap: aPosition - 6.
-	model positionBoardTo: oldPos.
-	self position: 7.
-	newPos _ index atWrap: final - 7.
-	posns _ OrderedCollection new.
-	n _ oldPos.
-	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n - 1].
-	posns _ posns asArray.
-	model positionBoardTo: posns first.
-	
-	self arrowLeft.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer position: final.
-				model doSpace.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 10/9/2017 17:43:57'!
-moonMove
-	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
-	| oldPos newPos index n posns limit i final |
-	
-	final _ 37.
-	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
-	oldPos _ model currentPlayer oldPosition.
-	model positionBoardTo: oldPos.
-	self position: 1.
-	newPos _ final + 1.
-	posns _ OrderedCollection new.
-	n _ oldPos.
-	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
-	posns _ posns asArray.
-	model positionBoardTo: posns first.
-	
-	self arrowRight.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer position: final.
-				model
-					setActionSelectorFor: #Harvest to: {model class harvestNormal};
-					setActionSelectorFor: #Expense to: {model class expenseNormal}.
-				model currentPlayer ifCows
-					ifTrue: [model currentPlayer harvestEnabled
-							ifTrue: [model enableAll: {'Harvest'. 'Expense'}]]
-					ifFalse: [model endTurnCheck].
-				model doSpace.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/5/2017 21:58:48'!
-moved
-	"Perform the results of the move"
-	| pl |
-	
-	pl _ self who.
-	doubled contents: who doubledString.
-	model doSpace.
-	pl harvestEnabled ifFalse: [model updateHistory]! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 19:44:24'!
-position: aCell
-	"Position the receiver over the board cell numbered by aCell"
-	| horiz |
-	
-	self morphPosition: self posAdjust.
-	horiz _ (model cells at: aCell) morphPosition x.
-	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/14/2017 19:04:41'!
-springMove
-	"Animate relocation to Spring Planting when player lands on space 8"
-	| oldPos posns limit i final |
-	
-	final _ 15.
-	oldPos _ model currentPlayer oldPosition.
-	self arrowRight.
-	posns _ (Interval from: oldPos to: final - who roll by: 1) asArray.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer position: final.
-				model space15.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'initialization' stamp: 'dhn 9/2/2017 11:18:41'!
-initialize
-
-	super initialize.
-	
-	labelArea _ LayoutMorph newColumn 
-		layoutSpec: LayoutSpec useAll;
-		color: Color transparent;
-		name: 'label area';
-		separation: 1;
-		padding: #center.
-	labelArea
-		addMorph: self makeIdArea;
-		addMorph: self makeDoubledArea.
-
-	self addMorphFront: labelArea! !
-
-!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:13:17'!
-makeDoubledArea
-	"Lay out the area for the arrow"
-	| area |
-	
-	area _ LayoutMorph newRow
-		color: Color transparent;
-		name: #doubled;
-		padding: #center.
-	
-	doubled _ (StringMorph contents: '') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
-		
-	area addMorph: doubled.
-	^ area	layoutSpec: (LayoutSpec  
-		proportionalWidth: 1.0)! !
-
-!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:11:56'!
-makeIdArea
-	"Lay out the area for the arrow"
-	| area |
-	
-	area _ LayoutMorph newRow
-		color: Color transparent;
-		name: #id;
-		padding: #center.
-	
-	id _ (StringMorph contents: 'Player') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
-		
-	area addMorph: id.
-	^ area	layoutSpec: (LayoutSpec  
-		proportionalWidth: 1.0)! !
-
-!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/2/2017 20:38:50'!
-actionSelector: anObject
-	"Set the value of actionSelector"
-	
-	actionSelector _ anObject! !
-
-!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/5/2017 12:33:32'!
-deferred
-	"Answer the value of deferred"
-
-	^ deferred! !
-
-!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/5/2017 12:33:32'!
-deferred: anObject
-	"Set the value of deferred"
-
-	deferred _ anObject! !
-
-!FarmButton methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:09:21'!
-disableButton
-	"Change to the disabled state, caching the actionSelector"
-	
-	self enabled 
-		ifTrue: [
-			self deferred
-				ifNil: [self oldTarget: self actionSelector]
-				ifNotNil: [
-					self oldTarget: self deferred.
-					self deferred: nil].
-			self action: nil.
-			self enabled: false.
-			self color: GameButtonMorph disabledColor]! !
-
-!FarmButton methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:08:41'!
-enableButton
-	"Change to the enabled state"
-	
-	self enabled ifFalse: [
-		oldTarget ifNotNil: [self action: oldTarget].
-		self enabled: true.
-		self color: GameButtonMorph enabledColor]! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 10/9/2017 18:00:30'!
-buildMorphicWindow
-
-	pasteup _ PasteUpMorph new
-		name: #pasteup;
-		color: Color transparent.
-		
-	layoutMorph addMorph: pasteup layoutSpec: LayoutSpec useAll.
-	board _ LayoutMorph newColumn name: #board.
-	board color:  (Color r: 0.986 g: 0.986 b: 0.986).
-	pasteup addMorph: board.
-	model world: pasteup.
-	FarmTheme beCurrent.
-	Theme current model: model.
-	
-	model when: #quitGame send: #delete to: self.
-	model when: #itemChange send: #displayNumbers to: self.
-	model when: #titleChange send: #titleChange: to: self with: #player.
-	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
-	model when: #showToken send: #showToken to: self.
-	model when: #showSeasons: send: #showSeasons: to: self with: #index.
-	model when: #showDraw send: #showDraw: to: self with: #option.
-	model when: #optionDrawn send: #checkEnd to: self.
-	model when: #showAssets send: #showAssets to: self.
-	model when: #showYourself send: #showYourself to: self.
-	model when: #showEverybody send: #showEverybody to: self.
-	model when: #showAuctionAssets send: #showAuctionAssets to: self.
-	model when: #showAuctionOptions send: #showAuctionOptions to: self.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
-getPlayers
-	"Get the names of two to six players"
-	| x y cnt clrs |
-
-	model disableAll: {'Players'. 'Tour'}.
-	clrs _ Token colors shuffled.
-	cnt _ 0.
-	x _ FillInTheBlankMorph request: 'First player''s name?' initialAnswer: ''.
-	x 
-		ifEmpty: [
-			model enableAll: {'Players'. 'Tour'}.
-			^ nil]
-		ifNotEmpty: [
-			cnt _ cnt + 1.
-			model setupPlayer: x color: (clrs at: cnt)].
-	
-	[cnt < 6] whileTrue: [
-		y _ FillInTheBlankMorph request: 'Next player''s name?' initialAnswer: ''.
-		y
-			ifEmpty: [
-				cnt > 1 
-					ifTrue: [self startGame]
-					ifFalse: [
-						model players: OrderedCollection new.
-						model enableAll: {'Players'. 'Tour'}].
-				^ nil]
-			ifNotEmpty: [
-				cnt _ cnt + 1.
-				model setupPlayer: y color: (clrs at: cnt)]].
-		
-	self startGame
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:28:09'!
-initialize
-
-	super initialize! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:38:25'!
-layoutSubmorphs
-
-    super layoutSubmorphs.
-    self board morphExtent: self board owner morphExtent! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:23'!
-makeAddPlayerButton
-	"Answer the 'Players' button"
-
-	^ (FarmButton label: 'Players' action: #getPlayers state: true model: self)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Use this button to enter names of two to six players;
-entering an empty name or cancel will start the game'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:43'!
-makeAuctionButton
-	"Answer the 'Auction' button"
-
-	^ (FarmButton label: 'Auction' action: #doAuction state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Auction options and equipment'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:29:09'!
-makeButtonArea
-	"Lay out the area for buttons"
-	
-	buttonArea _ (LayoutMorph newRow separation: 5)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: self class titleHeight
-			minorDirectionPadding: #center).
-	buttonArea
-			color: Color transparent;
-			name: #buttons;
-			padding: #center.
-			
-	board addMorph: buttonArea.
-	
-	^ buttonArea
-		! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/7/2017 14:49:58'!
-makeBuyOptionButton
-	"Answer the 'Option' button"
-
-	^ (GameButtonMorph label: 'Purchase' action: #showOpts state: true model: self)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'See what options you have and make purchases during WINTER.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 18:49:08'!
-makeCellsArea
-	"Lay out the area which shows some spaces of the board"
-	| cellArea view mm mt |
-	
-	cellArea _ (LayoutMorph newRow separation: 0)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 1.0
-			minorDirectionPadding: #center);
-		name: #'cell area'.
-	
-	1 to: model class cellsForGame do: [:ix |
-		view _ (CellView newColumn
-			layoutSpec: (LayoutSpec proportionalWidth: 1 / model class cellsForGame);
-			name: #cell).
-		view addMorph: (mt _ (GameCell 
-			textProvider: self
-			textGetter: #describe)
-				layoutSpec: (LayoutSpec proportionalWidth: 1.0);
-				color: self class cellColor;
-				borderWidth: 1;
-				name: 'cell text').
-		view addMorph: (mm _ (LayoutMorph newRow separation: 4)
-			layoutSpec: (LayoutSpec 
-				proportionalWidth: 1.0
-				fixedHeight: 20
-				minorDirectionPadding: #center);
-			color: self class cellColor;
-			padding: #center;
-			name: #marks).
-		view 
-			marksPane: mm;
-			textPane: mt.
-		model cells add: view].
-		
-	^ cellArea addAllMorphs: model cells reversed
-		
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:15'!
-makeDrawFateButton
-	"Answer the 'Fate' button"
-
-	^ (FarmButton label: 'Fate' action: #drawFate state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Determine your Farmer''s Fate.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:28'!
-makeEndTurnButton
-	"Answer the 'End Turn' button"
-
-	^ (FarmButton label: 'End Turn' action: #endTurn state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:40'!
-makeHarvestButton
-	"Answer the 'Harvest' button"
-
-	^ (FarmButton label: 'Harvest' action: #harvest state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Harvest the crop for the season indicated above the space.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:53'!
-makeMoveButton
-	"Answer the 'Move' button"
-
-	^ (FarmButton label: 'Move' action: #move state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:31:59'!
-makeNumbersArea
-	"Lay out the area for player cash on hand"
-	
-	numbersArea _ (LayoutMorph newRow separation: 0)
-		layoutSpec: (LayoutSpec proportionalWidth: 1.0
-			proportionalHeight: self class titleHeight
-			minorDirectionPadding: #center).
-	numbersArea
-			color: Color transparent;
-			name: #numbers;
-			padding: #center.
-			
-	^ numbersArea addMorph: ((StringMorph contents: '') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' pointSize: 22))
-		! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:32:44'!
-makeOthersArea
-	"Lay out the area for player cash on hand"
-	
-	othersArea _ (LayoutMorph newRow separation: 0)
-		layoutSpec: (LayoutSpec proportionalWidth: 1.0
-			proportionalHeight: self class titleHeight
-			minorDirectionPadding: #center).
-	^ othersArea
-		color: Color transparent;
-		name: #others;
-		padding: #center! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:07'!
-makePayExpenseButton
-	"Answer the 'Expense' button"
-
-	^ (FarmButton label: 'Expense' action: #payExpense state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Pay the farming expenses which are owed.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/7/2017 13:59:47'!
-makePayLoanButton
-	"Answer the 'Pay Loan' button"
-
-	^ (FarmButton label: 'Pay Loan' action: #showLoan state: true model: self)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Transfer cash to pay off some debt.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:41'!
-makeQuitGameButton
-	"Answer the 'Quit' button"
-	
-	^ (FarmButton label: 'Quit' action: #quitGame state: true model: self)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Completely ends the game. Nothing is saved.';
-		color: (Color orange alpha: 0.9)! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:33:14'!
-makeSeasonsArea
-	"Lay out the area for seasons"
-	
-	seasonsArea _ (LayoutMorph newRow separation: 0)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.08
-			minorDirectionPadding: #center).
-	^ seasonsArea
-			color: Color lightGreen;
-			name: #seasons! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:55'!
-makeSettingsButton
-	"Answer the 'Settings' button"
-	
-	^ (FarmButton label: 'Settings' action: #doSettings state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Change some of the game parameters'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:36:04'!
-makeShowStatsButton
-	"Answer the 'Stats' button"
-
-	^ (FarmButton label: 'Stats' action: #doStats state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:36:17'!
-makeTourButton
-	"Answer the 'Tour' button"
-	
-	^ (FarmButton label: 'Tour' action: #doTour state: true model: self)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:34:48'!
-playButtonSet
-	"Answer the buttons used to play the game"
-
-	buttonArea 
-		removeAllMorphs;
-		addMorph: self makeShowStatsButton;
-		addMorph: self makeAuctionButton;
-		addMorph: self makePayLoanButton;
-		addMorph: self makeBuyOptionButton;
-		addMorph: self makeEndTurnButton;
-		addMorph: self makePayExpenseButton;
-		addMorph: self makeDrawFateButton;
-		addMorph: self makeHarvestButton;
-		addMorph: (model moveButton: self makeMoveButton);
-		addMorph: self makeQuitGameButton! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:36:41'!
-setupToken: aPlayer
-	"Place the player's token on the board"
-	| w h |
-	
-	w _ owner morphExtent x * 0.13.
-	h _ w * 0.5.
-	model token id contents: aPlayer identity.
-	model token doubled contents: aPlayer doubledString.
-	model token 
-		color: aPlayer color;
-		morphExtent: w@h;
-		morphPosition: owner morphExtent * (0.006@0.72).
-	pasteup addMorph: model token.
-	^ model token who: aPlayer! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 20:41:28'!
-showSeasons: associations 
-	"Display the seasons contained in associations"
-	| width set bm txt |
-			
-	seasonsArea removeAllMorphs.
-	width _ layoutMorph morphWidth / model class cellsForGame.
-	set _ OrderedCollection new.
-	associations do: [:k | 	| first last sea |
-			first _ k key x - 1.
-			last _ k key y.
-			bm _ LayoutMorph newRow
-				padding: #center;
-				name: #season.
-			seasonsArea addMorph: bm
-				layoutSpec: (LayoutSpec proportionalWidth: width * (last - first) proportionalHeight: 1.0).
-			sea _ k value.
-			bm color: sea color.
-			txt _ StringMorph new
-				emphasis: 1;  "emphasis: bold=1"
-				font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-			bm addMorph: txt..
-			txt color: (sea textColor
-				ifTrue: [Color white]
-				ifFalse: [Color black]).
-			txt contents: sea desc.
-			set add: txt].
-	^ set! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:35:45'!
-startButtonSet
-	"Answer the buttons used to start the game"
-
-	buttonArea 
-		removeAllMorphs;
-		addMorph: self makeAddPlayerButton;
-		addMorph: self makeSettingsButton;
-		addMorph: self makeTourButton;
-		addMorph: self makeQuitGameButton.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 12:58:40'!
-startGame
-	"Change the buttons and start the game"
-	
-	self playButtonSet.
-	model players do: [:ea | 
-		ea 
-			when: #displayInvoice 
-			send: #displayInvoice:title: 
-			to: self 
-			withArguments: #(#invoice #heading)].
-	model playerIndex: 0. "retain players in order of entry"
-	model 
-		testGoal;
-		nextPlayer.
-	model initialButtonState! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 10/9/2017 18:02:37'!
-checkEnd
-	"Enable End Turn after an option is acknowledged"
-
-	model endTurnCheck! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 9/9/2017 16:29:41'!
-displayNumbers
-	"Display cash, debt, and goal progress"
-	| pl c d net otherLead pluralForm others |
-	
-	(pl _ model currentPlayer) ifNotNil: [
-		c _ '$', pl cash truncated printStringWithCommas.
-		d _ '$', pl debt negated asInteger printStringWithCommas.
-		net _ (pl netAssets / model goal * 100 roundDownTo: 0.1) asString.
-		numbersArea submorphs first 
-			contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
-			color: pl color.
-		pluralForm _ model players size = 2
-			ifTrue: ['Player''s']
-			ifFalse: ['Players'''].
-		otherLead _ (StringMorph contents: (String streamContents: [:string |
-			string
-				nextPutAll: 'Other ';
-				nextPutAll: pluralForm;
-				nextPutAll: ' Cash: '])).
-		otherLead
-			emphasis: AbstractFont boldCode;
-			color: Color lightBrown;
-			font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-		othersArea 
-			removeAllMorphs;
-			addMorph: otherLead.
-		others _ model players select: [:a | a ~= pl].
-		others do: [:ea | | x |
-			x _ ' $', ea cash truncated printStringWithCommas.
-			othersArea addMorph: ((StringMorph contents: x) 
-				emphasis: AbstractFont boldCode;
-				color: ea color;
-				setBalloonText: 'cash held by ', ea identity;
-				font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]]! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:38:51'!
-doTour
-	"Start the tour of the board"
-	| choice resp |
-	
-	model disableAll: {'Players'. 'Tour'}.
-	choice _ (PopUpMenu labelArray: #('Automatic' 'Interactive')) startUpWithCaption: nil.
-	choice = 1 ifTrue: [self tourAt: 500].
-	choice = 2 ifTrue: [
-		resp _ '1'.
-		[resp ~= ''] whileTrue: [
-			resp _ FillInTheBlankMorph request: 'Board starting where?' initialAnswer: resp.
-			(resp notEmpty and: [resp asNumber > 0]) ifTrue: [
-				self showSeasons: (model parseSeasonsAt: resp asNumber).
-				self model cellsAt: resp asNumber]]].
-	model enableAll: {'Players'. 'Tour'}! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 15:04:10'!
-titleChange: aPlayer
-	"Change the title, showing player data in color"
-	"Display cash, debt, and goal progress"
-	| c d net otherLead pluralForm others |
-	
-	gameTitle contents: aPlayer identity , '''s turn.'.
-	gameTitle color: aPlayer color.
-	
-	c _ '$', model currentPlayer cash truncated printStringWithCommas.
-	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
-	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
-	numbersArea submorphs first 
-		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
-		color: model currentPlayer color.
-	pluralForm _ model players size = 2
-		ifTrue: ['Player''s']
-		ifFalse: ['Players'''].
-	otherLead _ (StringMorph contents: (String streamContents: [:string |
-		string
-			nextPutAll: 'Other ';
-			nextPutAll: pluralForm;
-			nextPutAll: ' Cash: '])).
-	otherLead
-		emphasis: AbstractFont boldCode;
-		color: Color lightBrown;
-		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-	othersArea 
-		removeAllMorphs;
-		addMorph: otherLead.
-	others _ model players select: [:a | a ~= model currentPlayer].
-	others do: [:ea | | x |
-		x _ ' $', ea cash truncated printStringWithCommas.
-		othersArea addMorph: ((StringMorph contents: x) 
-			emphasis: AbstractFont boldCode;
-			color: ea color;
-			setBalloonText: 'cash held by ', ea identity;
-			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
-tourAt: anInterval 
-	"Take a tour of the board."
-	| limit i |
-	
-	limit _ model class describeSpaces size + 2.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :delta |
-		i _ i + 1.
-		i < limit 
-			ifTrue: [model positionBoardTo: i]
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep]].
-	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
-describe
-
-	^ ''! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
-namesCache
-	"Answer the value of namesCache"
-
-	^ namesCache! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
-namesCache: anObject
-	"Set the value of namesCache"
-
-	namesCache := anObject! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
-seasons
-	"Answer the value of seasons"
-
-	^ seasons! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
-seasons: anObject
-	"Set the value of seasons"
-
-	seasons := anObject! !
-
-!FarmingGame methodsFor: 'termination' stamp: 'dhn 8/31/2017 17:58:24'!
-quitGame
-
-	(self confirm: 'Are you sure you want to quit ', FarmingGame asString, '?')
-		ifTrue: [model quitGame]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 10:48:39'!
-showAssets
-	"Show window for status of assets"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	pl assets notEmpty
-		ifTrue: [
-			win _ AssetView openOn: model.
-			win openInWorld: pasteup.
-			win
-				setLabel: (pl identity, '''s Assets');
-				player: pl;
-				setWindowColor: pl color;
-				startButtons;
-				morphPosition: self windowPosition;
-				morphExtent: 300 @ 220]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/16/2017 12:05:36'!
-showAuctionAssets
-	"Show window for auctioning assets"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	pl assets notEmpty
-		ifTrue: [
-			win _ AuctionAsset openOn: model.
-			win openInWorld: pasteup.
-			win
-				player: pl;
-				setWindowColor: pl color;
-				startButtons;
-				morphPosition: self windowPosition;
-				morphExtent: 300 @ 220.
-			model triggerEvent: #itemChange]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/17/2017 20:33:22'!
-showAuctionOptions
-	"Show window for auctioning options"
-	| pl |
-
-	pl _ model currentPlayer.
-	pl options do: [:ea | {(pl assets at: (Farm anotherNameFor: ea)) forOptionAuction} print]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 10/9/2017 15:36:33'!
-showDraw: anObject
-	"Show window with description of an option"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	win _ DrawView openOn: model.
-	win openInWorld: pasteup.
-	model disableAll: {'End Turn'}.
-	win
-		setLabel: ('Option for ', pl identity);
-		setWindowColor: pl color;
-		startButtons;
-		morphPosition: self windowPosition;
-		details: anObject;
-		morphExtent: 300 @ 220! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 16:19:24'!
-showEverybody
-	"Show window for all player's statistics"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	pl assets notEmpty
-		ifTrue: [
-			win _ AllView openOn: model.
-			win openInWorld: pasteup.
-			win
-				setLabel: 'All Players';
-				player: pl;
-				setWindowColor: pl color;
-				startButtons;
-				updateEverybody;
-				morphPosition: self windowPosition;
-				morphExtent: 300 @ 250]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 17:12:17'!
-showLoan
-	"Show window for reducing debt"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	win _ LoanView openOn: model.
-	win openInWorld: pasteup.
-	win
-		setLabel: pl identity, '''s Debt';
-		player: pl;
-		setWindowColor: pl color;
-		startButtons;
-		morphPosition: self windowPosition;
-		morphExtent: 300 @ 220.
-				
-	model disableAll: {'Pay Loan'}! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/14/2017 13:28:25'!
-showOpts
-	"Show window for buying assets"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	pl priorOptions notEmpty
-		ifTrue: [
-			win _ OptionsView openOn: model.
-			win openInWorld: pasteup.
-			win
-				setLabel: (pl identity, '''s Shopping');
-				player: pl;
-				setWindowColor: pl color;
-				startButtons;
-				morphPosition: self windowPosition;
-				morphExtent: 300 @ 220.
-			win list updateList.
-			model disableAll: {'Purchase'}]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 15:13:33'!
-showYourself
-	"Show window for player's statistics"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	pl assets notEmpty
-		ifTrue: [
-			win _ YouView openOn: model.
-			win openInWorld: pasteup.
-			win
-				setLabel: (pl identity, '''s Status');
-				player: pl;
-				setWindowColor: pl color;
-				startButtons;
-				updatePerformance;
-				morphPosition: self windowPosition;
-				morphExtent: 300 @ 280]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 12:10:45'!
-windowPosition
-	"Answer the position for a window"
-	
-	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:39'!
-boardColor
-	"Answer the color of the board itself"
-	^Color yellow alpha: 0.5! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 10:30'!
-debtLimit
-	"Answer the debt limit for a player to stay in the game."
-	^ -50000! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 16:55'!
-goal
-	"Answer the winning net asset goal"
-	| normal |
-	normal := 250000.
-	Game testMode
-		ifTrue: [^ normal * 10]
-		ifFalse: [^ normal]	"Answer the winning net asset goal"
-! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/2/2017 13:26:24'!
-buttonSize
-	"Answer the layoutSpec for buttons on the game board"
-	
-	^ LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:01:13'!
-cellColor
-	"Answer the color for a cell"
-	
-	^ Color r: 1.0 g: 0.93 b: 0.83! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:14:03'!
-includeInNewMorphMenu
-	"Instantiate from the menu"
-	
-	^ true! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:12:41'!
-labelAreaHeight
-
-	^ 50! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:11:50'!
-start
-	"Start the Farming Game"
-	| win world |
-	
-	win _ self new.
-	win 
-		widgetsColor: win windowColor; "standard color for the window frame"
-		color:  (Color r: 0.986 g: 0.986 b: 0.986); "background color"
-		model: Farm new;
-		buildMorphicWindow;
-		setLabel: 'A Board Game'.
-		
-	win board
-		addMorph: win makeTitleArea;
-		addMorph: win makeNumbersArea;
-		addMorph: win makeOthersArea.
-		
-	win gameTitle
-		contents: 'Farming';
-		color: Color lightBrown.
-	win model buttons: win makeButtonArea.
-	win board
-		addMorph: win makeSeasonsArea;
-		addMorph: win makeCellsArea.
-	win model positionBoardTo: 1.
-	win startButtonSet.
-	win showSeasons: (win model parseSeasonsAt: 1).
-	
-	"Now do open it"
-	world _ Processor activeProcess animatedUI.
-	win morphExtent: (world morphExtent * (0.99@0.8)).
-	world addMorph: win position: 0@60.
-	win someSubmorphPositionOrExtentChanged.
-
-	win model token: win model setUpToken.
-	
-	^ win
-! !
-
-!FarmingGame class methodsFor: 'documentation' stamp: 'dhn 8/29/2017 20:00:09'!
-how
-	"
-	FarmingGame start.
-	"! !
-
-!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
-aboutToBeGrabbedBy: aHand
-	"The receiver is being grabbed by a hand.
-	Perform necessary adjustments (if any) and return the actual morph
-	that should be added to the hand.
-	Answer nil to reject the drag."
-	"This message is sent to the dragged morph, not to the owner.
-	It is included here just for reference."
-
-	^self "Grab me"! !
-
-!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
-justDroppedInto: newOwnerMorph event: anEvent 
-	"This message is sent to a dropped morph after it has been dropped on -- and been accepted by -- a drop-sensitive morph"
-	"This message is sent to the dragged morph, not to the owner.
-	It is included here just for reference."
-
-	^super justDroppedInto: newOwnerMorph event: anEvent ! !
-
-!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
-justGrabbedFrom: formerOwner
-	"The receiver was just grabbed from its former owner and is now attached to the hand."
-	"This message is sent to the dragged morph, not to the owner.
-	It is included here just for reference."! !
-
-!FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
-wantsToBeDroppedInto: aMorph
-	"Return true if it's okay to drop the receiver into aMorph. This check is symmetric to #wantsDroppedMorph:event: to give both parties a chance of figuring out whether they like each other."
-	"This message is sent to the dragged morph, not to the owner.
-	It is included here just for reference."
-
-	^true! !
-
-!FarmingView methodsFor: 'initialization' stamp: 'dhn 9/7/2017 12:18:32'!
-removeWindowMenu
-	"Remove the button in the title bar which brings up the window menu"
-	
-	(self findDeepSubmorphThat: [:s | s balloonText = 'window menu'] ifAbsent: [^ nil]) delete! !
-
-!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/7/2017 12:18:32'!
-open: aModel label: aString
-	"Answer a view on aModel"
-	|  window |
-	
-	window _ self new.
-	window
-		model: aModel;
-		buildMorphicWindow.
-	aString ifNotNil: [ window setLabel: aString ].
-	^ window! !
-
-!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/8/2017 19:58:36'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel label: ''.
-	win removeWindowMenu.
-	
-	^ win
-! !
-
-!FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/7/2017 12:18:32'!
-viewPosition
-	"Answer the basic position for instances of this class"
-	
-	^ 200@-50! !
-
-!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
-ack
-	"Acknowledge what is in the text pane and close the receiver"
-	
-	self delete! !
-
-!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
-closeBoxHit
-
-	super closeBoxHit! !
-
-!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
-endIt
-	"Close the receiver"
-	
-	self delete! !
-
-!AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
-buildMorphicWindow
-	"Lay out the window for player status"
-	
-	self layoutMorph beColumn.
-			
-	buttonArea _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-	buttonArea
-		name: #buttons;
-		padding: #center.
-
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
-	textPane 
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.85
-			minorDirectionPadding: #center).
-
-	layoutMorph
-		addMorph: textPane;
-		addMorph: buttonArea! !
-
-!AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
-startButtons
-	"Set the button for acknowledging an option"
-	
-	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
-	ackButton 
-		morphExtent: 70@20;
-		setBalloonText: 'acknowledge receipt'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: ackButton;
-		padding: #center.
-! !
-
-!AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:08:04'!
-player: anObject
-	"Set the value of player"
-	
-	player _ anObject! !
-
-!AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:13:08'!
-reportAllPlayers
-	"Answer a report on all players"
-	
-	^ String streamContents: [:str |
-		model players
-			do: [:pl | str newLine; 
-				nextPutAll: pl identity, ':'; newLine;
-				nextPutAll: pl years asString; 
-				nextPutAll: ' years as a farmer'; newLine; 
-				nextPutAll: '$' , (pl netAssets roundTo: 1) printStringWithCommas; 
-				nextPutAll: ' net assets'; newLine;
-				nextPutAll: pl priorOptions size asString;
-				nextPutAll: ' options held'; newLine]]! !
-
-!AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:11:43'!
-updateEverybody
-	"Show the latest status of all players"
-	
-	textPane model actualContents: self reportAllPlayers ! !
-
-!AllView class methodsFor: 'class initialization' stamp: 'dhn 9/15/2017 16:10:42'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel.
-	win removeWindowMenu.
-	
-	aModel when: #itemChange send: #updateEverybody to: win.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
-! !
-
-!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 10:57:33'!
-assetItem
-	"Answer the value of assetItem"
-
-	assetItem ifNil: [assetItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ assetItem! !
-
-!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 11:22:59'!
-assetItem: anObject
-	"Set the value of assetItem"
-	
-	(assetItem _ anObject) ifNotNil: [
-	anObject ~= 0
-		ifTrue: [
-			assetReport _ self reportFor: (self class statusList at: anObject)]
-		ifFalse: [
-			assetReport _ '']].
-	textPane model actualContents: assetReport.
-	self changed: #assetItem 	"makes deselection of the list happen"! !
-
-!AssetView methodsFor: 'operating' stamp: 'dhn 9/13/2017 10:56:47'!
-assetList
-	"Answer the asset list for a player"
-	
-	^ self class statusList! !
-
-!AssetView methodsFor: 'operating' stamp: 'dhn 9/14/2017 15:16:50'!
-reportFor: aName
-	"Answer the status report for anAsset"
-	| property asset col |
-	
-	property _ player assets at: aName ifAbsent: [^ 'No such asset named ', aName].
-	asset _ self class translate: aName.
-	col _ (player harvests) select: [:ea | ea assetName = asset].
-	
-	^ String streamContents: [:str |
-		str 
-			nextPutAll: property description,':'; newLine;
-			nextPutAll: (property reportAsAssetFor: player); newLine.
-		col ifNotEmpty: [
-			col do: [:ea | 
-				ea enabled ifFalse: [str nextPutAll: ea desc, ' - done.'; newLine]]]]! !
-
-!AssetView methodsFor: 'operating' stamp: 'dhn 9/18/2017 15:53:44'!
-updateStatus
-	"Show the latest status of the selected asset"
-
-	assetItem isZero 
-		ifFalse: [
-			assetReport _ self reportFor: (self class statusList at: assetItem).
-			textPane model actualContents: assetReport]! !
-
-!AssetView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 10:59:32'!
-buildMorphicWindow
-	"Lay out the window for asset status"
-	| rightPane |
-	
-	self layoutMorph beRow.
-	list _ (PluggableListMorph
-		model: self
-		listGetter: #assetList
-		indexGetter: #assetItem
-		indexSetter: #assetItem:
-		mainView: self
-		menuGetter: nil
-		keystrokeAction: nil)
-			name: #assets.
-			
-	buttonArea _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-	buttonArea
-		name: #buttons;
-		padding: #center.
-
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'asset status'. 	"give the TextModelMorph a name which will appear in the halos"
-	textPane 
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.85
-			minorDirectionPadding: #center).
-
-	rightPane _ LayoutMorph newColumn.
-	rightPane
-		name: 'right pane';
-		addMorph: textPane;
-		addMorph: buttonArea.
-	
-	self layoutMorph
-		addMorph: list proportionalWidth: 0.35;
-		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
-! !
-
-!AssetView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 10:43:31'!
-startButtons
-	"Set the button for acknowledging an asset status report"
-	| btn |
-	
-	btn _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
-	btn 
-		morphExtent: 70@20;
-		setBalloonText: 'quit'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: btn;
-		padding: #center.
-! !
-
-!AssetView methodsFor: 'termination' stamp: 'dhn 9/12/2017 20:55:38'!
-closeBoxHit
-
-	super closeBoxHit! !
-
-!AssetView methodsFor: 'termination' stamp: 'dhn 9/13/2017 11:36:23'!
-endIt
-	"Close the receiver"
-	
-	self delete! !
-
-!AssetView methodsFor: 'access' stamp: 'dhn 9/13/2017 10:46:58'!
-player: anObject
-	"Set the value of player"
-	
-	player _ anObject! !
-
-!AssetView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 15:27:25'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel.
-	win removeWindowMenu.
-			
-	aModel when: #itemChange send: #updateStatus to: win.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
-! !
-
-!AssetView class methodsFor: 'class initialization' stamp: 'dhn 9/13/2017 10:55:29'!
-statusList
-	"Answer the list of assets in order suitable for the list in the window"
-	
-	^ #('Hay' 'Corn' 'Wheat' 'Apples' 'Cherries' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
-
-!AssetView class methodsFor: 'operation' stamp: 'dhn 9/12/2017 15:32:57'!
-translate: aName
-	"Answer a name suited for status reporting, translated from aName"
-	
-	{'CattleOnFarm'. 'Ahtanum'. 'Rattlesnake'. 'Cascade'. 'Toppenish'}
-		detect: [:a | a = aName] ifNone: [^ aName].
-	^ 'Livestock'
-! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 10/29/2016 19:56:18'!
-beat: aSymbol
-	"Produce the auctioneer's chant; perform aSymbol when limit is exceeded"
-	| limit |
-	
-	limit _ 4.
-	self when: #morphicStep evaluate: [ :delta |
-		self going: self going + 1.
-		self going <= limit 
-			ifTrue: [
-				self going > 1 ifTrue: [
-					chant addFirst: (String streamContents: [:str |
-					str
-						nextPutAll: '...going ';
-						nextPutAll: (self class degree: self going); newLine]).
-				self showChant]]
-			ifFalse: [
-				self stopStepping.
-				self perform: aSymbol.
-				self removeActionsForEvent: #morphicStep]].
-	self startSteppingStepTime: model chantBeat. 	"time between chants"! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:31:27'!
-going
-	"Answer the value of going"
-	
-	going ifNil: [going _ 0].
-	^ going! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:33:12'!
-going: anObject
-	"Set the value of going"
-	
-	going _ anObject
-! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 8/28/2018 17:47:47'!
-list: anObject
-	"Set the value of list"
-	
-	list _ anObject
-! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 8/20/2018 14:37:55'!
-offer: anObject by: aName
-	"State that an offer referred to by anObject was made by aName"
-
-	self currentBid: self currentBid + (model class bidBump at: anObject).
-	currentBidder _ aName.
-	self chant addFirst: (String streamContents: [:str |
-		str
-			nextPut: $$;
-			nextPutAll: self currentBid printStringWithCommas;
-			nextPutAll: ' was bid by '; 
-			nextPutAll: currentBidder; newLine]).
-	self showChant.
-	going _ 0.
-	buyers submorphsDo: [:ea | ea enableButton].
-	(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton
-! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 8/28/2018 17:47:03'!
-seller
-	"Answer the value of seller"
-	
-	^ seller! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 8/28/2018 17:46:15'!
-seller: anObject
-	"Set the value of seller"
-	
-	seller _ anObject
-! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 9/18/2016 16:16:04'!
-showChant
-	"Write the auction 'transcript' to the text pane"
-	| record |
-
-	record _ String new writeStream.
-	chant do: [:ea | record nextPutAll: ea].
-	textPane model actualContents: record contents! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/16/2017 12:58:35'!
-beginButton: aBool
-	"Change begin button state according to aBool"
-	
-	aBool
-		ifTrue: [beginButton enableButton]
-		ifFalse: [beginButton disableButton]! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 12:12:29'!
-buyers
-	"Answer the value of buyers"
-	
-	^ buyers! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 8/20/2018 14:40:22'!
-chant
-	"Answer the value of chant"
-	
-	^ chant ifNil: [chant _ OrderedCollection new]! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 15:38:10'!
-currentBid
-	"Answer the value of currentBid"
-	
-	currentBid ifNil: [currentBid _ 0].
-	^ currentBid! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 20:53:45'!
-currentBid: anObject
-	"Set the value of currentBid"
-	
-	currentBid _ anObject! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/16/2017 12:54:23'!
-list
-	"Answer the value of list"
-	
-	^ list! !
-
-!AuctionView methodsFor: 'initialization' stamp: 'dhn 10/27/2016 19:53:59'!
-initialize
-
-	super initialize.
-	begun _ false! !
-
-!AuctionView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 21:32:56'!
-player: anObject
-	"Set the value of player"
-	
-	player _ anObject! !
-
-!AuctionView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 12:46:07'!
-setUpBuyers
-	"Answer the layout for the buyers buttons"
-	
-	^ (LayoutMorph newRow)
-		name: #buyers;
-		padding: #center;
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center)! !
-
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 9/16/2016 11:36:50'!
-makeBeginButton
-	"Answer the 'Begin Auction' button"
-	
-	beginButton _ GameButtonMorph label: 'Begin' action: #beginAuction state: false model: self.
-	beginButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Assemble the bidders and begin the auction'.
-	^ beginButton! !
-
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 9/17/2016 12:38:21'!
-makeCancelButton
-	"Answer the 'Cancel' button"
-
-	^ (cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self)
-		morphExtent: 70@20;
-		setBalloonText: 'Forget about continuing the auction.'! !
-
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 9/19/2016 14:32:20'!
-makeEndButton
-	"Answer the 'End' button"
-	
-	endButton _ GameButtonMorph label: 'End' action: #endIt state: false model: self.
-	endButton 
-		morphExtent: 70@20;
-		setBalloonText: 'End the auction.'.
-	^ endButton! !
-
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 11/13/2016 13:55:05'!
-soldEndButtons
-	"Replace buttons with the End button"
-	
-	buttonsArea
-		removeAllMorphs;
-		addMorph: self makeEndButton;
-		padding: #center! !
-
-!AuctionView class methodsFor: 'data base' stamp: 'dhn 9/15/2017 21:15:41'!
-bidBump
-	^ 1000 * #(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)! !
-
-!AuctionView class methodsFor: 'data base' stamp: 'dhn 9/15/2017 21:12:49'!
-bidIncrement
-	"Answer the list for an auction"
-	| col |
-	
-	col _ OrderedCollection new.
-	self bidBump do: [:each | col add: '$', each printStringWithCommas].
-	^ col! !
-
-!AuctionView class methodsFor: 'data base' stamp: 'dhn 10/29/2016 19:47:56'!
-degree: anIndex
-	"Translate anIndex to auctioneer's chant verbage "
-	
-	^ #(nil 'once' 'twice' 'three times') at: anIndex! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 12:37:01'!
-assetAuctionItem
-	"Answer the value of assetAuctionItem"
-
-	assetAuctionItem ifNil: [assetAuctionItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ assetAuctionItem! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 19:53:09'!
-assetAuctionItem: anObject
-	"Set the value of assetAuctionItem"
-	| enab |
-	
-	(assetAuctionItem _ anObject) ifNotNil: [
-		anObject isZero 
-			ifTrue: [
-				chant _ OrderedCollection with: ''.
-				enab _ false]
-			ifFalse: [
-				self openingFor: assetAuctionItem.
-				enab _ true].
-		self showChant.
-		self beginButton: enab.
-		self changed: #assetAuctionItem]! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 12:07:07'!
-assetAuctionList
-	"Answer a list for the asset auction window"
-	
-	^ player
-		ifNotNil: [player auctionable]
-		ifNil: [OrderedCollection new]! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/9/2017 17:53:58'!
-assetSold
-	"Record the sale; enable End button"
-	| seller purchase recipient |
-	
-	cancelButton disableButton.
-	endButton enableButton.
-	buyers removeAllMorphs.
-	chant addFirst: (String streamContents: [:str |
-		str
-			nextPutAll: 'SOLD!! to ';
-			nextPutAll: currentBidder;
-			nextPutAll: ' for $';
-			nextPutAll: self currentBid printStringWithCommas; newLine]).
-	self showChant.
-	seller _ model currentPlayer.
-	seller sellAsset: asset description for: currentBid.
-	currentBidder = self class bankName
-		ifTrue: [recipient _ currentBidder]
-		ifFalse: [
-			recipient _ model players detect: [:pl | pl identity = currentBidder] ifNone: [].
-			recipient tally: currentBid negated.
-			purchase _ recipient assets at: asset description.
-			purchase cost: purchase cost + currentBid.
-			purchase quantity: purchase quantity + 1.
-			(model availableOptions at: purchase description) owner: recipient].
-	model currentPlayer cash < 0 ifFalse: [
-		model updateHistory.
-		model endTurnCheck].
-	model updatePlayer! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 11:43:51'!
-beginAuction
-	"Show the bid increments and let the bidding begin"
-	
-	self 
-		soldEndButtons;
-		beat: #assetSold;
-		buyerButtons;
-		auctionList: self class bidIncrement;
-		assetAuctionItem: 1;
-		changed: #assetAuctionList.
-	heading contents: 'Bid Increment'.
-	begun _ true
-! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 18:09:43'!
-details
-	"Set the contents of the chant pane"
-	
-	self assetAuctionItem > 0
-		ifTrue: [
-			self openingFor: self assetAuctionItem.
-			beginButton enableButton]
-		ifFalse: [
-			begun ifFalse: [
-				chant _ ''.
-				self showChant.
-				beginButton disableButton]]! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:42:27'!
-offer: aName
-	"Record a bid by aName"
-	
-	assetAuctionItem > 0 
-		ifTrue: [
-			currentBid _ currentBid + (self class bidBump at: assetAuctionItem).
-			currentBidder _ aName.
-			chant addFirst: (String streamContents: [:str |
-				str
-					nextPut: $$;
-					nextPutAll: self currentBid printStringWithCommas;
-					nextPutAll: ' was bid.'; newLine]).
-			self showChant.
-			self going: 0.
-			buyers submorphsDo: [:ea | ea enableButton].
-			(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton]
-		ifFalse: [
-			buyers submorphsDo: [:ea | ea enableButton].
-			(buyers findDeepSubmorphThat: [:mm | mm label = currentBidder] ifAbsent: [^ self]) disableButton]! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:17:04'!
-openingFor: anItem
-	"Form the opening bid for anItem"
-	| listItem item opening xlation |
-	
-	{assetAuctionItem} print.
-	listItem _ self assetAuctionList at: anItem.
-	item _ (listItem findTokens: '()' keep: ($A to:$Z), ($a to: $z)) first.
-	xlation _ model class translate: item.
-	asset _ player assets at: xlation asSymbol ifAbsent: [self halt].
-	opening _ (asset class price * asset class lotQuantity) // 2.
-	self currentBid: opening.
-	currentBidder _ self class bankName.
-	chant _ OrderedCollection new.
-	chant addFirst: (String streamContents: [:string |
-		string
-			nextPutAll: 'The opening bid for ';
-			nextPutAll: item;
-			nextPutAll: ' by ';
-			nextPutAll: self class bankName;
-			nextPutAll: ' will be for ';
-			nextPut: $$;
-			nextPutAll: opening printStringWithCommas;
-			nextPutAll: ' (half the list price).'; newLine])! !
-
-!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
-auctionList: anObject
-	"Set the value of auctionList"
-	
-	auctionList _ anObject! !
-
-!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
-getList
-	"Update the list of assets"
-	
-	self assetAuctionItem: 0.
-	list updateList! !
-
-!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 10/1/2016 15:33:53'!
-buildMorphicWindow
-	"Lay out the window for auctioning an asset"
-	
-	buttonsArea _ (LayoutMorph newRow)
-		name: #buttons;
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-			
-	self layoutMorph
-		addMorph: buttonsArea;
-		addMorph: self setUpMidRow;
-		addMorph: (buyers _ self setUpBuyers)! !
-
-!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 9/15/2017 22:03:39'!
-setUpMidRow
-	"Answer the layout for the middle row of the Job Auction window"
-	| row leftPane headingArea |
-	
-	list _ (PluggableListMorph
-		model: self
-		listGetter: #assetAuctionList
-		indexGetter: #assetAuctionItem
-		indexSetter: #assetAuctionItem:
-		mainView: self
-		menuGetter: nil
-		keystrokeAction: nil)
-			name: #catalog;
-			layoutSpec: (LayoutSpec 
-				proportionalWidth: 1.0
-				proportionalHeight: 0.9
-				minorDirectionPadding: #center).
-
-	heading _ ((StringMorph contents: 'Assets') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' pointSize: 10)).
-	headingArea _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.1
-			minorDirectionPadding: #center);
-		name: 'heading area';
-		padding: #left.
-	headingArea addMorph: heading.
-
-	
-	leftPane _ (LayoutMorph newColumn)
-		name: 'left pane';
-		addMorph: headingArea;
-		addMorph: list.
-
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'chant'. 	"give the TextModelMorph a name which will appear in the halos"
-	textPane 
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 0.6
-			proportionalHeight: 1.0
-			minorDirectionPadding: #center).
-
-	row _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.7
-			minorDirectionPadding: #center).
-	row
-		name: 'mid row';
-		addMorph: leftPane proportionalWidth: 0.4;
-		addAdjusterAndMorph: textPane layoutSpec: (LayoutSpec useAll).
-		
-	^ row
-	
-
-! !
-
-!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 3/18/2017 20:18:17'!
-buyerButtons
-	"Set bidding buttons for the players"
-	| col |
-	
-	col _ OrderedCollection new.
-	model players do: [:ea |
-		col add: ((BidderButton label: ea identity action: #offer: state: true model: self)
-			morphExtent: 70@30;
-			color: ea color;
-			setBalloonText: 'bidder')].
-	buyers addAllMorphs: col reversed! !
-
-!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 9/20/2016 13:16:38'!
-startButtons
-	"Set the initial buttons for asset auction"
-	
-	buttonsArea
-		removeAllMorphs;
-		addMorph: self makeBeginButton;
-		addMorph: self makeCancelButton;
-		padding: #center
-! !
-
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:44'!
-closeBoxHit
-
-	model enableAll: {'Auction'}.
-	model moveButton enabled
-		ifFalse: [begun ifFalse: [model endTurnCheck]].
-	super closeBoxHit! !
-
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:26'!
-endIt
-	
-	model enableAll: {'Auction'}.
-	model moveButton enabled
-		ifFalse: [begun ifFalse: [model endTurnCheck]].
-	self delete! !
-
-!AuctionAsset class methodsFor: 'data base' stamp: 'dhn 9/15/2017 20:38:56'!
-bankName
-	^ 'First Friendly Bank'! !
-
-!AuctionAsset class methodsFor: 'class initialization' stamp: 'dhn 9/16/2017 11:50:18'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel label: 'Asset Auction'.
-	win removeWindowMenu.
-			
-	aModel when: #itemChange send: #getList to: win.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
-! !
-
-!DrawView methodsFor: 'termination' stamp: 'dhn 10/10/2017 10:28:46'!
-ack
-	"Acknowledge what is in the text pane and close the receiver"
-
-	model currentPlayer priorOptions: model currentPlayer options copy.
-	model endFlag: true.
-	model triggerEvent: #optionDrawn.
-	model triggerEvent: #itemChange.
-	self delete! !
-
-!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 20:13:44'!
-closeBoxHit
-
-	super closeBoxHit! !
-
-!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 17:05:16'!
-endIt
-	"Close the receiver"
-	
-	self delete! !
-
-!DrawView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:45:20'!
-buildMorphicWindow
-	"Lay out the window for the drawn option"
-	
-	self layoutMorph beColumn.
-			
-	buttonArea _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-	buttonArea
-		name: #buttons;
-		padding: #center.
-
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
-	textPane 
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.85
-			minorDirectionPadding: #center).
-
-	layoutMorph
-		addMorph: textPane;
-		addMorph: buttonArea! !
-
-!DrawView methodsFor: 'initialization' stamp: 'dhn 9/12/2017 09:32:37'!
-startButtons
-	"Set the button for acknowledging an option"
-	
-	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
-	ackButton 
-		morphExtent: 70@20;
-		setBalloonText: 'acknowledge receipt'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: ackButton;
-		padding: #center.
-! !
-
-!DrawView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 17:57:56'!
-details: aString
-	"Set the content of the text pane"
-	
-	textPane model actualContents: aString! !
-
-!DrawView class methodsFor: 'class initialization' stamp: 'dhn 9/10/2017 16:56:28'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel.
-	win removeWindowMenu.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
-! !
-
-!LoanView methodsFor: 'initialization' stamp: 'dhn 9/14/2017 11:07:48'!
-buildMorphicWindow
-	"Lay out the window for paying down debt"
-	| list1 rightPane |
-	
-	self layoutMorph beRow.
-	list1 _ (PluggableListMorph
-		model: self
-		listGetter: #loanList
-		indexGetter: #loanItem
-		indexSetter: #loanItem:
-		mainView: self
-		menuGetter: nil
-		keystrokeAction: nil)
-			name: #'payment size'.
-			
-	buttonArea _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-	buttonArea
-		name: #buttons;
-		padding: #center.
-	model when: #payButton: send: #payButton: to: self with: #state.
-
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'item description'. 	"give the TextModelMorph a name which will appear in the halos"
-	textPane 
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.85
-			minorDirectionPadding: #center).
-
-	rightPane _ LayoutMorph newColumn.
-	rightPane
-		name: 'right pane';
-		addMorph: buttonArea;
-		addMorph: textPane.
-	
-	self layoutMorph
-		addMorph: list1 proportionalWidth: 0.35;
-		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
-! !
-
-!LoanView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 16:30:09'!
-startButtons
-	"Set the Loan Payment buttons"
-	
-	payButton _ GameButtonMorph label: 'Pay' action: #pay state: false model: self.
-	payButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Make the selected payment.'.
-		
-	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
-	cancelButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Forget about reducing debt.'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: payButton;
-		addMorph: cancelButton;
-		padding: #center.
-! !
-
-!LoanView methodsFor: 'termination' stamp: 'dhn 9/12/2016 17:01:31'!
-closeBoxHit
-
-	model 
-		loanItem: nil;
-		enableAll: {'Pay Loan'}.
-	super closeBoxHit! !
-
-!LoanView methodsFor: 'termination' stamp: 'dhn 9/14/2017 11:48:54'!
-endIt
-	"Close the receiver"
-	
-	model enableAll: {'Pay Loan'}.
-	self delete! !
-
-!LoanView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 11:48:00'!
-details
-	"Set the loan report in the textPane"
-	
-	textPane model actualContents: (self loanReportFor: self loanItem)	"note that the textPane model differs from the model for this view"! !
-
-!LoanView methodsFor: 'accessing' stamp: 'dhn 9/16/2016 14:57:28'!
-payButton: aBool
-	"Change Pay button state according to aBool"
-	
-	aBool
-		ifTrue: [payButton enableButton]
-		ifFalse: [payButton disableButton]! !
-
-!LoanView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:14:36'!
-player: anObject
-	"Set the value of player to anObject"
-	
-	player _ anObject! !
-
-!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:00:58'!
-loanItem
-	"Answer the value of loanItem"
-
-	loanItem ifNil: [loanItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ loanItem! !
-
-!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:21:30'!
-loanItem: anObject
-	"Set the value of loanItem and loanReport"
-	| enab |
-	
-	(loanItem _ anObject) ifNotNil: [
-	anObject ~= 0
-		ifTrue: [
-			loanReport _ self loanReportFor: anObject.
-			enab _ true]
-		ifFalse: [
-			loanReport _ ''.
-			enab _ false].
-		textPane model actualContents: loanReport.
-		self payButton: enab.
-		model triggerEvent: #itemChange.
-		self changed: #loanItem]! !
-
-!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:04:20'!
-loanList
-	"Answer possible loan payment amounts"
-	| list |
-	
-	list _ OrderedCollection new.
-	1 to: 50 do: [:n | 
-		list add: (String streamContents: [:str |
-			str 
-				nextPut: $$;
-				nextPutAll: (n * self class paymentIncrement) printStringWithCommas;
-				newLine])].
-	^ list! !
-
-!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:06:35'!
-loanReportFor: anInteger
-	"Answer the effect on cash and debt of a payment selected by anInteger"
-	| pmt enab |
-
-	anInteger > 0
-		ifTrue: [
-			enab _ true.
-			pmt _ anInteger * self class paymentIncrement min: player debt negated.
-			^ (String streamContents: [:string |
-				string 
-					nextPutAll: 'By making this payment, ', player identity, ' would have:';
-					newLine; newLine;
-					nextPut: $$;
-					nextPutAll: (player debt + pmt) negated asInteger printStringWithCommas, ' in debt and';
-					newLine;
-					nextPut: $$;
-					nextPutAll: (player cash - pmt) asInteger printStringWithCommas , ' in cash and';
-					newLine;
-					nextPutAll: '$' , player playerDebtLimit value negated  printStringWithCommas , ' debt limit.'])]
-		ifFalse: [
-			enab _ false.
-			^ ''].
-	self payButton: enab.
-	self triggerEvent: #itemChange.
-	self changed: #loanItem! !
-
-!LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 13:38:30'!
-pay
-	"Make payment on the loan"
-	| index payment |
-	
-	index _ loanItem.
-	self loanItem: 0. 	"avoid multiples via contact bounce"
-	payment _ index * self class paymentIncrement min: player debt negated.
-	player debt: player debt + payment.
-	player cash: player cash - payment.
-	model updatePlayer.
-	(player playerDebtLimit value <= player debt and: [model moveButton enabled not])
-		ifTrue: [model updateHistory].
-	self details! !
-
-!LoanView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:59'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel label: 'Purchases'.
-	win removeWindowMenu.
-			
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
-! !
-
-!LoanView class methodsFor: 'database' stamp: 'dhn 9/14/2017 11:12:09'!
-paymentIncrement
-	"Answer the payment increment for displaying loan payment choices"
-	
-	^ 1000! !
-
-!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 14:18:31'!
-buildMorphicWindow
-	"Lay out the window for purchases"
-	| rightPane |
-	
-	self layoutMorph beRow.
-	list _ (PluggableListMorph
-		model: self
-		listGetter: #optionsList
-		indexGetter: #optionsItem
-		indexSetter: #optionsItem:
-		mainView: self
-		menuGetter: nil
-		keystrokeAction: nil)
-			name: #catalog.
-			
-	buttonArea _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-	buttonArea
-		name: #buttons;
-		padding: #center.
-
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'item description'. 	"give the TextModelMorph a name which will appear in the halos"
-	textPane 
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.85
-			minorDirectionPadding: #center).
-
-	rightPane _ LayoutMorph newColumn.
-	rightPane
-		name: 'right pane';
-		addMorph: buttonArea;
-		addMorph: textPane.
-	
-	self layoutMorph
-		addMorph: list proportionalWidth: 0.35;
-		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
-! !
-
-!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 10:20:02'!
-startButtons
-	"Set the buttons for buying assets"
-	
-	buyButton _ GameButtonMorph label: 'Buy' action: #buy state: false model: self.
-	buyButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Make the purchase.'.
-		
-	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
-	cancelButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Forget about shopping for now.'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: buyButton;
-		addMorph: cancelButton;
-		padding: #center.
-! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 15:12:22'!
-buy
-	"Purchase an asset"
-	| key method amt |
-	
-	(model seasonAt: player position) enabled
-		ifTrue: [self buyButton: false] 		"can buy only in Winter"
-		ifFalse: [
-			key _ self optionsList at: self optionsItem.
-			method _ self class optionMethod at: key.
-			amt _ (Smalltalk classNamed: key) lotQuantity.
-			model perform: method withArguments: {amt}.
-	
-			"remove option from player"
-			player options: (self optionsList remove: key; yourself).
-			player priorOptions: player options copy.
-			model triggerEvent: #itemChange.
-	
-			"put the option in the 'discard pile' "
-			model exercisedOptions add: key.
-	
-			"remove option from the shopping window list"
-			list updateList.
-	
-			"de-select the list in the shopping window"
-			self optionsItem: 0.
-	
-			"disable the 'Buy' button"
-			self buyButton: false.
-	
-			"update the text pane"
-			self details]! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:22:04'!
-buyButton: aBool
-	"Change buy button state according to aBool"
-	
-	aBool
-		ifTrue: [
-			(model seasonAt: model currentPlayer position) enabled
-				ifFalse: [buyButton enableButton]]
-		ifFalse: [buyButton disableButton]! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:26:01'!
-details
-	"Set the content of the text pane"
-	
-	textPane model actualContents: 
-		(player priorOptions
-			ifEmpty: ['']
-			ifNotEmpty: [self optionsReport])! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 09:41:12'!
-getList
-	"Update the list of options"
-	
-	self optionsItem: 0.
-	list updateList! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:15:42'!
-list
-	"Answer the value of list"
-	
-	^ list! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:16:32'!
-list: aCollection
-	"Set the value of list"
-	
-	list _ aCollection! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
-player: anObject
-	"Set the value of player"
-	
-	player _ anObject! !
-
-!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:25'!
-closeBoxHit
-
-	model enableAll: {'Purchase'}.
-	super closeBoxHit! !
-
-!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:41'!
-endIt
-	"Close the receiver"
-	
-	model enableAll: {'Purchase'}.
-	self delete! !
-
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:13:20'!
-optionsItem
-	"Answer the value of optionsItem"
-
-	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ optionsItem! !
-
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/14/2017 12:00:01'!
-optionsItem: anObject
-	"Set the value of optionsItem and optionsReport"
-	| key option enab |
-	
-	(optionsItem _ anObject) ifNotNil: [
-	anObject ~= 0
-		ifTrue: [
-			key _ self optionsList at: anObject.
-			option _ self class optionsDesc at: key.
-			optionsReport _ self optionsReport: key.
-			option singleOwner not
-				ifTrue: [enab _ true]
-				ifFalse: [enab _ option owner isNil]]
-		ifFalse: [
-			optionsReport _ ''.
-			enab _ false].
-		self buyButton: enab].
-	textPane model actualContents: optionsReport.
-	self changed: #optionsItem 	"makes deselection of the list happen"! !
-
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/14/2017 13:29:18'!
-optionsList
-	"Answer the shopping list for a player"
-	
-	^ (player 
-		ifNotNil: [player priorOptions]
-		ifNil: [OrderedCollection new])! !
-
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:21:40'!
-optionsList: aList
-	"Set the shopping list for a player"
-	
-	player options: aList! !
-
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:16:50'!
-optionsReport
-	"Answer the report on the selected option"
-
-	^ optionsItem > 0
-		ifTrue: [self optionsReport: (model class translate: (self optionsList at: optionsItem))]
-		ifFalse: ['']! !
-
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/17/2017 21:42:41'!
-optionsReport: anAsset
-	"Show the status of anAsset for shopping purposes"
-	
-	^ player optionDescription: (model class anotherNameFor: anAsset)! !
-
-!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:33'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel.
-	win removeWindowMenu.
-			
-	aModel when: #optionDrawn send: #getList to: win.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
-! !
-
-!OptionsView class methodsFor: 'database' stamp: 'dhn 9/13/2017 16:05:53'!
-optionMethod
-	"Answer a dictionary of methods which account for the execution of options."
-	
-	^ Dictionary new
-		at: #Tractor put: #tractor:;
-		at: #Harvester put: #harvester:;
-		at: #Fruit put: #fruit:;
-		at: #Grain put: #grain:;
-		at: #Hay put: #hay:;
-		at: #Livestock put: #livestock:;
-		at: #Ahtanum put: #ahtanum:;
-		at: #Rattlesnake put: #rattlesnake:;
-		at: #Cascade put: #cascade:;
-		at: #Toppenish put: #toppenish:;
-		yourself! !
-
-!OptionsView class methodsFor: 'database' stamp: 'dhn 9/13/2017 14:15:14'!
-optionsDesc
-	"Answer a dictionary of things that farmers can purchase."
-	
-	^ Dictionary new
-		at: #Tractor put: Tractor new;
-		at: #Harvester put: Harvester new;
-		at: #Fruit put: Fruit new;
-		at: #Grain put: Grain new;
-		at: #Hay put: Hay new;
-		at: #Livestock put: Livestock new;
-		at: #Ahtanum put: Ahtanum new;
-		at: #Rattlesnake put: Rattlesnake new;
-		at: #Cascade put: Cascade new;
-		at: #Toppenish put: Toppenish new;
-		yourself! !
-
-!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:44:00'!
-ack
-	"Acknowledge what is in the text pane and close the receiver"
-	
-	self delete! !
-
-!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:34:54'!
-closeBoxHit
-
-	super closeBoxHit! !
-
-!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:34:54'!
-endIt
-	"Close the receiver"
-	
-	self delete! !
-
-!YouView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:44:33'!
-buildMorphicWindow
-	"Lay out the window for player status"
-	
-	self layoutMorph beColumn.
-			
-	buttonArea _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-	buttonArea
-		name: #buttons;
-		padding: #center.
-
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
-	textPane 
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.85
-			minorDirectionPadding: #center).
-
-	layoutMorph
-		addMorph: textPane;
-		addMorph: buttonArea! !
-
-!YouView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:34:54'!
-startButtons
-	"Set the button for acknowledging an option"
-	
-	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
-	ackButton 
-		morphExtent: 70@20;
-		setBalloonText: 'acknowledge receipt'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: ackButton;
-		padding: #center.
-! !
-
-!YouView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 14:36:00'!
-player: anObject
-	"Set the value of player"
-	
-	player _ anObject! !
-
-!YouView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 14:40:37'!
-updatePerformance
-	"Show the latest status of the current player"
-	
-	textPane model actualContents: player reportYourself ! !
-
-!YouView class methodsFor: 'class initialization' stamp: 'dhn 9/15/2017 14:46:49'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel.
-	win removeWindowMenu.
-	
-	aModel when: #itemChange send: #updatePerformance to: win.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
-! !
-
-!FarmTheme methodsFor: 'colors' stamp: 'dhn 10/3/2017 11:02:51'!
-defaultWindowColor
-
-	^ model currentPlayer color! !
-
-!FarmTheme methodsFor: 'colors' stamp: 'dhn 10/3/2017 11:41:45'!
-menu
-
-	Display depth <= 2 ifTrue: [^ Color white].
-	^ model currentPlayer
-		ifNotNil: [(model currentPlayer color) alpha: 0.63]
-		ifNil: [Color r: 0.75 g: 0.75 b: 0.75 alpha: 0.93]! !
-
-!FarmTheme methodsFor: 'accessing' stamp: 'dhn 10/3/2017 11:02:25'!
-model
-	"Answer the value of model"
-
-	^ model! !
-
-!FarmTheme methodsFor: 'accessing' stamp: 'dhn 10/3/2017 11:02:25'!
-model: anObject
-	"Set the value of model"
-
-	model _ anObject! !
-
 !FarmAsset methodsFor: 'operating' stamp: 'dhn 9/17/2017 16:43:54'!
 assetValue
 	^self class price * (self quantity / 2)! !
@@ -5771,6 +4603,151 @@ for lifetime at $25,000 and
 buy 50 pregnant cows to stock it
 at $500 each
 Total $', self optionCost printStringWithCommas! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:17'!
+assetLabel
+	^ ' Auction of ' , self mgr currentPlayer identity , '''s Assets'! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 15:00'!
+assetPressed
+	self listAssets.
+	window model 
+		 text1: '';
+		 changed: #text1.
+	window setLabel: self assetLabel.
+	window model assetButton disableButton.
+	mgr currentPlayer options notEmpty
+		ifTrue: [window model optionButton enableButton]
+		ifFalse: [window model optionButton disableButton]! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/8/2014 20:52'!
+deleteAuction
+	mgr enableAll: {'Auction'}.
+	self restoreButtonState.
+	window delete! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/8/2014 19:33'!
+endAsset
+	mgr enableAll: {'Auction'}.
+	self deleteAuction.
+! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/10/2013 20:22'!
+initialize
+	super initialize.
+! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 14:59'!
+listAssets
+	window model collection: mgr currentPlayer auctionable;
+		 selectedItem: 0;
+		 changed: #list;
+		 showingAssets: true.
+	window model soldButton actionSelector: #soldAsset.
+	window model listHeading contents: 'ASSETS'! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 12:10'!
+listOptions
+	| list |
+	mgr currentPlayer options notEmpty
+		ifTrue: [
+			window model soldButton actionSelector: #soldOption.
+			list := mgr currentPlayer options]
+		ifFalse: [list := OrderedCollection new.].
+	window model collection: list;
+		 selectedItem: 0;
+		 changed: #list;
+		 showingAssets: false.
+	window model listHeading contents: 'OPTIONS'! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:18'!
+optionLabel
+	^ ' Auction of ' , self mgr currentPlayer identity , '''s Options'! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 14:59'!
+optionPressed
+	self listOptions.
+	window model 
+		 text1: '';
+		 changed: #text1.
+	window setLabel: self optionLabel.
+	window model optionButton disableButton.
+	mgr currentPlayer assets notEmpty
+		ifTrue: [window model assetButton enableButton]
+		ifFalse: [window model assetButton disableButton]! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/12/2014 21:08'!
+optionsOrAssetsToSell
+	window model optionButton disableButton.
+	mgr currentPlayer options isEmpty
+		ifTrue: [window model assetButton disableButton.
+			mgr currentPlayer assets isEmpty
+				ifFalse: [self listAssets]]
+		ifFalse: [self listOptions.
+			window model assetButton enableButton].
+! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 14:41'!
+sellAssets
+	| xl xw |
+	xl := FarmAuctionList new.
+	xl chanter: self;
+		 player: self mgr currentPlayer.
+	xw := xl windowLabelled: self assetLabel for: self.
+	xl buttonsPane addAllMorphs: xl choiceButtons.
+	xl buttonsPane addAllMorphs: xl assetButtons.
+	xw setWindowColor: self mgr currentPlayer tokenColor.
+	xw openInWorld.
+	xw extent: 450 @ 280.
+	self mgr arena addMorph: xw.
+	xw center: self mgr arena center.
+	self window: xw.
+	self listAssets! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 15:02'!
+showAssetAuction
+	| xl xw |
+	xl := FarmAuctionList new.
+	xl chanter: self;
+		 player: self mgr currentPlayer.
+	xw := xl windowLabelled: self assetLabel for: self.
+	xl buttonsPane addAllMorphs: xl assetButtons.
+	xw setWindowColor: self mgr currentPlayer tokenColor.
+	xw openInWorld.
+	xw extent: 450 @ 280.
+	self mgr arena addMorph: xw.
+	xw center: self mgr arena center.
+	self window: xw.
+	self listAssets! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 15:08'!
+showOptionAuction
+	| xl xw |
+	xl := FarmAuctionList new.
+	xl chanter: self;
+		 player: self mgr currentPlayer.
+	xw := xl windowLabelled: self optionLabel for: self.
+	xl buttonsPane addAllMorphs: xl assetButtons.
+	xw setWindowColor: self mgr currentPlayer tokenColor.
+	xw openInWorld.
+	xw extent: 450 @ 280.
+	self mgr arena addMorph: xw.
+	xw center: self mgr arena center.
+	self window: xw.
+	self listOptions! !
+
+!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:03:23'!
+enabled
+	"Answer the value of enabled"
+
+	enabled ifNil: [enabled _ false].
+	^ enabled! !
+
+!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:04:15'!
+enabled: anObject
+	"Set the value of enabled"
+	
+	enabled _ anObject! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 12/14/2011 11:47'!
 addOption: anObject
@@ -6710,210 +5687,6 @@ moveInterval
 test: aString
 	FarmerTest := aString.! !
 
-!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:03:23'!
-enabled
-	"Answer the value of enabled"
-
-	enabled ifNil: [enabled _ false].
-	^ enabled! !
-
-!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:04:15'!
-enabled: anObject
-	"Set the value of enabled"
-	
-	enabled _ anObject! !
-
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 10/21/2014 20:11'!
-describe
-	"Answer a string which describes the field"
-	^ String new writeStream
-		nextPutAll: self heading;
-		nextPutAll: self description;
-		contents	! !
-
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:58:29'!
-describeMarket
-	"Answer a string containing the market name"
-	^ label, Character newLine	! !
-
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:26:00'!
-heading: string1 with: string2
-	"Set the heading to string1, newLine, string2"
-	| str |
-	
-	str := String new writeStream.
-	str nextPutAll: string1; newLine;
-		nextPutAll: string2.
-	self heading: str contents! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
-description
-	"Answer the description for the cell of this site"
-	^ description! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 8/29/2017 21:34:55'!
-description: anObject
-	"Set the description for the cell of this site"
-	| str |
-	
-	str _ String new writeStream.
-	str newLine; newLine; nextPutAll: anObject.
-	description _ str contents! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
-heading
-	"Answer the short heading describing this site"
-	^ heading! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
-heading: anObject
-	"Set the short heading describing this site"
-	heading := anObject! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:54:42'!
-label
-	"Answer the value of label"
-
-	^ label! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:55:38'!
-label: anObject
-	"Set the value of label"
-
-	label _ anObject! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:17'!
-assetLabel
-	^ ' Auction of ' , self mgr currentPlayer identity , '''s Assets'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 15:00'!
-assetPressed
-	self listAssets.
-	window model 
-		 text1: '';
-		 changed: #text1.
-	window setLabel: self assetLabel.
-	window model assetButton disableButton.
-	mgr currentPlayer options notEmpty
-		ifTrue: [window model optionButton enableButton]
-		ifFalse: [window model optionButton disableButton]! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/8/2014 20:52'!
-deleteAuction
-	mgr enableAll: {'Auction'}.
-	self restoreButtonState.
-	window delete! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/8/2014 19:33'!
-endAsset
-	mgr enableAll: {'Auction'}.
-	self deleteAuction.
-! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/10/2013 20:22'!
-initialize
-	super initialize.
-! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 14:59'!
-listAssets
-	window model collection: mgr currentPlayer auctionable;
-		 selectedItem: 0;
-		 changed: #list;
-		 showingAssets: true.
-	window model soldButton actionSelector: #soldAsset.
-	window model listHeading contents: 'ASSETS'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 12:10'!
-listOptions
-	| list |
-	mgr currentPlayer options notEmpty
-		ifTrue: [
-			window model soldButton actionSelector: #soldOption.
-			list := mgr currentPlayer options]
-		ifFalse: [list := OrderedCollection new.].
-	window model collection: list;
-		 selectedItem: 0;
-		 changed: #list;
-		 showingAssets: false.
-	window model listHeading contents: 'OPTIONS'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:18'!
-optionLabel
-	^ ' Auction of ' , self mgr currentPlayer identity , '''s Options'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 14:59'!
-optionPressed
-	self listOptions.
-	window model 
-		 text1: '';
-		 changed: #text1.
-	window setLabel: self optionLabel.
-	window model optionButton disableButton.
-	mgr currentPlayer assets notEmpty
-		ifTrue: [window model assetButton enableButton]
-		ifFalse: [window model assetButton disableButton]! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/12/2014 21:08'!
-optionsOrAssetsToSell
-	window model optionButton disableButton.
-	mgr currentPlayer options isEmpty
-		ifTrue: [window model assetButton disableButton.
-			mgr currentPlayer assets isEmpty
-				ifFalse: [self listAssets]]
-		ifFalse: [self listOptions.
-			window model assetButton enableButton].
-! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 14:41'!
-sellAssets
-	| xl xw |
-	xl := FarmAuctionList new.
-	xl chanter: self;
-		 player: self mgr currentPlayer.
-	xw := xl windowLabelled: self assetLabel for: self.
-	xl buttonsPane addAllMorphs: xl choiceButtons.
-	xl buttonsPane addAllMorphs: xl assetButtons.
-	xw setWindowColor: self mgr currentPlayer tokenColor.
-	xw openInWorld.
-	xw extent: 450 @ 280.
-	self mgr arena addMorph: xw.
-	xw center: self mgr arena center.
-	self window: xw.
-	self listAssets! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 15:02'!
-showAssetAuction
-	| xl xw |
-	xl := FarmAuctionList new.
-	xl chanter: self;
-		 player: self mgr currentPlayer.
-	xw := xl windowLabelled: self assetLabel for: self.
-	xl buttonsPane addAllMorphs: xl assetButtons.
-	xw setWindowColor: self mgr currentPlayer tokenColor.
-	xw openInWorld.
-	xw extent: 450 @ 280.
-	self mgr arena addMorph: xw.
-	xw center: self mgr arena center.
-	self window: xw.
-	self listAssets! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 15:08'!
-showOptionAuction
-	| xl xw |
-	xl := FarmAuctionList new.
-	xl chanter: self;
-		 player: self mgr currentPlayer.
-	xw := xl windowLabelled: self optionLabel for: self.
-	xl buttonsPane addAllMorphs: xl assetButtons.
-	xw setWindowColor: self mgr currentPlayer tokenColor.
-	xw openInWorld.
-	xw extent: 450 @ 280.
-	self mgr arena addMorph: xw.
-	xw center: self mgr arena center.
-	self window: xw.
-	self listOptions! !
-
 !FarmAuctionList methodsFor: 'as yet unclassified' stamp: 'dhn 12/14/2013 20:59'!
 assetButton
 	^ assetButton! !
@@ -7202,6 +5975,48 @@ windowLabelled: aString for: anObject
 	self removeWindowMenu: window.
 	^ window! !
 
+!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/2/2017 20:38:50'!
+actionSelector: anObject
+	"Set the value of actionSelector"
+	
+	actionSelector _ anObject! !
+
+!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/5/2017 12:33:32'!
+deferred
+	"Answer the value of deferred"
+
+	^ deferred! !
+
+!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/5/2017 12:33:32'!
+deferred: anObject
+	"Set the value of deferred"
+
+	deferred _ anObject! !
+
+!FarmButton methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:09:21'!
+disableButton
+	"Change to the disabled state, caching the actionSelector"
+	
+	self enabled 
+		ifTrue: [
+			self deferred
+				ifNil: [self oldTarget: self actionSelector]
+				ifNotNil: [
+					self oldTarget: self deferred.
+					self deferred: nil].
+			self action: nil.
+			self enabled: false.
+			self color: GameButtonMorph disabledColor]! !
+
+!FarmButton methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:08:41'!
+enableButton
+	"Change to the enabled state"
+	
+	self enabled ifFalse: [
+		oldTarget ifNotNil: [self action: oldTarget].
+		self enabled: true.
+		self color: GameButtonMorph enabledColor]! !
+
 !FarmPlot methodsFor: 'as yet unclassified' stamp: 'dhn 9/26/2014 13:40'!
 initialize
 	super initialize.
@@ -7246,3 +6061,973 @@ lineWidth
 lineWidth: anObject
 
 	lineWidth := anObject! !
+
+!FarmToken methodsFor: 'accessing' stamp: 'dhn 8/31/2017 15:21:13'!
+doubled
+	"Answer the value of doubled"
+
+	^ doubled! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:37:41'!
+feb4MoveFrom: aPosition
+	"Animate relocation of self when player moves ahead to Feb 4 from aPosition"
+	| oldPos newPos index n posns limit i final |
+	
+	final _ 9.
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ index atWrap: aPosition.
+	model positionBoardTo: oldPos.
+	self position: 1.
+	newPos _ final + 1.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
+	
+	self arrowRight.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer 
+					position: final;
+					years: 1 + model currentPlayer years;
+					salary.
+				model
+					setActionSelectorFor: #Harvest to: {model class harvestNormal};
+					setActionSelectorFor: #Expense to: {model class expenseNormal};
+					doSpace.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 10/10/2017 11:38:27'!
+jan2MoveFrom: aPosition
+	"Animate relocation of self when player must go BACK to Jan. 2 from aPosition"
+	| oldPos newPos index n posns limit i final |
+	
+	final _ 3.
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ index atWrap: aPosition - 6.
+	model positionBoardTo: oldPos.
+	self position: 7.
+	newPos _ index atWrap: final - 7.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n - 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
+	
+	self arrowLeft.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: final.
+				model doSpace.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 10/9/2017 17:43:57'!
+moonMove
+	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
+	| oldPos newPos index n posns limit i final |
+	
+	final _ 37.
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ model currentPlayer oldPosition.
+	model positionBoardTo: oldPos.
+	self position: 1.
+	newPos _ final + 1.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
+	
+	self arrowRight.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: final.
+				model
+					setActionSelectorFor: #Harvest to: {model class harvestNormal};
+					setActionSelectorFor: #Expense to: {model class expenseNormal}.
+				model currentPlayer ifCows
+					ifTrue: [model currentPlayer harvestEnabled
+							ifTrue: [model enableAll: {'Harvest'. 'Expense'}]]
+					ifFalse: [model endTurnCheck].
+				model doSpace.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/5/2017 21:58:48'!
+moved
+	"Perform the results of the move"
+	| pl |
+	
+	pl _ self who.
+	doubled contents: who doubledString.
+	model doSpace.
+	pl harvestEnabled ifFalse: [model updateHistory]! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 19:44:24'!
+position: aCell
+	"Position the receiver over the board cell numbered by aCell"
+	| horiz |
+	
+	self morphPosition: self posAdjust.
+	horiz _ (model cells at: aCell) morphPosition x.
+	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/14/2017 19:04:41'!
+springMove
+	"Animate relocation to Spring Planting when player lands on space 8"
+	| oldPos posns limit i final |
+	
+	final _ 15.
+	oldPos _ model currentPlayer oldPosition.
+	self arrowRight.
+	posns _ (Interval from: oldPos to: final - who roll by: 1) asArray.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: final.
+				model space15.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 9/2/2017 11:18:41'!
+initialize
+
+	super initialize.
+	
+	labelArea _ LayoutMorph newColumn 
+		layoutSpec: LayoutSpec useAll;
+		color: Color transparent;
+		name: 'label area';
+		separation: 1;
+		padding: #center.
+	labelArea
+		addMorph: self makeIdArea;
+		addMorph: self makeDoubledArea.
+
+	self addMorphFront: labelArea! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:13:17'!
+makeDoubledArea
+	"Lay out the area for the arrow"
+	| area |
+	
+	area _ LayoutMorph newRow
+		color: Color transparent;
+		name: #doubled;
+		padding: #center.
+	
+	doubled _ (StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
+		
+	area addMorph: doubled.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0)! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:11:56'!
+makeIdArea
+	"Lay out the area for the arrow"
+	| area |
+	
+	area _ LayoutMorph newRow
+		color: Color transparent;
+		name: #id;
+		padding: #center.
+	
+	id _ (StringMorph contents: 'Player') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
+		
+	area addMorph: id.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0)! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 10/9/2017 18:00:30'!
+buildMorphicWindow
+
+	pasteup _ PasteUpMorph new
+		name: #pasteup;
+		color: Color transparent.
+		
+	layoutMorph addMorph: pasteup layoutSpec: LayoutSpec useAll.
+	board _ LayoutMorph newColumn name: #board.
+	board color:  (Color r: 0.986 g: 0.986 b: 0.986).
+	pasteup addMorph: board.
+	model world: pasteup.
+	FarmTheme beCurrent.
+	Theme current model: model.
+	
+	model when: #quitGame send: #delete to: self.
+	model when: #itemChange send: #displayNumbers to: self.
+	model when: #titleChange send: #titleChange: to: self with: #player.
+	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
+	model when: #showToken send: #showToken to: self.
+	model when: #showSeasons: send: #showSeasons: to: self with: #index.
+	model when: #showDraw send: #showDraw: to: self with: #option.
+	model when: #optionDrawn send: #checkEnd to: self.
+	model when: #showAssets send: #showAssets to: self.
+	model when: #showYourself send: #showYourself to: self.
+	model when: #showEverybody send: #showEverybody to: self.
+	model when: #showAuctionAssets send: #showAuctionAssets to: self.
+	model when: #showAuctionOptions send: #showAuctionOptions to: self.
+! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
+getPlayers
+	"Get the names of two to six players"
+	| x y cnt clrs |
+
+	model disableAll: {'Players'. 'Tour'}.
+	clrs _ Token colors shuffled.
+	cnt _ 0.
+	x _ FillInTheBlankMorph request: 'First player''s name?' initialAnswer: ''.
+	x 
+		ifEmpty: [
+			model enableAll: {'Players'. 'Tour'}.
+			^ nil]
+		ifNotEmpty: [
+			cnt _ cnt + 1.
+			model setupPlayer: x color: (clrs at: cnt)].
+	
+	[cnt < 6] whileTrue: [
+		y _ FillInTheBlankMorph request: 'Next player''s name?' initialAnswer: ''.
+		y
+			ifEmpty: [
+				cnt > 1 
+					ifTrue: [self startGame]
+					ifFalse: [
+						model players: OrderedCollection new.
+						model enableAll: {'Players'. 'Tour'}].
+				^ nil]
+			ifNotEmpty: [
+				cnt _ cnt + 1.
+				model setupPlayer: y color: (clrs at: cnt)]].
+		
+	self startGame
+! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:28:09'!
+initialize
+
+	super initialize! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:38:25'!
+layoutSubmorphs
+
+    super layoutSubmorphs.
+    self board morphExtent: self board owner morphExtent! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:23'!
+makeAddPlayerButton
+	"Answer the 'Players' button"
+
+	^ (FarmButton label: 'Players' action: #getPlayers state: true model: self)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Use this button to enter names of two to six players;
+entering an empty name or cancel will start the game'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:43'!
+makeAuctionButton
+	"Answer the 'Auction' button"
+
+	^ (FarmButton label: 'Auction' action: #doAuction state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Auction options and equipment'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:29:09'!
+makeButtonArea
+	"Lay out the area for buttons"
+	
+	buttonArea _ (LayoutMorph newRow separation: 5)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	buttonArea
+			color: Color transparent;
+			name: #buttons;
+			padding: #center.
+			
+	board addMorph: buttonArea.
+	
+	^ buttonArea
+		! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/7/2017 14:49:58'!
+makeBuyOptionButton
+	"Answer the 'Option' button"
+
+	^ (GameButtonMorph label: 'Purchase' action: #showOpts state: true model: self)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'See what options you have and make purchases during WINTER.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 18:49:08'!
+makeCellsArea
+	"Lay out the area which shows some spaces of the board"
+	| cellArea view mm mt |
+	
+	cellArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 1.0
+			minorDirectionPadding: #center);
+		name: #'cell area'.
+	
+	1 to: model class cellsForGame do: [:ix |
+		view _ (CellView newColumn
+			layoutSpec: (LayoutSpec proportionalWidth: 1 / model class cellsForGame);
+			name: #cell).
+		view addMorph: (mt _ (GameCell 
+			textProvider: self
+			textGetter: #describe)
+				layoutSpec: (LayoutSpec proportionalWidth: 1.0);
+				color: self class cellColor;
+				borderWidth: 1;
+				name: 'cell text').
+		view addMorph: (mm _ (LayoutMorph newRow separation: 4)
+			layoutSpec: (LayoutSpec 
+				proportionalWidth: 1.0
+				fixedHeight: 20
+				minorDirectionPadding: #center);
+			color: self class cellColor;
+			padding: #center;
+			name: #marks).
+		view 
+			marksPane: mm;
+			textPane: mt.
+		model cells add: view].
+		
+	^ cellArea addAllMorphs: model cells reversed
+		
+! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:15'!
+makeDrawFateButton
+	"Answer the 'Fate' button"
+
+	^ (FarmButton label: 'Fate' action: #drawFate state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Determine your Farmer''s Fate.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:28'!
+makeEndTurnButton
+	"Answer the 'End Turn' button"
+
+	^ (FarmButton label: 'End Turn' action: #endTurn state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:40'!
+makeHarvestButton
+	"Answer the 'Harvest' button"
+
+	^ (FarmButton label: 'Harvest' action: #harvest state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Harvest the crop for the season indicated above the space.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:53'!
+makeMoveButton
+	"Answer the 'Move' button"
+
+	^ (FarmButton label: 'Move' action: #move state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:31:59'!
+makeNumbersArea
+	"Lay out the area for player cash on hand"
+	
+	numbersArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	numbersArea
+			color: Color transparent;
+			name: #numbers;
+			padding: #center.
+			
+	^ numbersArea addMorph: ((StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 22))
+		! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:32:44'!
+makeOthersArea
+	"Lay out the area for player cash on hand"
+	
+	othersArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	^ othersArea
+		color: Color transparent;
+		name: #others;
+		padding: #center! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:07'!
+makePayExpenseButton
+	"Answer the 'Expense' button"
+
+	^ (FarmButton label: 'Expense' action: #payExpense state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Pay the farming expenses which are owed.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/7/2017 13:59:47'!
+makePayLoanButton
+	"Answer the 'Pay Loan' button"
+
+	^ (FarmButton label: 'Pay Loan' action: #showLoan state: true model: self)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Transfer cash to pay off some debt.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:41'!
+makeQuitGameButton
+	"Answer the 'Quit' button"
+	
+	^ (FarmButton label: 'Quit' action: #quitGame state: true model: self)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Completely ends the game. Nothing is saved.';
+		color: (Color orange alpha: 0.9)! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:33:14'!
+makeSeasonsArea
+	"Lay out the area for seasons"
+	
+	seasonsArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.08
+			minorDirectionPadding: #center).
+	^ seasonsArea
+			color: Color lightGreen;
+			name: #seasons! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:55'!
+makeSettingsButton
+	"Answer the 'Settings' button"
+	
+	^ (FarmButton label: 'Settings' action: #doSettings state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Change some of the game parameters'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:36:04'!
+makeShowStatsButton
+	"Answer the 'Stats' button"
+
+	^ (FarmButton label: 'Stats' action: #doStats state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:36:17'!
+makeTourButton
+	"Answer the 'Tour' button"
+	
+	^ (FarmButton label: 'Tour' action: #doTour state: true model: self)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:34:48'!
+playButtonSet
+	"Answer the buttons used to play the game"
+
+	buttonArea 
+		removeAllMorphs;
+		addMorph: self makeShowStatsButton;
+		addMorph: self makeAuctionButton;
+		addMorph: self makePayLoanButton;
+		addMorph: self makeBuyOptionButton;
+		addMorph: self makeEndTurnButton;
+		addMorph: self makePayExpenseButton;
+		addMorph: self makeDrawFateButton;
+		addMorph: self makeHarvestButton;
+		addMorph: (model moveButton: self makeMoveButton);
+		addMorph: self makeQuitGameButton! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:36:41'!
+setupToken: aPlayer
+	"Place the player's token on the board"
+	| w h |
+	
+	w _ owner morphExtent x * 0.13.
+	h _ w * 0.5.
+	model token id contents: aPlayer identity.
+	model token doubled contents: aPlayer doubledString.
+	model token 
+		color: aPlayer color;
+		morphExtent: w@h;
+		morphPosition: owner morphExtent * (0.006@0.72).
+	pasteup addMorph: model token.
+	^ model token who: aPlayer! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 20:41:28'!
+showSeasons: associations 
+	"Display the seasons contained in associations"
+	| width set bm txt |
+			
+	seasonsArea removeAllMorphs.
+	width _ layoutMorph morphWidth / model class cellsForGame.
+	set _ OrderedCollection new.
+	associations do: [:k | 	| first last sea |
+			first _ k key x - 1.
+			last _ k key y.
+			bm _ LayoutMorph newRow
+				padding: #center;
+				name: #season.
+			seasonsArea addMorph: bm
+				layoutSpec: (LayoutSpec proportionalWidth: width * (last - first) proportionalHeight: 1.0).
+			sea _ k value.
+			bm color: sea color.
+			txt _ StringMorph new
+				emphasis: 1;  "emphasis: bold=1"
+				font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+			bm addMorph: txt..
+			txt color: (sea textColor
+				ifTrue: [Color white]
+				ifFalse: [Color black]).
+			txt contents: sea desc.
+			set add: txt].
+	^ set! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:35:45'!
+startButtonSet
+	"Answer the buttons used to start the game"
+
+	buttonArea 
+		removeAllMorphs;
+		addMorph: self makeAddPlayerButton;
+		addMorph: self makeSettingsButton;
+		addMorph: self makeTourButton;
+		addMorph: self makeQuitGameButton.
+! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 12:58:40'!
+startGame
+	"Change the buttons and start the game"
+	
+	self playButtonSet.
+	model players do: [:ea | 
+		ea 
+			when: #displayInvoice 
+			send: #displayInvoice:title: 
+			to: self 
+			withArguments: #(#invoice #heading)].
+	model playerIndex: 0. "retain players in order of entry"
+	model 
+		testGoal;
+		nextPlayer.
+	model initialButtonState! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 10/9/2017 18:02:37'!
+checkEnd
+	"Enable End Turn after an option is acknowledged"
+
+	model endTurnCheck! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 9/9/2017 16:29:41'!
+displayNumbers
+	"Display cash, debt, and goal progress"
+	| pl c d net otherLead pluralForm others |
+	
+	(pl _ model currentPlayer) ifNotNil: [
+		c _ '$', pl cash truncated printStringWithCommas.
+		d _ '$', pl debt negated asInteger printStringWithCommas.
+		net _ (pl netAssets / model goal * 100 roundDownTo: 0.1) asString.
+		numbersArea submorphs first 
+			contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+			color: pl color.
+		pluralForm _ model players size = 2
+			ifTrue: ['Player''s']
+			ifFalse: ['Players'''].
+		otherLead _ (StringMorph contents: (String streamContents: [:string |
+			string
+				nextPutAll: 'Other ';
+				nextPutAll: pluralForm;
+				nextPutAll: ' Cash: '])).
+		otherLead
+			emphasis: AbstractFont boldCode;
+			color: Color lightBrown;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+		othersArea 
+			removeAllMorphs;
+			addMorph: otherLead.
+		others _ model players select: [:a | a ~= pl].
+		others do: [:ea | | x |
+			x _ ' $', ea cash truncated printStringWithCommas.
+			othersArea addMorph: ((StringMorph contents: x) 
+				emphasis: AbstractFont boldCode;
+				color: ea color;
+				setBalloonText: 'cash held by ', ea identity;
+				font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]]! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:38:51'!
+doTour
+	"Start the tour of the board"
+	| choice resp |
+	
+	model disableAll: {'Players'. 'Tour'}.
+	choice _ (PopUpMenu labelArray: #('Automatic' 'Interactive')) startUpWithCaption: nil.
+	choice = 1 ifTrue: [self tourAt: 500].
+	choice = 2 ifTrue: [
+		resp _ '1'.
+		[resp ~= ''] whileTrue: [
+			resp _ FillInTheBlankMorph request: 'Board starting where?' initialAnswer: resp.
+			(resp notEmpty and: [resp asNumber > 0]) ifTrue: [
+				self showSeasons: (model parseSeasonsAt: resp asNumber).
+				self model cellsAt: resp asNumber]]].
+	model enableAll: {'Players'. 'Tour'}! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 15:04:10'!
+titleChange: aPlayer
+	"Change the title, showing player data in color"
+	"Display cash, debt, and goal progress"
+	| c d net otherLead pluralForm others |
+	
+	gameTitle contents: aPlayer identity , '''s turn.'.
+	gameTitle color: aPlayer color.
+	
+	c _ '$', model currentPlayer cash truncated printStringWithCommas.
+	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
+	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
+	numbersArea submorphs first 
+		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+		color: model currentPlayer color.
+	pluralForm _ model players size = 2
+		ifTrue: ['Player''s']
+		ifFalse: ['Players'''].
+	otherLead _ (StringMorph contents: (String streamContents: [:string |
+		string
+			nextPutAll: 'Other ';
+			nextPutAll: pluralForm;
+			nextPutAll: ' Cash: '])).
+	otherLead
+		emphasis: AbstractFont boldCode;
+		color: Color lightBrown;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+	othersArea 
+		removeAllMorphs;
+		addMorph: otherLead.
+	others _ model players select: [:a | a ~= model currentPlayer].
+	others do: [:ea | | x |
+		x _ ' $', ea cash truncated printStringWithCommas.
+		othersArea addMorph: ((StringMorph contents: x) 
+			emphasis: AbstractFont boldCode;
+			color: ea color;
+			setBalloonText: 'cash held by ', ea identity;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
+tourAt: anInterval 
+	"Take a tour of the board."
+	| limit i |
+	
+	limit _ model class describeSpaces size + 2.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		i < limit 
+			ifTrue: [model positionBoardTo: i]
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep]].
+	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
+describe
+
+	^ ''! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
+namesCache
+	"Answer the value of namesCache"
+
+	^ namesCache! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
+namesCache: anObject
+	"Set the value of namesCache"
+
+	namesCache := anObject! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
+seasons
+	"Answer the value of seasons"
+
+	^ seasons! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
+seasons: anObject
+	"Set the value of seasons"
+
+	seasons := anObject! !
+
+!FarmingGame methodsFor: 'termination' stamp: 'dhn 8/31/2017 17:58:24'!
+quitGame
+
+	(self confirm: 'Are you sure you want to quit ', FarmingGame asString, '?')
+		ifTrue: [model quitGame]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 10:48:39'!
+showAssets
+	"Show window for status of assets"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ AssetView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: (pl identity, '''s Assets');
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 220]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/16/2017 12:05:36'!
+showAuctionAssets
+	"Show window for auctioning assets"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ AuctionAsset openOn: model.
+			win openInWorld: pasteup.
+			win
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 220.
+			model triggerEvent: #itemChange]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/17/2017 20:33:22'!
+showAuctionOptions
+	"Show window for auctioning options"
+	| pl |
+
+	pl _ model currentPlayer.
+	pl options do: [:ea | {(pl assets at: (Farm anotherNameFor: ea)) forOptionAuction} print]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 10/9/2017 15:36:33'!
+showDraw: anObject
+	"Show window with description of an option"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	win _ DrawView openOn: model.
+	win openInWorld: pasteup.
+	model disableAll: {'End Turn'}.
+	win
+		setLabel: ('Option for ', pl identity);
+		setWindowColor: pl color;
+		startButtons;
+		morphPosition: self windowPosition;
+		details: anObject;
+		morphExtent: 300 @ 220! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 16:19:24'!
+showEverybody
+	"Show window for all player's statistics"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ AllView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: 'All Players';
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				updateEverybody;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 250]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 17:12:17'!
+showLoan
+	"Show window for reducing debt"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	win _ LoanView openOn: model.
+	win openInWorld: pasteup.
+	win
+		setLabel: pl identity, '''s Debt';
+		player: pl;
+		setWindowColor: pl color;
+		startButtons;
+		morphPosition: self windowPosition;
+		morphExtent: 300 @ 220.
+				
+	model disableAll: {'Pay Loan'}! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/14/2017 13:28:25'!
+showOpts
+	"Show window for buying assets"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl priorOptions notEmpty
+		ifTrue: [
+			win _ OptionsView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: (pl identity, '''s Shopping');
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 220.
+			win list updateList.
+			model disableAll: {'Purchase'}]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 15:13:33'!
+showYourself
+	"Show window for player's statistics"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ YouView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: (pl identity, '''s Status');
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				updatePerformance;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 280]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 12:10:45'!
+windowPosition
+	"Answer the position for a window"
+	
+	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
+
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:39'!
+boardColor
+	"Answer the color of the board itself"
+	^Color yellow alpha: 0.5! !
+
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 10:30'!
+debtLimit
+	"Answer the debt limit for a player to stay in the game."
+	^ -50000! !
+
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 16:55'!
+goal
+	"Answer the winning net asset goal"
+	| normal |
+	normal := 250000.
+	Game testMode
+		ifTrue: [^ normal * 10]
+		ifFalse: [^ normal]	"Answer the winning net asset goal"
+! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/2/2017 13:26:24'!
+buttonSize
+	"Answer the layoutSpec for buttons on the game board"
+	
+	^ LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:01:13'!
+cellColor
+	"Answer the color for a cell"
+	
+	^ Color r: 1.0 g: 0.93 b: 0.83! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:14:03'!
+includeInNewMorphMenu
+	"Instantiate from the menu"
+	
+	^ true! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:12:41'!
+labelAreaHeight
+
+	^ 50! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:11:50'!
+start
+	"Start the Farming Game"
+	| win world |
+	
+	win _ self new.
+	win 
+		widgetsColor: win windowColor; "standard color for the window frame"
+		color:  (Color r: 0.986 g: 0.986 b: 0.986); "background color"
+		model: Farm new;
+		buildMorphicWindow;
+		setLabel: 'A Board Game'.
+		
+	win board
+		addMorph: win makeTitleArea;
+		addMorph: win makeNumbersArea;
+		addMorph: win makeOthersArea.
+		
+	win gameTitle
+		contents: 'Farming';
+		color: Color lightBrown.
+	win model buttons: win makeButtonArea.
+	win board
+		addMorph: win makeSeasonsArea;
+		addMorph: win makeCellsArea.
+	win model positionBoardTo: 1.
+	win startButtonSet.
+	win showSeasons: (win model parseSeasonsAt: 1).
+	
+	"Now do open it"
+	world _ Processor activeProcess animatedUI.
+	win morphExtent: (world morphExtent * (0.99@0.8)).
+	world addMorph: win position: 0@60.
+	win someSubmorphPositionOrExtentChanged.
+
+	win model token: win model setUpToken.
+	
+	^ win
+! !
+
+!FarmingGame class methodsFor: 'documentation' stamp: 'dhn 8/29/2017 20:00:09'!
+how
+	"
+	FarmingGame start.
+	"! !
