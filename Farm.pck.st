@@ -1,7 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3190] on 10 October 2017 at 12:43:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 7:43:30 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 6!
-!requires: 'Game' 1 1 nil!
+!provides: 'Farm' 1 7!
+SystemOrganization addCategory: #'Farm-Model'!
+SystemOrganization addCategory: #'Farm-Graphics'!
+
+
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
 	instanceVariableNames: 'availableOptions exercisedOptions fates drawnFates expenses drawnExpenses leases plotWindow moveButton latestPlayer windowCount endFlag'
@@ -524,480 +527,6 @@ addTestPlayer: aString
 	2 timesRepeat: [pl options addFirst: (self drawOptionQuietly: true).].
 ! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 20:27'!
-ahtanum: quantity
-	"Lease Ahtanum Ridge for $quantity."
-	self lease: 'Ahtanum' for: quantity! !
-
-!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 17:58:22'!
-availableOptions
-	"Answer the value of availableOptions"
-
-	availableOptions ifNil: [availableOptions := OrderedCollection new].
-	^ availableOptions! !
-
-!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 17:58:44'!
-availableOptions: anObject
-	"Set the value of availableOptions"
-
-	availableOptions := anObject! !
-
-!Farm methodsFor: 'buttons' stamp: 'dhn 9/5/2017 14:38:57'!
-buttonsNamed: aCollection
-	"Answer the buttons whose labels match those in aCollection"
-	| ans btn |
-	
-	ans _ OrderedCollection new.
-	aCollection do: [:x |
-		btn _ self buttons submorphs detect: [:b | b label = x] ifNone: [nil].
-		btn ifNotNil: [ans add: btn; yourself]].
-	^ ans! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 20:28'!
-cascade: quantity 
-	"Lease Cascade Ridge for $quantity."
-	self lease: 'Cascade' for: quantity! !
-
-!Farm methodsFor: 'buttons' stamp: 'dhn 9/5/2017 12:29:59'!
-disableAll: aCollection
-	"Disable each button in aCollection"
-	
-	(self buttonsNamed: aCollection) do: [:ea | ea disableButton]! !
-
-!Farm methodsFor: 'buttons' stamp: 'dhn 10/9/2017 17:27:11'!
-disabledAll: aCollection
-	"Answer true if all buttons in aCollection are disabled"
-	| ans |
-
-	ans _ true.
-	(self buttonsNamed: aCollection) do: [:ea | ans _ ans and: ea enabled not].
-	^ ans! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:45'!
-doAssetAuction
-	"Open the window for auctioning assets and leases."
-	self auctioneers add: ((FarmAuctioneer new)
-		name: 'Asset';
-		mgr: self;
-		saveButtonState: {'End Turn'};
-		showAssetAuction).
-	self disableAll: {'Auction'. 'End Turn'}.
-! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 20:20:04'!
-doAuction
-	"Display the Auction button menu."
-	| ans |
-	
-	ans := (SelectionMenu fromArray:
-	#(	('Sell Your Assets'	            showAuctionAssets)
-		('Sell Your Options'	            showAuctionOptions)
-		)) startUpWithCaption: 'Start an Auction'.
-		
-	ans ifNotNil: [self triggerEvent: ans]! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:23:20'!
-doAug1
-	"Move the player to February Week 4 after his landing on August  Week 1."
-
-	self disableAll: {'End Turn'}.
-	(self disabledAll: {'Harvest'. 'Expense'})
-		ifTrue: [
-			GamePopUp inform: 'You will advance to 4th week in February.' title: 'Farming like a Pro'.
-			token feb4MoveFrom: currentPlayer position]! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/5/2017 12:58:51'!
-doJul3
-	"Move the player to Harvest Moon after his landing on July Week 3."
-	
-	self disableAll: {'End Turn'}.
-	(self disabledAll: {'Harvest'. 'Expense'})
-		ifTrue: [GamePopUp inform: 'You will advance to Harvest Moon.' title: 'Harvest Moon'.
-			token moonMove]! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:46'!
-doOptionAuction
-	"Open the window for auctioning options."
-	self auctioneers add: ((FarmAuctioneer new)
-		name: 'Option';
-		mgr: self;
-		saveButtonState: {'End Turn'};
-		showOptionAuction).
-	self disableAll: {'End Turn'}.
-! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:53:04'!
-doSep1
-	"Move the player to November Week 3 after his landing on September Week 1."
-	
-	(self disabledAll: {'Harvest'. 'Expense'})
-		ifTrue: [GamePopUp inform: 'You will advance to 3rd week in November.' title: '3rd week in November'.
-			currentPlayer advanceTo: 46;
-				 position: 46.
-			currentPlayer tally: 1000.
-			currentPlayer ifFruit
-				ifTrue: [self enableHarvestButtons]
-				ifFalse: [| a |
-					a := currentPlayer assets at: #Apples.
-					a missed: a missed + 1.
-					self endTurnCheck].
-			self setActionSelectorFor: #Harvest to: {self class harvestNormal}.
-			self setActionSelectorFor: #Expense to: {self class expenseNormal}.
-			self updatePlayer]! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/5/2017 21:19:23'!
-doSettings
-	"Provide a facility for changing settings"
-	| ans |
-	
-	ans _ (PopUpMenu withCaption: 'Settings' chooseFrom: 'Change the goal of the game\Change test mode').
-	ans > 0 ifTrue: [self perform: (#(#setGoal #setTestMode) at: ans)]
-! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/1/2017 13:43:33'!
-doSpace
-	"Do what the space says"
-	
-	currentPlayer spaceEffect: self whatSpaceSays! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/12/2017 08:17:27'!
-doStats
-	"Display the Stats button menu."
-	| ans |
-	
-	ans _ (SelectionMenu fromArray:
-	#(	('Your Assets'	            showAssets)
-		('Yourself'	                  showYourself)
-		('All Players'                  showEverybody)
-		-
-		('Progress Graph'          showProgress)
-		('Space Histogram'        showSpaceHistogram)
-		)) startUpWithCaption: '  Statistics  '.
-		
-	ans ifNotNil: [self triggerEvent: ans]! !
-
-!Farm methodsFor: 'expense' stamp: 'dhn 10/27/2014 21:05'!
-drawExpense
-	"Answer an expense card and place it in the discard pile."
-	^ self drawCard: (self expenses) discard: (self drawnExpenses).
-! !
-
-!Farm methodsFor: 'fates' stamp: 'dhn 10/9/2017 17:02:41'!
-drawFate
-	"Draw a farmer's fate card, account for it, and place it in the discard pile."
-	"Special case: inheritance from Uncle Bert"
-	| assoc tale response |
-	
-	assoc _ self drawCard: self fates discard: self drawnFates.
-	self triggerEvent: #itemChange.
-	self disableAll: {'Fate'}.
-	assoc key key = #uncleBert:
-		ifTrue: [
-			tale _ String streamContents: [:str |
-				str
-					nextPutAll: assoc value; newLine;
-					nextPutAll: 'Do you want to inherit?'].
-			response _ PopUpMenu confirm: tale trueChoice: 'yes' falseChoice: 'no'.
-			response
-				ifTrue: [| h |
-					currentPlayer tally: 10000 negated.
-					h _ currentPlayer assets at: #Hay.
-					"inherited hay comes cheaper"
-					h cost: 10000 + h cost.
-					h quantity: 10 + h quantity.
-					self triggerEvent: #itemChange]]
-		ifFalse: [
-			GamePopUp inform: assoc value title: 'Farmer''s Fate'.
-			currentPlayer perform: assoc key key withArguments: {assoc key value}].
-	self triggerEvent: #itemChange.
-	self endTurnCheck
-! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 10/10/2017 10:52:17'!
-drawOptionQuietly: aBoolean 
-	"Answer an option, drawn from those available if possible; however,
-	 resupply first from exercised options, if any; failing that,
-	resupply from a new 'deck' of options."
-	| otb |
-	
-	endFlag _ false.
-	self availableOptions isEmpty
-		ifTrue: [exercisedOptions isEmpty
-			ifTrue: [availableOptions _ self class optionsNames shuffled]
-			ifFalse: [
-				availableOptions _ exercisedOptions shuffled.
-				exercisedOptions _ OrderedCollection new]].
-	otb _ availableOptions removeFirst.
-	aBoolean ifFalse: [self triggerEvent: #showDraw with: (Compiler evaluate: otb , ' optionText')].
-	^ otb! !
-
-!Farm methodsFor: 'expense' stamp: 'dhn 10/12/2011 21:54'!
-drawnExpenses
-	"Answer the value of drawnExpenses"
-
-	^ drawnExpenses! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 3/13/2012 15:53'!
-drawnExpenses: anObject
-	"Set the value of drawnExpenses"
-
-	drawnExpenses := anObject! !
-
-!Farm methodsFor: 'fates' stamp: 'dhn 10/12/2011 21:54'!
-drawnFates
-	"Answer the value of drawnFates"
-
-	^ drawnFates! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 3/13/2012 15:53'!
-drawnFates: anObject
-	"Set the value of drawnFates"
-
-	drawnFates := anObject! !
-
-!Farm methodsFor: 'operating' stamp: 'dhn 10/9/2017 17:52:41'!
-enableHarvestButtons
-	"Enable buttons according to the state of the player"
-	
-	currentPlayer harvestEnabled
-				ifTrue: [
-					currentPlayer garnish
-						ifTrue: [
-							currentPlayer harvested.
-							self endTurnCheck]
-						ifFalse: [self enableAll: {'Harvest'. 'Expense'}]]
-				ifFalse: [self endTurnCheck]
-! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 10/10/2017 10:13:51'!
-endFlag
-	"Answer the value of endFlag"
-	
-	^ endFlag! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 10/10/2017 10:15:13'!
-endFlag: aBool
-	"Set the value of endFlag"
-	
-	endFlag _ aBool! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/31/2017 17:16:55'!
-endTurn
-	"End a player's turn"
-	
-	(spaces atWrap: currentPlayer position) markAddFor: currentPlayer.
-"	self addMarkerIDInMarks; removeAllMarkersInCells."
-	self enableAll: {'Auction'}.
-	currentPlayer cash < 0
-		ifTrue: [self disableAll: {'Move'}.
-			currentPlayer outOfAssets
-				ifTrue: [self removeFromGame]
-				ifFalse: [
-					self declareBroke: currentPlayer identity.
-					self disableAll: {'End Turn'}]]
-		ifFalse: [
-			currentPlayer debt < currentPlayer playerDebtLimit value
-				ifTrue: [
-					self declareOver: currentPlayer identity.
-					self disableAll: {'End Turn'}]
-				ifFalse: [currentPlayer netAssets >= self goal
-						ifTrue: [won
-								ifFalse: [self declareWinner]].
-					self disableAll: {'Harvest'}.
-					self triggerEvent: #deleteOpenWindows.
-					windowCount _ 0.
-					self nextPlayer.
-					self won
-						ifTrue: [self wonButtonsState]
-						ifFalse: [self enableAll: {'Move'. 'Stats'}.
-							self disableAll: {'End Turn'}]]]! !
-
-!Farm methodsFor: 'operating' stamp: 'dhn 10/10/2017 10:21:34'!
-endTurnCheck
-	"Enable the End Turn button if certain conditions are met"
-	| btns |
-
-	btns _ self disabledAll: {'Harvest'. 'Fate'. 'Expense'}.
-	(btns and: [endFlag]) ifTrue: [self enableAll: {'End Turn'}]! !
-
-!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:01:09'!
-exercisedOptions
-	"Answer the value of exercisedOptions"
-
-	exercisedOptions isNil ifTrue: [exercisedOptions := OrderedCollection new].
-	^ exercisedOptions! !
-
-!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:01:26'!
-exercisedOptions: anObject
-	"Set the value of exercisedOptions"
-
-	exercisedOptions := anObject! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:17'!
-expenseAug1
-	self payExpense;
-	doAug1! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:18'!
-expenseJul3
-	self payExpense;
-	doJul3! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:18'!
-expenseSep1
-	self payExpense;
-	doSep1! !
-
-!Farm methodsFor: 'expense' stamp: 'dhn 10/12/2011 21:57'!
-expenses
-	"Answer the value of expenses"
-
-	^ expenses! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 3/13/2012 15:53'!
-expenses: anObject
-	"Set the value of expenses"
-
-	expenses := anObject! !
-
-!Farm methodsFor: 'fates' stamp: 'dhn 10/12/2011 21:58'!
-fates
-	"Answer the value of fates"
-
-	^ fates! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 3/13/2012 15:53'!
-fates: anObject
-	"Set the value of fates"
-
-	fates := anObject! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 13:19:24'!
-franchiseEffect: aRoll
-	"Account for a harvest of aRoll quality"
-	| asset income |
-
-	asset _ currentPlayer harvesting.
-	income _ (Smalltalk classNamed: asset) income: aRoll from: asset for: currentPlayer.
-	currentPlayer 
-		tally: income;
-		harvested.
-	self triggerEvent: #itemChange.
-! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:03'!
-fruit: quantity
-	"Answer the purchased number of acres of fruit; split the cost." 
-	| total down balance |
-	
-	total _ quantity * Fruit price.
-	down _ 0.2 * total.
-	balance _ total - down.
-	self
-		pay: down / 2
-		borrow: balance / 2
-		for: #Cherries
-		amount: Cherries auctionQuantity.
-	self
-		pay: down / 2
-		borrow: balance / 2
-		for: #Apples
-		amount: Apples auctionQuantity.
-	^ quantity! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:15'!
-grain: quantity 
-	"Answer the purchased number of acres of grain; split the cost." 
-	| total down balance |
-	
-	total _ quantity * Grain price.
-	down _ 0.2 * total.
-	balance _ total - down.
-	self
-		pay: down / 2
-		borrow: balance / 2
-		for: #Wheat
-		amount: Wheat auctionQuantity.
-	self
-		pay: down / 2
-		borrow: balance / 2
-		for: #Corn
-		amount: Corn auctionQuantity.
-	^ quantity! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/10/2017 12:18:30'!
-harvest
-	"Harvest and account for the result."
-
-	currentPlayer harvest: (self class harvestSeason at: currentPlayer position).
-	self
-		disableAll: {'Harvest'}! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/27/2014 21:28'!
-harvestAug1
-	"Harvest in August Week 1 and then travel."
-	self harvest;
-	doAug1! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 18:34:56'!
-harvestJul3
-	"Harvest in July Week 3 and then travel."
-
-	self harvestThen: #doJul3! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/25/2017 17:33:35'!
-harvestSep1
-	"Harvest in September Week 1 and then travel."
-	self halt.
-	self harvest;
-	 doSep1! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/10/2017 12:39:12'!
-harvestThen: aSymbol
-	"Harvest and account for the result."
-	
-	currentPlayer 
-		harvest: (self class harvestSeason at: currentPlayer position)
-		then: aSymbol.
-	self
-		disableAll: {'Harvest'}! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:26'!
-harvester: quantity 
-	"Answer the purchased number of harvesters; account for the cost." 
-	| total down balance |
-	
-	total _ quantity * Harvester price.
-	down _ 0.2 * total.
-	balance _ total - down.
-	self
-		pay: down
-		borrow: balance
-		for: #Harvester
-		amount: Harvester auctionQuantity.
-	^ quantity! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:34'!
-hay: quantity 
-	"Answer the purchased number of acres of hay; account for the cost." 
-	| total down balance |
-	
-	total _ quantity * Hay price.
-	down _ 0.2 * total.
-	balance _ total - down.
-	self
-		pay: down
-		borrow: balance
-		for: #Hay
-		amount: Hay auctionQuantity.
-	^ quantity! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/2/2014 21:33'!
-initialButtonState
-	"Establish the button state at the start of the game"
-	self enableAll: {'Option'}.
-	self disableAll: {'End Turn'. 'Expense'. 'Fate'. 'Harvest'}! !
-
 !Farm methodsFor: 'initialize-release' stamp: 'dhn 9/25/2017 11:58:06'!
 initialize
 
@@ -1014,192 +543,6 @@ initialize
 	windowCount _ 0.
 	won _ false
 ! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 14:37:52'!
-lease: aName for: quantity 
-	"Answer the purchased number of cattle on aName lease; account for the cost." 
-	| total down balance who |
-	
-	who _ leases at: aName.
-	who isNil
-		ifTrue: [
-			total _ quantity * CattleOnLease price.
-			down _ 0.2 * total.
-			balance _ total - down.
-			self
-				pay: down
-				borrow: balance
-				for: aName asSymbol
-				amount: (Compiler evaluate: aName , ' auctionQuantity').
-			leases at: aName put: currentPlayer identity]
-		ifFalse: [GamePopUp inform: 'Sorry, but the ' , aName , ' lease is held by ' , who title: 'Lease Taken'].
-	^ quantity! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:16:14'!
-livestock: quantity 
-	"Answer the purchased number of cattle for the farm; account for the cost." 
-	| total down balance |
-	
-	total _ quantity * CattleOnFarm price.
-	down _ 0.2 * total.
-	balance _ total - down.
-	self
-		pay: down
-		borrow: balance
-		for: #CattleOnFarm
-		amount: CattleOnFarm auctionQuantity.
-	^ quantity! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 9/7/2017 14:23:38'!
-moveButton
-	"Answer the value of moveButton"
-	
-	^ moveButton! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 8/31/2017 14:33:52'!
-moveButton: anObject
-	"Set the value of moveButton"
-	
-	^ moveButton _ anObject! !
-
-!Farm methodsFor: 'operating' stamp: 'dhn 10/10/2017 10:19:18'!
-nextPlayer
-	"Begin the next player's turn in Farming Game"
-
-	super nextPlayer.
-	endFlag _ true! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 21:40'!
-pay: down borrow: balance for: aSymbol amount: qty
-	"Account for the down payment and loan balance to purchase the asset named in aSymbol." 
-	| asset |
-	currentPlayer debt: balance negated + currentPlayer debt.
-	currentPlayer tally: down negated.
-	asset := currentPlayer assets at: aSymbol.
-	asset quantity: qty + asset quantity.
-	asset cost: down + balance + asset cost.
-	self updatePlayer! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:04:34'!
-payExpense
-	"Account for an expense."
-	| assoc expense value class |
-	
-	assoc _ self drawExpense.
-	expense _ assoc key value.
-	GamePopUp inform: assoc value title: 'Expense'.
-	value _ currentPlayer perform: assoc key key with: expense.
-	currentPlayer expenseCount: 1 +  currentPlayer expenseCount.
-	class _ Smalltalk classNamed: (self class harvestSeason at: currentPlayer position).
-	class perform: #expense:for: withArguments: (Array with: value with: currentPlayer).
-	self triggerEvent: #itemChange.
-	self
-		disableAll: {'Expense'};
-		endTurnCheck! !
-
-!Farm methodsFor: 'loan' stamp: 'dhn 9/1/2017 13:37:11'!
-paymentChoices
-	"Answer a collection of payment amounts for choosing."
-	| list |
-	list := OrderedCollection new.
-	1000
-		to: 50000 by: 1000
-		do: [:n | 
-			list addLast: '$' , n printStringWithCommas].
-	^ list
-! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:44'!
-plotWindow
-	"Answer the value of plotWindow."
-	^ plotWindow! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:44'!
-plotWindow: anObject
-	"Set the value of plotWindow."
-	plotWindow := anObject! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/9/2017 17:51:58'!
-queryWin: aBool
-	"Change state of buttons according to whether a win has occurred."
-		aBool ifTrue: [self wonButtonsState]
-		ifFalse: [self endTurnCheck]! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 21:47'!
-rattlesnake: quantity 
-	"Lease Rattlesnake Ridge for $quantity."
-	self lease: 'Rattlesnake' for: quantity! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 17:29:05'!
-removeFromGame
-	"Remove the current player from the game."
-	| old |
-	GamePopUp inform:  currentPlayer identity , ' has exceeded the $50,000 debt 
-limit and is out of the game'
-	title: 'YER OUT!!'.
-	leases
-		keysAndValuesDo: [:aKey :aValue | aValue =  currentPlayer identity
-				ifTrue: [leases at: aKey put: nil]].
-	old := self outs.
-	old addFirst:  currentPlayer.
-	self outs: old.
-	(players includes: currentPlayer)
-		ifTrue: [players removeAll: {currentPlayer}.
-			playerIndex _ playerIndex - 1.
-			self 
-				nextPlayer; 
-				triggerEvent: #setupToken: with: currentPlayer;
-				enableAll: {'Move'}].
-"	players
-		do: [:each | (arena submorphs
-				detect: [:s | s externalName = each identity]) delete].
-	token delete.
-	self removeMarkerIDInMarks."
-	1 = players size
-		ifTrue: [GamePopUp inform: self players first identity , ' has won the game by default.' title: 'WE HAVE A WINNER!!'.
-			self disableAll: {'Pay Loan'. 'End Turn'. 'Option'. 'Expense'. 'Fate'. 'Harvest'. 'Move'}.
-			self won: true]! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/19/2014 16:20'!
-reportProgress
-	"Plot players' progress"
-	| window plot relation target |	
-	window := self windowNamed: 'Progress'.
-	plot := window findA: FarmPlot.
-	target := boardMgr class goal.
-	relation := GameRelation new 
-		continuous;
-		collection: {0@target. 15000@target}. "Goal of the game"
-	relation color: Color black.
-	plot addRelation: relation.
-	players do: [:each |
-		relation := GameRelation new 
-			continuous.
-		relation color: each tokenColor.
-		relation collection: (each history select: [:a | a ~= nil]). "a player's progress"
-		plot addRelation: relation.].
-! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:31:59'!
-seasonAt: aPosition
-	"Answer the season at aPosition."
-	| y |
-	
-	y _ self class season select: [:a | a range x <= aPosition].
-	^ y last ! !
-
-!Farm methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:21:42'!
-setActionSelectorFor: aName to: aCollection
-	"Set the old target for the button named aName. Set deferred method if present."
-	| col btn |
-	
-	col _ aCollection asOrderedCollection.
-	btn _ (self buttonsNamed: {aName}) first.
-	btn oldTarget: col removeFirst.
-	btn deferred: (
-		col  
-			ifNotEmpty: [col first]
-			ifEmpty: [nil])! !
 
 !Farm methodsFor: 'initialize-release' stamp: 'dhn 9/5/2017 21:26:16'!
 setTestMode
@@ -1269,6 +612,432 @@ setupPlayer: aName color: aColor
 	
 ! !
 
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 13:00:50'!
+testGoal
+	"Answer the value of TestGoal"
+	| g x |
+	
+	TestMode ifTrue: [
+		TestGoal 
+			ifNil: [g _ goal asString]
+			ifNotNil: [g _ TestGoal asString].
+		x _ (FillInTheBlankMorph request: 'Test Goal?' initialAnswer: g).
+		x ~= '' 
+			ifTrue:  [self testGoal: x asNumber]
+			ifFalse: [self testGoal: self goal].
+		^ TestGoal]! !
+
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 13:01:27'!
+testGoal: anObject
+	"Set the value of TestGoal"
+	
+	TestGoal _ anObject! !
+
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 19:47:18'!
+testMode
+	"Answer the value of testMode"
+	
+	TestMode ifNil: [TestMode _ false].
+	^ TestMode! !
+
+!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/5/2017 21:24:27'!
+testMode: aBool
+	"Set the value of testMode"
+	
+	TestMode _ aBool! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 20:27'!
+ahtanum: quantity
+	"Lease Ahtanum Ridge for $quantity."
+	self lease: 'Ahtanum' for: quantity! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 20:28'!
+cascade: quantity 
+	"Lease Cascade Ridge for $quantity."
+	self lease: 'Cascade' for: quantity! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/10/2017 10:52:17'!
+drawOptionQuietly: aBoolean 
+	"Answer an option, drawn from those available if possible; however,
+	 resupply first from exercised options, if any; failing that,
+	resupply from a new 'deck' of options."
+	| otb |
+	
+	endFlag _ false.
+	self availableOptions isEmpty
+		ifTrue: [exercisedOptions isEmpty
+			ifTrue: [availableOptions _ self class optionsNames shuffled]
+			ifFalse: [
+				availableOptions _ exercisedOptions shuffled.
+				exercisedOptions _ OrderedCollection new]].
+	otb _ availableOptions removeFirst.
+	aBoolean ifFalse: [self triggerEvent: #showDraw with: (Compiler evaluate: otb , ' optionText')].
+	^ otb! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:03'!
+fruit: quantity
+	"Answer the purchased number of acres of fruit; split the cost." 
+	| total down balance |
+	
+	total _ quantity * Fruit price.
+	down _ 0.2 * total.
+	balance _ total - down.
+	self
+		pay: down / 2
+		borrow: balance / 2
+		for: #Cherries
+		amount: Cherries auctionQuantity.
+	self
+		pay: down / 2
+		borrow: balance / 2
+		for: #Apples
+		amount: Apples auctionQuantity.
+	^ quantity! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:15'!
+grain: quantity 
+	"Answer the purchased number of acres of grain; split the cost." 
+	| total down balance |
+	
+	total _ quantity * Grain price.
+	down _ 0.2 * total.
+	balance _ total - down.
+	self
+		pay: down / 2
+		borrow: balance / 2
+		for: #Wheat
+		amount: Wheat auctionQuantity.
+	self
+		pay: down / 2
+		borrow: balance / 2
+		for: #Corn
+		amount: Corn auctionQuantity.
+	^ quantity! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:26'!
+harvester: quantity 
+	"Answer the purchased number of harvesters; account for the cost." 
+	| total down balance |
+	
+	total _ quantity * Harvester price.
+	down _ 0.2 * total.
+	balance _ total - down.
+	self
+		pay: down
+		borrow: balance
+		for: #Harvester
+		amount: Harvester auctionQuantity.
+	^ quantity! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:15:34'!
+hay: quantity 
+	"Answer the purchased number of acres of hay; account for the cost." 
+	| total down balance |
+	
+	total _ quantity * Hay price.
+	down _ 0.2 * total.
+	balance _ total - down.
+	self
+		pay: down
+		borrow: balance
+		for: #Hay
+		amount: Hay auctionQuantity.
+	^ quantity! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 14:37:52'!
+lease: aName for: quantity 
+	"Answer the purchased number of cattle on aName lease; account for the cost." 
+	| total down balance who |
+	
+	who _ leases at: aName.
+	who isNil
+		ifTrue: [
+			total _ quantity * CattleOnLease price.
+			down _ 0.2 * total.
+			balance _ total - down.
+			self
+				pay: down
+				borrow: balance
+				for: aName asSymbol
+				amount: (Compiler evaluate: aName , ' auctionQuantity').
+			leases at: aName put: currentPlayer identity]
+		ifFalse: [GamePopUp inform: 'Sorry, but the ' , aName , ' lease is held by ' , who title: 'Lease Taken'].
+	^ quantity! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:16:14'!
+livestock: quantity 
+	"Answer the purchased number of cattle for the farm; account for the cost." 
+	| total down balance |
+	
+	total _ quantity * CattleOnFarm price.
+	down _ 0.2 * total.
+	balance _ total - down.
+	self
+		pay: down
+		borrow: balance
+		for: #CattleOnFarm
+		amount: CattleOnFarm auctionQuantity.
+	^ quantity! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 21:40'!
+pay: down borrow: balance for: aSymbol amount: qty
+	"Account for the down payment and loan balance to purchase the asset named in aSymbol." 
+	| asset |
+	currentPlayer debt: balance negated + currentPlayer debt.
+	currentPlayer tally: down negated.
+	asset := currentPlayer assets at: aSymbol.
+	asset quantity: qty + asset quantity.
+	asset cost: down + balance + asset cost.
+	self updatePlayer! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 21:47'!
+rattlesnake: quantity 
+	"Lease Rattlesnake Ridge for $quantity."
+	self lease: 'Rattlesnake' for: quantity! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 22:06'!
+toppenish: quantity 
+	"Lease Toppenish Ridge for $quantity."
+	self lease: 'Toppenish' for: quantity
+! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:16:25'!
+tractor: quantity 
+	"Answer the purchased number of tractors; account for the cost." 
+	| total down balance |
+	
+	total _ quantity * Tractor price.
+	down _ 0.2 * total.
+	balance _ total - down.
+	self
+		pay: down
+		borrow: balance
+		for: #Tractor
+		amount: Tractor auctionQuantity.
+	^ quantity! !
+
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 17:58:22'!
+availableOptions
+	"Answer the value of availableOptions"
+
+	availableOptions ifNil: [availableOptions := OrderedCollection new].
+	^ availableOptions! !
+
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 17:58:44'!
+availableOptions: anObject
+	"Set the value of availableOptions"
+
+	availableOptions := anObject! !
+
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:01:09'!
+exercisedOptions
+	"Answer the value of exercisedOptions"
+
+	exercisedOptions isNil ifTrue: [exercisedOptions := OrderedCollection new].
+	^ exercisedOptions! !
+
+!Farm methodsFor: 'options-reporting' stamp: 'dhn 9/9/2017 18:01:26'!
+exercisedOptions: anObject
+	"Set the value of exercisedOptions"
+
+	exercisedOptions := anObject! !
+
+!Farm methodsFor: 'buttons' stamp: 'dhn 9/5/2017 14:38:57'!
+buttonsNamed: aCollection
+	"Answer the buttons whose labels match those in aCollection"
+	| ans btn |
+	
+	ans _ OrderedCollection new.
+	aCollection do: [:x |
+		btn _ self buttons submorphs detect: [:b | b label = x] ifNone: [nil].
+		btn ifNotNil: [ans add: btn; yourself]].
+	^ ans! !
+
+!Farm methodsFor: 'buttons' stamp: 'dhn 9/5/2017 12:29:59'!
+disableAll: aCollection
+	"Disable each button in aCollection"
+	
+	(self buttonsNamed: aCollection) do: [:ea | ea disableButton]! !
+
+!Farm methodsFor: 'buttons' stamp: 'dhn 10/9/2017 17:27:11'!
+disabledAll: aCollection
+	"Answer true if all buttons in aCollection are disabled"
+	| ans |
+
+	ans _ true.
+	(self buttonsNamed: aCollection) do: [:ea | ans _ ans and: ea enabled not].
+	^ ans! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:45'!
+doAssetAuction
+	"Open the window for auctioning assets and leases."
+	self auctioneers add: ((FarmAuctioneer new)
+		name: 'Asset';
+		mgr: self;
+		saveButtonState: {'End Turn'};
+		showAssetAuction).
+	self disableAll: {'Auction'. 'End Turn'}.
+! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 20:20:04'!
+doAuction
+	"Display the Auction button menu."
+	| ans |
+	
+	ans := (SelectionMenu fromArray:
+	#(	('Sell Your Assets'	            showAuctionAssets)
+		('Sell Your Options'	            showAuctionOptions)
+		)) startUpWithCaption: 'Start an Auction'.
+		
+	ans ifNotNil: [self triggerEvent: ans]! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:46'!
+doOptionAuction
+	"Open the window for auctioning options."
+	self auctioneers add: ((FarmAuctioneer new)
+		name: 'Option';
+		mgr: self;
+		saveButtonState: {'End Turn'};
+		showOptionAuction).
+	self disableAll: {'End Turn'}.
+! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/5/2017 21:19:23'!
+doSettings
+	"Provide a facility for changing settings"
+	| ans |
+	
+	ans _ (PopUpMenu withCaption: 'Settings' chooseFrom: 'Change the goal of the game\Change test mode').
+	ans > 0 ifTrue: [self perform: (#(#setGoal #setTestMode) at: ans)]
+! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/12/2017 08:17:27'!
+doStats
+	"Display the Stats button menu."
+	| ans |
+	
+	ans _ (SelectionMenu fromArray:
+	#(	('Your Assets'	            showAssets)
+		('Yourself'	                  showYourself)
+		('All Players'                  showEverybody)
+		-
+		('Progress Graph'          showProgress)
+		('Space Histogram'        showSpaceHistogram)
+		)) startUpWithCaption: '  Statistics  '.
+		
+	ans ifNotNil: [self triggerEvent: ans]! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/31/2017 17:16:55'!
+endTurn
+	"End a player's turn"
+	
+	(spaces atWrap: currentPlayer position) markAddFor: currentPlayer.
+"	self addMarkerIDInMarks; removeAllMarkersInCells."
+	self enableAll: {'Auction'}.
+	currentPlayer cash < 0
+		ifTrue: [self disableAll: {'Move'}.
+			currentPlayer outOfAssets
+				ifTrue: [self removeFromGame]
+				ifFalse: [
+					self declareBroke: currentPlayer identity.
+					self disableAll: {'End Turn'}]]
+		ifFalse: [
+			currentPlayer debt < currentPlayer playerDebtLimit value
+				ifTrue: [
+					self declareOver: currentPlayer identity.
+					self disableAll: {'End Turn'}]
+				ifFalse: [currentPlayer netAssets >= self goal
+						ifTrue: [won
+								ifFalse: [self declareWinner]].
+					self disableAll: {'Harvest'}.
+					self triggerEvent: #deleteOpenWindows.
+					windowCount _ 0.
+					self nextPlayer.
+					self won
+						ifTrue: [self wonButtonsState]
+						ifFalse: [self enableAll: {'Move'. 'Stats'}.
+							self disableAll: {'End Turn'}]]]! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/2/2014 21:33'!
+initialButtonState
+	"Establish the button state at the start of the game"
+	self enableAll: {'Option'}.
+	self disableAll: {'End Turn'. 'Expense'. 'Fate'. 'Harvest'}! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:44'!
+plotWindow
+	"Answer the value of plotWindow."
+	^ plotWindow! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 21:44'!
+plotWindow: anObject
+	"Set the value of plotWindow."
+	plotWindow := anObject! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/9/2017 17:51:58'!
+queryWin: aBool
+	"Change state of buttons according to whether a win has occurred."
+		aBool ifTrue: [self wonButtonsState]
+		ifFalse: [self endTurnCheck]! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 17:29:05'!
+removeFromGame
+	"Remove the current player from the game."
+	| old |
+	GamePopUp inform:  currentPlayer identity , ' has exceeded the $50,000 debt 
+limit and is out of the game'
+	title: 'YER OUT!!'.
+	leases
+		keysAndValuesDo: [:aKey :aValue | aValue =  currentPlayer identity
+				ifTrue: [leases at: aKey put: nil]].
+	old := self outs.
+	old addFirst:  currentPlayer.
+	self outs: old.
+	(players includes: currentPlayer)
+		ifTrue: [players removeAll: {currentPlayer}.
+			playerIndex _ playerIndex - 1.
+			self 
+				nextPlayer; 
+				triggerEvent: #setupToken: with: currentPlayer;
+				enableAll: {'Move'}].
+"	players
+		do: [:each | (arena submorphs
+				detect: [:s | s externalName = each identity]) delete].
+	token delete.
+	self removeMarkerIDInMarks."
+	1 = players size
+		ifTrue: [GamePopUp inform: self players first identity , ' has won the game by default.' title: 'WE HAVE A WINNER!!'.
+			self disableAll: {'Pay Loan'. 'End Turn'. 'Option'. 'Expense'. 'Fate'. 'Harvest'. 'Move'}.
+			self won: true]! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/19/2014 16:20'!
+reportProgress
+	"Plot players' progress"
+	| window plot relation target |	
+	window := self windowNamed: 'Progress'.
+	plot := window findA: FarmPlot.
+	target := boardMgr class goal.
+	relation := GameRelation new 
+		continuous;
+		collection: {0@target. 15000@target}. "Goal of the game"
+	relation color: Color black.
+	plot addRelation: relation.
+	players do: [:each |
+		relation := GameRelation new 
+			continuous.
+		relation color: each tokenColor.
+		relation collection: (each history select: [:a | a ~= nil]). "a player's progress"
+		plot addRelation: relation.].
+! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:31:59'!
+seasonAt: aPosition
+	"Answer the season at aPosition."
+	| y |
+	
+	y _ self class season select: [:a | a range x <= aPosition].
+	^ y last ! !
+
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/20/2014 09:50'!
 showProgress
 	"Plot all player's net worth vs number of turns."
@@ -1301,6 +1070,338 @@ showProgress
 			xw addMorph: plot fullFrame: (LayoutFrame fractions: (0 @ 0 corner: 1 @ 1)).
 			xw model reportProgress]
 		ifNotNil: [xw comeToFront].
+! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/3/2017 12:25:39'!
+updatePlayer
+	"Make the screen show the latest numbers."
+	
+	self triggerEvent: #itemChange! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/19/2014 16:53'!
+updateProgressIn: aWindow
+	"Bring window showing players' progress toward goal up to date"
+	| plot pl |
+	plot := aWindow findA: FarmPlot.
+	plot removeAllRelations;
+		changed.
+	pl := aWindow model currentPlayer.
+	pl history at: pl turns put: pl turns @ pl netAssets.
+	aWindow model reportProgress.
+! !
+
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 22:10'!
+wonButtonsState
+	"Set the state of the buttons after a winner is identified."
+	self disableAll: {'Pay Loan'. 'Expense'. 'Fate'. 'Harvest'. 'Move'}.
+	self enableAll: {'End Turn'}.
+! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:23:20'!
+doAug1
+	"Move the player to February Week 4 after his landing on August  Week 1."
+
+	self disableAll: {'End Turn'}.
+	(self disabledAll: {'Harvest'. 'Expense'})
+		ifTrue: [
+			GamePopUp inform: 'You will advance to 4th week in February.' title: 'Farming like a Pro'.
+			token feb4MoveFrom: currentPlayer position]! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/5/2017 12:58:51'!
+doJul3
+	"Move the player to Harvest Moon after his landing on July Week 3."
+	
+	self disableAll: {'End Turn'}.
+	(self disabledAll: {'Harvest'. 'Expense'})
+		ifTrue: [GamePopUp inform: 'You will advance to Harvest Moon.' title: 'Harvest Moon'.
+			token moonMove]! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:53:04'!
+doSep1
+	"Move the player to November Week 3 after his landing on September Week 1."
+	
+	(self disabledAll: {'Harvest'. 'Expense'})
+		ifTrue: [GamePopUp inform: 'You will advance to 3rd week in November.' title: '3rd week in November'.
+			currentPlayer advanceTo: 46;
+				 position: 46.
+			currentPlayer tally: 1000.
+			currentPlayer ifFruit
+				ifTrue: [self enableHarvestButtons]
+				ifFalse: [| a |
+					a := currentPlayer assets at: #Apples.
+					a missed: a missed + 1.
+					self endTurnCheck].
+			self setActionSelectorFor: #Harvest to: {self class harvestNormal}.
+			self setActionSelectorFor: #Expense to: {self class expenseNormal}.
+			self updatePlayer]! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/1/2017 13:43:33'!
+doSpace
+	"Do what the space says"
+	
+	currentPlayer spaceEffect: self whatSpaceSays! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:17'!
+expenseAug1
+	self payExpense;
+	doAug1! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:18'!
+expenseJul3
+	self payExpense;
+	doJul3! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:18'!
+expenseSep1
+	self payExpense;
+	doSep1! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 13:19:24'!
+franchiseEffect: aRoll
+	"Account for a harvest of aRoll quality"
+	| asset income |
+
+	asset _ currentPlayer harvesting.
+	income _ (Smalltalk classNamed: asset) income: aRoll from: asset for: currentPlayer.
+	currentPlayer 
+		tally: income;
+		harvested.
+	self triggerEvent: #itemChange.
+! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/10/2017 12:18:30'!
+harvest
+	"Harvest and account for the result."
+
+	currentPlayer harvest: (self class harvestSeason at: currentPlayer position).
+	self
+		disableAll: {'Harvest'}! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/27/2014 21:28'!
+harvestAug1
+	"Harvest in August Week 1 and then travel."
+	self harvest;
+	doAug1! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 18:34:56'!
+harvestJul3
+	"Harvest in July Week 3 and then travel."
+
+	self harvestThen: #doJul3! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 9/25/2017 17:33:35'!
+harvestSep1
+	"Harvest in September Week 1 and then travel."
+	self halt.
+	self harvest;
+	 doSep1! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/10/2017 12:39:12'!
+harvestThen: aSymbol
+	"Harvest and account for the result."
+	
+	currentPlayer 
+		harvest: (self class harvestSeason at: currentPlayer position)
+		then: aSymbol.
+	self
+		disableAll: {'Harvest'}! !
+
+!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:04:34'!
+payExpense
+	"Account for an expense."
+	| assoc expense value class |
+	
+	assoc _ self drawExpense.
+	expense _ assoc key value.
+	GamePopUp inform: assoc value title: 'Expense'.
+	value _ currentPlayer perform: assoc key key with: expense.
+	currentPlayer expenseCount: 1 +  currentPlayer expenseCount.
+	class _ Smalltalk classNamed: (self class harvestSeason at: currentPlayer position).
+	class perform: #expense:for: withArguments: (Array with: value with: currentPlayer).
+	self triggerEvent: #itemChange.
+	self
+		disableAll: {'Expense'};
+		endTurnCheck! !
+
+!Farm methodsFor: 'expense' stamp: 'dhn 10/27/2014 21:05'!
+drawExpense
+	"Answer an expense card and place it in the discard pile."
+	^ self drawCard: (self expenses) discard: (self drawnExpenses).
+! !
+
+!Farm methodsFor: 'expense' stamp: 'dhn 10/12/2011 21:54'!
+drawnExpenses
+	"Answer the value of drawnExpenses"
+
+	^ drawnExpenses! !
+
+!Farm methodsFor: 'expense' stamp: 'dhn 10/12/2011 21:57'!
+expenses
+	"Answer the value of expenses"
+
+	^ expenses! !
+
+!Farm methodsFor: 'fates' stamp: 'dhn 10/9/2017 17:02:41'!
+drawFate
+	"Draw a farmer's fate card, account for it, and place it in the discard pile."
+	"Special case: inheritance from Uncle Bert"
+	| assoc tale response |
+	
+	assoc _ self drawCard: self fates discard: self drawnFates.
+	self triggerEvent: #itemChange.
+	self disableAll: {'Fate'}.
+	assoc key key = #uncleBert:
+		ifTrue: [
+			tale _ String streamContents: [:str |
+				str
+					nextPutAll: assoc value; newLine;
+					nextPutAll: 'Do you want to inherit?'].
+			response _ PopUpMenu confirm: tale trueChoice: 'yes' falseChoice: 'no'.
+			response
+				ifTrue: [| h |
+					currentPlayer tally: 10000 negated.
+					h _ currentPlayer assets at: #Hay.
+					"inherited hay comes cheaper"
+					h cost: 10000 + h cost.
+					h quantity: 10 + h quantity.
+					self triggerEvent: #itemChange]]
+		ifFalse: [
+			GamePopUp inform: assoc value title: 'Farmer''s Fate'.
+			currentPlayer perform: assoc key key withArguments: {assoc key value}].
+	self triggerEvent: #itemChange.
+	self endTurnCheck
+! !
+
+!Farm methodsFor: 'fates' stamp: 'dhn 10/12/2011 21:54'!
+drawnFates
+	"Answer the value of drawnFates"
+
+	^ drawnFates! !
+
+!Farm methodsFor: 'fates' stamp: 'dhn 10/12/2011 21:58'!
+fates
+	"Answer the value of fates"
+
+	^ fates! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 3/13/2012 15:53'!
+drawnExpenses: anObject
+	"Set the value of drawnExpenses"
+
+	drawnExpenses := anObject! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 3/13/2012 15:53'!
+drawnFates: anObject
+	"Set the value of drawnFates"
+
+	drawnFates := anObject! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 10/10/2017 10:13:51'!
+endFlag
+	"Answer the value of endFlag"
+	
+	^ endFlag! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 10/10/2017 10:15:13'!
+endFlag: aBool
+	"Set the value of endFlag"
+	
+	endFlag _ aBool! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 3/13/2012 15:53'!
+expenses: anObject
+	"Set the value of expenses"
+
+	expenses := anObject! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 3/13/2012 15:53'!
+fates: anObject
+	"Set the value of fates"
+
+	fates := anObject! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 9/7/2017 14:23:38'!
+moveButton
+	"Answer the value of moveButton"
+	
+	^ moveButton! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 8/31/2017 14:33:52'!
+moveButton: anObject
+	"Set the value of moveButton"
+	
+	^ moveButton _ anObject! !
+
+!Farm methodsFor: 'accessing' stamp: 'dhn 9/7/2017 12:07:33'!
+windowPosition: aPoint
+	"Answer a staggered position for a window"
+	
+	windowCount _ windowCount + 1.
+	^ aPoint + (windowCount * (20@20))! !
+
+!Farm methodsFor: 'operating' stamp: 'dhn 10/9/2017 17:52:41'!
+enableHarvestButtons
+	"Enable buttons according to the state of the player"
+	
+	currentPlayer harvestEnabled
+				ifTrue: [
+					currentPlayer garnish
+						ifTrue: [
+							currentPlayer harvested.
+							self endTurnCheck]
+						ifFalse: [self enableAll: {'Harvest'. 'Expense'}]]
+				ifFalse: [self endTurnCheck]
+! !
+
+!Farm methodsFor: 'operating' stamp: 'dhn 10/10/2017 10:21:34'!
+endTurnCheck
+	"Enable the End Turn button if certain conditions are met"
+	| btns |
+
+	btns _ self disabledAll: {'Harvest'. 'Fate'. 'Expense'}.
+	(btns and: [endFlag]) ifTrue: [self enableAll: {'End Turn'}]! !
+
+!Farm methodsFor: 'operating' stamp: 'dhn 10/10/2017 10:19:18'!
+nextPlayer
+	"Begin the next player's turn in Farming Game"
+
+	super nextPlayer.
+	endFlag _ true! !
+
+!Farm methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:21:42'!
+setActionSelectorFor: aName to: aCollection
+	"Set the old target for the button named aName. Set deferred method if present."
+	| col btn |
+	
+	col _ aCollection asOrderedCollection.
+	btn _ (self buttonsNamed: {aName}) first.
+	btn oldTarget: col removeFirst.
+	btn deferred: (
+		col  
+			ifNotEmpty: [col first]
+			ifEmpty: [nil])! !
+
+!Farm methodsFor: 'operating' stamp: 'dhn 8/31/2017 16:59:12'!
+updateHistory
+	"Change player's history"
+	
+	latestPlayer = playerIndex 
+		ifTrue: [currentPlayer updateHistory]
+		ifFalse: [
+			latestPlayer _ playerIndex.
+			currentPlayer appendHistory].
+	self triggerEvent: #itemChange! !
+
+!Farm methodsFor: 'loan' stamp: 'dhn 9/1/2017 13:37:11'!
+paymentChoices
+	"Answer a collection of payment amounts for choosing."
+	| list |
+	list := OrderedCollection new.
+	1000
+		to: 50000 by: 1000
+		do: [:n | 
+			list addLast: '$' , n printStringWithCommas].
+	^ list
 ! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:51:28'!
@@ -1874,109 +1975,11 @@ spaces
 	
 	^ spaces! !
 
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 13:00:50'!
-testGoal
-	"Answer the value of TestGoal"
-	| g x |
-	
-	TestMode ifTrue: [
-		TestGoal 
-			ifNil: [g _ goal asString]
-			ifNotNil: [g _ TestGoal asString].
-		x _ (FillInTheBlankMorph request: 'Test Goal?' initialAnswer: g).
-		x ~= '' 
-			ifTrue:  [self testGoal: x asNumber]
-			ifFalse: [self testGoal: self goal].
-		^ TestGoal]! !
-
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 13:01:27'!
-testGoal: anObject
-	"Set the value of TestGoal"
-	
-	TestGoal _ anObject! !
-
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 8/30/2017 19:47:18'!
-testMode
-	"Answer the value of testMode"
-	
-	TestMode ifNil: [TestMode _ false].
-	^ TestMode! !
-
-!Farm methodsFor: 'initialize-release' stamp: 'dhn 9/5/2017 21:24:27'!
-testMode: aBool
-	"Set the value of testMode"
-	
-	TestMode _ aBool! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 22:06'!
-toppenish: quantity 
-	"Lease Toppenish Ridge for $quantity."
-	self lease: 'Toppenish' for: quantity
-! !
-
-!Farm methodsFor: 'options-buying' stamp: 'dhn 9/14/2017 13:16:25'!
-tractor: quantity 
-	"Answer the purchased number of tractors; account for the cost." 
-	| total down balance |
-	
-	total _ quantity * Tractor price.
-	down _ 0.2 * total.
-	balance _ total - down.
-	self
-		pay: down
-		borrow: balance
-		for: #Tractor
-		amount: Tractor auctionQuantity.
-	^ quantity! !
-
-!Farm methodsFor: 'operating' stamp: 'dhn 8/31/2017 16:59:12'!
-updateHistory
-	"Change player's history"
-	
-	latestPlayer = playerIndex 
-		ifTrue: [currentPlayer updateHistory]
-		ifFalse: [
-			latestPlayer _ playerIndex.
-			currentPlayer appendHistory].
-	self triggerEvent: #itemChange! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/3/2017 12:25:39'!
-updatePlayer
-	"Make the screen show the latest numbers."
-	
-	self triggerEvent: #itemChange! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/19/2014 16:53'!
-updateProgressIn: aWindow
-	"Bring window showing players' progress toward goal up to date"
-	| plot pl |
-	plot := aWindow findA: FarmPlot.
-	plot removeAllRelations;
-		changed.
-	pl := aWindow model currentPlayer.
-	pl history at: pl turns put: pl turns @ pl netAssets.
-	aWindow model reportProgress.
-! !
-
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 09:04:36'!
 whatSpaceSays
 	"Perform the method associated with the space where the player is"
 
 	^ self perform: ((spaces atWrap: self currentPlayer position) routine)! !
-
-!Farm methodsFor: 'accessing' stamp: 'dhn 9/7/2017 12:07:33'!
-windowPosition: aPoint
-	"Answer a staggered position for a window"
-	
-	windowCount _ windowCount + 1.
-	^ aPoint + (windowCount * (20@20))! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 22:10'!
-wonButtonsState
-	"Set the state of the buttons after a winner is identified."
-	self disableAll: {'Pay Loan'. 'Expense'. 'Fate'. 'Harvest'. 'Move'}.
-	self enableAll: {'End Turn'}.
-! !
 
 !Farm class methodsFor: 'database' stamp: 'dhn 9/17/2017 20:32:42'!
 alternativeTo: aName
@@ -2013,18 +2016,6 @@ assetOption
 			at: #Cascade put: #Cascade;
 			at: #Toppenish put: #Toppenish;
 			yourself! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:18:31'!
-cellsForGame
-	"Answer the number of board spaces in view at any time"
-	
-	^ 7! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 8/31/2017 15:00:11'!
-defaultGoal
-	"Answer the default winning net asset goal"
-	
-	^ 250000! !
 
 !Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 15:50:14'!
 describeSpaces
@@ -2273,11 +2264,6 @@ Week 2
 First snow. Draw Farmer''s Fate.';
 	yourself! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:19'!
-expenseAug1
-	"Answer the actionSelector for the Expense button when on Aug wk 1."
-	^#expenseAug1! !
-
 !Farm class methodsFor: 'database' stamp: 'dhn 9/26/2017 10:31:59'!
 expenseDesc
 	"Answer the description of each expense."
@@ -2331,21 +2317,6 @@ temp add:(#feedBill:->-500)->'Feed bill due,
 PAY $500 per cow'.
 	
 		^temp! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:36'!
-expenseJul3
-	"Answer the actionSelector for the Expense button when on Jul wk 3."
-	^#expenseJul3! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:52'!
-expenseNormal
-	"Answer the normal actionSelector for the Expense button."
-	^#payExpense! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:13:10'!
-expenseSep1
-	"Answer the actionSelector for the Expense button when on Sep wk 1."
-	^#expenseSep1! !
 
 !Farm class methodsFor: 'database' stamp: 'dhn 9/26/2017 09:30:09'!
 fatesDesc
@@ -2414,21 +2385,6 @@ COLLECT $2,000 from each player who has none.'.
 RECEIVE a 50% bonus in your Livestock Harvest check each of the next two years.'.
 	}.! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:13:27'!
-harvestAug1
-	"Answer the actionSelector for the Harvest button when on Aug wk 1."
-	^#harvestAug1! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:10'!
-harvestJul3
-	"Answer the actionSelector for the Harvest button when on Jul wk 3."
-	^#harvestJul3! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:40'!
-harvestNormal
-	"Answer the normal actionSelector for the Harvest button."
-	^#harvest! !
-
 !Farm class methodsFor: 'database' stamp: 'dhn 9/7/2017 18:16:44'!
 harvestSeason
 	"Answer an ordered collection of harvest seasons in order of their board positions."
@@ -2446,11 +2402,6 @@ harvestSeason
 	43 to: 46 do: [:a | temp addLast: #Apples].
 	47 to: 49 do: [:a | temp addLast: #Corn].
 	^temp! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:17:02'!
-harvestSep1
-	"Answer the actionSelector for the Harvest button when on Sep wk 1."
-	^#harvestSep1! !
 
 !Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 15:52:22'!
 optionsDesc
@@ -2485,6 +2436,76 @@ optionsNames
 		 add: 'Cascade' withOccurrences: 3;
 		 add: 'Toppenish' withOccurrences: 3;
 		 yourself! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:18:31'!
+cellsForGame
+	"Answer the number of board spaces in view at any time"
+	
+	^ 7! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 8/31/2017 15:00:11'!
+defaultGoal
+	"Answer the default winning net asset goal"
+	
+	^ 250000! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:19'!
+expenseAug1
+	"Answer the actionSelector for the Expense button when on Aug wk 1."
+	^#expenseAug1! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:36'!
+expenseJul3
+	"Answer the actionSelector for the Expense button when on Jul wk 3."
+	^#expenseJul3! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:52'!
+expenseNormal
+	"Answer the normal actionSelector for the Expense button."
+	^#payExpense! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:13:10'!
+expenseSep1
+	"Answer the actionSelector for the Expense button when on Sep wk 1."
+	^#expenseSep1! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:13:27'!
+harvestAug1
+	"Answer the actionSelector for the Harvest button when on Aug wk 1."
+	^#harvestAug1! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:10'!
+harvestJul3
+	"Answer the actionSelector for the Harvest button when on Jul wk 3."
+	^#harvestJul3! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:40'!
+harvestNormal
+	"Answer the normal actionSelector for the Harvest button."
+	^#harvest! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:17:02'!
+harvestSep1
+	"Answer the actionSelector for the Harvest button when on Sep wk 1."
+	^#harvestSep1! !
+
+!Farm class methodsFor: 'operation' stamp: 'dhn 9/17/2017 14:29:55'!
+translate: aName
+	"Answer a name suited for auctioning or buying, translated from aName"
+	
+	^ (Dictionary new
+		at: #Hay put: #Hay;
+		at: #Grain put: #Wheat; 	"same as Corn"
+		at: #Fruit put: #Cherries; 	"same as Apples"
+		at: #Tractor put: #Tractor;
+		at: #Harvester put: #Harvester;
+		at: #CattleOnFarm put: #CattleOnFarm;
+		at: #Ahtanum put: #Ahtanum;
+		at: #Rattlesnake put: #Rattlesnake;
+		at: #Cascade put: #Cascade;
+		at: #Toppenish put: #Toppenish;
+		yourself)
+			at: aName! !
 
 !Farm class methodsFor: 'setup' stamp: 'dhn 8/31/2017 10:58:45'!
 season
@@ -2539,24 +2560,6 @@ season
 			color: Color yellow; range: 47 @ 49);
 		yourself! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/17/2017 14:29:55'!
-translate: aName
-	"Answer a name suited for auctioning or buying, translated from aName"
-	
-	^ (Dictionary new
-		at: #Hay put: #Hay;
-		at: #Grain put: #Wheat; 	"same as Corn"
-		at: #Fruit put: #Cherries; 	"same as Apples"
-		at: #Tractor put: #Tractor;
-		at: #Harvester put: #Harvester;
-		at: #CattleOnFarm put: #CattleOnFarm;
-		at: #Ahtanum put: #Ahtanum;
-		at: #Rattlesnake put: #Rattlesnake;
-		at: #Cascade put: #Cascade;
-		at: #Toppenish put: #Toppenish;
-		yourself)
-			at: aName! !
-
 !FarmToken methodsFor: 'accessing' stamp: 'dhn 8/31/2017 15:21:13'!
 doubled
 	"Answer the value of doubled"
@@ -2602,23 +2605,6 @@ feb4MoveFrom: aPosition
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
 
-!FarmToken methodsFor: 'initialization' stamp: 'dhn 9/2/2017 11:18:41'!
-initialize
-
-	super initialize.
-	
-	labelArea _ LayoutMorph newColumn 
-		layoutSpec: LayoutSpec useAll;
-		color: Color transparent;
-		name: 'label area';
-		separation: 1;
-		padding: #center.
-	labelArea
-		addMorph: self makeIdArea;
-		addMorph: self makeDoubledArea.
-
-	self addMorphFront: labelArea! !
-
 !FarmToken methodsFor: 'operations' stamp: 'dhn 10/10/2017 11:38:27'!
 jan2MoveFrom: aPosition
 	"Animate relocation of self when player must go BACK to Jan. 2 from aPosition"
@@ -2651,42 +2637,6 @@ jan2MoveFrom: aPosition
 				model doSpace.
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:13:17'!
-makeDoubledArea
-	"Lay out the area for the arrow"
-	| area |
-	
-	area _ LayoutMorph newRow
-		color: Color transparent;
-		name: #doubled;
-		padding: #center.
-	
-	doubled _ (StringMorph contents: '') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
-		
-	area addMorph: doubled.
-	^ area	layoutSpec: (LayoutSpec  
-		proportionalWidth: 1.0)! !
-
-!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:11:56'!
-makeIdArea
-	"Lay out the area for the arrow"
-	| area |
-	
-	area _ LayoutMorph newRow
-		color: Color transparent;
-		name: #id;
-		padding: #center.
-	
-	id _ (StringMorph contents: 'Player') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
-		
-	area addMorph: id.
-	^ area	layoutSpec: (LayoutSpec  
-		proportionalWidth: 1.0)! !
 
 !FarmToken methodsFor: 'operations' stamp: 'dhn 10/9/2017 17:43:57'!
 moonMove
@@ -2771,6 +2721,59 @@ springMove
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
 
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 9/2/2017 11:18:41'!
+initialize
+
+	super initialize.
+	
+	labelArea _ LayoutMorph newColumn 
+		layoutSpec: LayoutSpec useAll;
+		color: Color transparent;
+		name: 'label area';
+		separation: 1;
+		padding: #center.
+	labelArea
+		addMorph: self makeIdArea;
+		addMorph: self makeDoubledArea.
+
+	self addMorphFront: labelArea! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:13:17'!
+makeDoubledArea
+	"Lay out the area for the arrow"
+	| area |
+	
+	area _ LayoutMorph newRow
+		color: Color transparent;
+		name: #doubled;
+		padding: #center.
+	
+	doubled _ (StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
+		
+	area addMorph: doubled.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0)! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:11:56'!
+makeIdArea
+	"Lay out the area for the arrow"
+	| area |
+	
+	area _ LayoutMorph newRow
+		color: Color transparent;
+		name: #id;
+		padding: #center.
+	
+	id _ (StringMorph contents: 'Player') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
+		
+	area addMorph: id.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0)! !
+
 !FarmButton methodsFor: 'accessing' stamp: 'dhn 9/2/2017 20:38:50'!
 actionSelector: anObject
 	"Set the value of actionSelector"
@@ -2842,70 +2845,6 @@ buildMorphicWindow
 	model when: #showAuctionAssets send: #showAuctionAssets to: self.
 	model when: #showAuctionOptions send: #showAuctionOptions to: self.
 ! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 10/9/2017 18:02:37'!
-checkEnd
-	"Enable End Turn after an option is acknowledged"
-
-	model endTurnCheck! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
-describe
-
-	^ ''! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 9/9/2017 16:29:41'!
-displayNumbers
-	"Display cash, debt, and goal progress"
-	| pl c d net otherLead pluralForm others |
-	
-	(pl _ model currentPlayer) ifNotNil: [
-		c _ '$', pl cash truncated printStringWithCommas.
-		d _ '$', pl debt negated asInteger printStringWithCommas.
-		net _ (pl netAssets / model goal * 100 roundDownTo: 0.1) asString.
-		numbersArea submorphs first 
-			contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
-			color: pl color.
-		pluralForm _ model players size = 2
-			ifTrue: ['Player''s']
-			ifFalse: ['Players'''].
-		otherLead _ (StringMorph contents: (String streamContents: [:string |
-			string
-				nextPutAll: 'Other ';
-				nextPutAll: pluralForm;
-				nextPutAll: ' Cash: '])).
-		otherLead
-			emphasis: AbstractFont boldCode;
-			color: Color lightBrown;
-			font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-		othersArea 
-			removeAllMorphs;
-			addMorph: otherLead.
-		others _ model players select: [:a | a ~= pl].
-		others do: [:ea | | x |
-			x _ ' $', ea cash truncated printStringWithCommas.
-			othersArea addMorph: ((StringMorph contents: x) 
-				emphasis: AbstractFont boldCode;
-				color: ea color;
-				setBalloonText: 'cash held by ', ea identity;
-				font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]]! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:38:51'!
-doTour
-	"Start the tour of the board"
-	| choice resp |
-	
-	model disableAll: {'Players'. 'Tour'}.
-	choice _ (PopUpMenu labelArray: #('Automatic' 'Interactive')) startUpWithCaption: nil.
-	choice = 1 ifTrue: [self tourAt: 500].
-	choice = 2 ifTrue: [
-		resp _ '1'.
-		[resp ~= ''] whileTrue: [
-			resp _ FillInTheBlankMorph request: 'Board starting where?' initialAnswer: resp.
-			(resp notEmpty and: [resp asNumber > 0]) ifTrue: [
-				self showSeasons: (model parseSeasonsAt: resp asNumber).
-				self model cellsAt: resp asNumber]]].
-	model enableAll: {'Players'. 'Tour'}! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
 getPlayers
@@ -3161,18 +3100,6 @@ makeTourButton
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
 
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
-namesCache
-	"Answer the value of namesCache"
-
-	^ namesCache! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
-namesCache: anObject
-	"Set the value of namesCache"
-
-	namesCache := anObject! !
-
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:34:48'!
 playButtonSet
 	"Answer the buttons used to play the game"
@@ -3190,24 +3117,6 @@ playButtonSet
 		addMorph: (model moveButton: self makeMoveButton);
 		addMorph: self makeQuitGameButton! !
 
-!FarmingGame methodsFor: 'termination' stamp: 'dhn 8/31/2017 17:58:24'!
-quitGame
-
-	(self confirm: 'Are you sure you want to quit ', FarmingGame asString, '?')
-		ifTrue: [model quitGame]! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
-seasons
-	"Answer the value of seasons"
-
-	^ seasons! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
-seasons: anObject
-	"Set the value of seasons"
-
-	seasons := anObject! !
-
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:36:41'!
 setupToken: aPlayer
 	"Place the player's token on the board"
@@ -3223,6 +3132,213 @@ setupToken: aPlayer
 		morphPosition: owner morphExtent * (0.006@0.72).
 	pasteup addMorph: model token.
 	^ model token who: aPlayer! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 20:41:28'!
+showSeasons: associations 
+	"Display the seasons contained in associations"
+	| width set bm txt |
+			
+	seasonsArea removeAllMorphs.
+	width _ layoutMorph morphWidth / model class cellsForGame.
+	set _ OrderedCollection new.
+	associations do: [:k | 	| first last sea |
+			first _ k key x - 1.
+			last _ k key y.
+			bm _ LayoutMorph newRow
+				padding: #center;
+				name: #season.
+			seasonsArea addMorph: bm
+				layoutSpec: (LayoutSpec proportionalWidth: width * (last - first) proportionalHeight: 1.0).
+			sea _ k value.
+			bm color: sea color.
+			txt _ StringMorph new
+				emphasis: 1;  "emphasis: bold=1"
+				font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+			bm addMorph: txt..
+			txt color: (sea textColor
+				ifTrue: [Color white]
+				ifFalse: [Color black]).
+			txt contents: sea desc.
+			set add: txt].
+	^ set! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:35:45'!
+startButtonSet
+	"Answer the buttons used to start the game"
+
+	buttonArea 
+		removeAllMorphs;
+		addMorph: self makeAddPlayerButton;
+		addMorph: self makeSettingsButton;
+		addMorph: self makeTourButton;
+		addMorph: self makeQuitGameButton.
+! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 12:58:40'!
+startGame
+	"Change the buttons and start the game"
+	
+	self playButtonSet.
+	model players do: [:ea | 
+		ea 
+			when: #displayInvoice 
+			send: #displayInvoice:title: 
+			to: self 
+			withArguments: #(#invoice #heading)].
+	model playerIndex: 0. "retain players in order of entry"
+	model 
+		testGoal;
+		nextPlayer.
+	model initialButtonState! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 10/9/2017 18:02:37'!
+checkEnd
+	"Enable End Turn after an option is acknowledged"
+
+	model endTurnCheck! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 9/9/2017 16:29:41'!
+displayNumbers
+	"Display cash, debt, and goal progress"
+	| pl c d net otherLead pluralForm others |
+	
+	(pl _ model currentPlayer) ifNotNil: [
+		c _ '$', pl cash truncated printStringWithCommas.
+		d _ '$', pl debt negated asInteger printStringWithCommas.
+		net _ (pl netAssets / model goal * 100 roundDownTo: 0.1) asString.
+		numbersArea submorphs first 
+			contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+			color: pl color.
+		pluralForm _ model players size = 2
+			ifTrue: ['Player''s']
+			ifFalse: ['Players'''].
+		otherLead _ (StringMorph contents: (String streamContents: [:string |
+			string
+				nextPutAll: 'Other ';
+				nextPutAll: pluralForm;
+				nextPutAll: ' Cash: '])).
+		otherLead
+			emphasis: AbstractFont boldCode;
+			color: Color lightBrown;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+		othersArea 
+			removeAllMorphs;
+			addMorph: otherLead.
+		others _ model players select: [:a | a ~= pl].
+		others do: [:ea | | x |
+			x _ ' $', ea cash truncated printStringWithCommas.
+			othersArea addMorph: ((StringMorph contents: x) 
+				emphasis: AbstractFont boldCode;
+				color: ea color;
+				setBalloonText: 'cash held by ', ea identity;
+				font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]]! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:38:51'!
+doTour
+	"Start the tour of the board"
+	| choice resp |
+	
+	model disableAll: {'Players'. 'Tour'}.
+	choice _ (PopUpMenu labelArray: #('Automatic' 'Interactive')) startUpWithCaption: nil.
+	choice = 1 ifTrue: [self tourAt: 500].
+	choice = 2 ifTrue: [
+		resp _ '1'.
+		[resp ~= ''] whileTrue: [
+			resp _ FillInTheBlankMorph request: 'Board starting where?' initialAnswer: resp.
+			(resp notEmpty and: [resp asNumber > 0]) ifTrue: [
+				self showSeasons: (model parseSeasonsAt: resp asNumber).
+				self model cellsAt: resp asNumber]]].
+	model enableAll: {'Players'. 'Tour'}! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 15:04:10'!
+titleChange: aPlayer
+	"Change the title, showing player data in color"
+	"Display cash, debt, and goal progress"
+	| c d net otherLead pluralForm others |
+	
+	gameTitle contents: aPlayer identity , '''s turn.'.
+	gameTitle color: aPlayer color.
+	
+	c _ '$', model currentPlayer cash truncated printStringWithCommas.
+	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
+	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
+	numbersArea submorphs first 
+		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+		color: model currentPlayer color.
+	pluralForm _ model players size = 2
+		ifTrue: ['Player''s']
+		ifFalse: ['Players'''].
+	otherLead _ (StringMorph contents: (String streamContents: [:string |
+		string
+			nextPutAll: 'Other ';
+			nextPutAll: pluralForm;
+			nextPutAll: ' Cash: '])).
+	otherLead
+		emphasis: AbstractFont boldCode;
+		color: Color lightBrown;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+	othersArea 
+		removeAllMorphs;
+		addMorph: otherLead.
+	others _ model players select: [:a | a ~= model currentPlayer].
+	others do: [:ea | | x |
+		x _ ' $', ea cash truncated printStringWithCommas.
+		othersArea addMorph: ((StringMorph contents: x) 
+			emphasis: AbstractFont boldCode;
+			color: ea color;
+			setBalloonText: 'cash held by ', ea identity;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
+tourAt: anInterval 
+	"Take a tour of the board."
+	| limit i |
+	
+	limit _ model class describeSpaces size + 2.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		i < limit 
+			ifTrue: [model positionBoardTo: i]
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep]].
+	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
+describe
+
+	^ ''! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
+namesCache
+	"Answer the value of namesCache"
+
+	^ namesCache! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
+namesCache: anObject
+	"Set the value of namesCache"
+
+	namesCache := anObject! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
+seasons
+	"Answer the value of seasons"
+
+	^ seasons! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
+seasons: anObject
+	"Set the value of seasons"
+
+	seasons := anObject! !
+
+!FarmingGame methodsFor: 'termination' stamp: 'dhn 8/31/2017 17:58:24'!
+quitGame
+
+	(self confirm: 'Are you sure you want to quit ', FarmingGame asString, '?')
+		ifTrue: [model quitGame]! !
 
 !FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 10:48:39'!
 showAssets
@@ -3342,35 +3458,6 @@ showOpts
 			win list updateList.
 			model disableAll: {'Purchase'}]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 20:41:28'!
-showSeasons: associations 
-	"Display the seasons contained in associations"
-	| width set bm txt |
-			
-	seasonsArea removeAllMorphs.
-	width _ layoutMorph morphWidth / model class cellsForGame.
-	set _ OrderedCollection new.
-	associations do: [:k | 	| first last sea |
-			first _ k key x - 1.
-			last _ k key y.
-			bm _ LayoutMorph newRow
-				padding: #center;
-				name: #season.
-			seasonsArea addMorph: bm
-				layoutSpec: (LayoutSpec proportionalWidth: width * (last - first) proportionalHeight: 1.0).
-			sea _ k value.
-			bm color: sea color.
-			txt _ StringMorph new
-				emphasis: 1;  "emphasis: bold=1"
-				font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-			bm addMorph: txt..
-			txt color: (sea textColor
-				ifTrue: [Color white]
-				ifFalse: [Color black]).
-			txt contents: sea desc.
-			set add: txt].
-	^ set! !
-
 !FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 15:13:33'!
 showYourself
 	"Show window for player's statistics"
@@ -3390,90 +3477,6 @@ showYourself
 				morphPosition: self windowPosition;
 				morphExtent: 300 @ 280]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:35:45'!
-startButtonSet
-	"Answer the buttons used to start the game"
-
-	buttonArea 
-		removeAllMorphs;
-		addMorph: self makeAddPlayerButton;
-		addMorph: self makeSettingsButton;
-		addMorph: self makeTourButton;
-		addMorph: self makeQuitGameButton.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 12:58:40'!
-startGame
-	"Change the buttons and start the game"
-	
-	self playButtonSet.
-	model players do: [:ea | 
-		ea 
-			when: #displayInvoice 
-			send: #displayInvoice:title: 
-			to: self 
-			withArguments: #(#invoice #heading)].
-	model playerIndex: 0. "retain players in order of entry"
-	model 
-		testGoal;
-		nextPlayer.
-	model initialButtonState! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 15:04:10'!
-titleChange: aPlayer
-	"Change the title, showing player data in color"
-	"Display cash, debt, and goal progress"
-	| c d net otherLead pluralForm others |
-	
-	gameTitle contents: aPlayer identity , '''s turn.'.
-	gameTitle color: aPlayer color.
-	
-	c _ '$', model currentPlayer cash truncated printStringWithCommas.
-	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
-	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
-	numbersArea submorphs first 
-		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
-		color: model currentPlayer color.
-	pluralForm _ model players size = 2
-		ifTrue: ['Player''s']
-		ifFalse: ['Players'''].
-	otherLead _ (StringMorph contents: (String streamContents: [:string |
-		string
-			nextPutAll: 'Other ';
-			nextPutAll: pluralForm;
-			nextPutAll: ' Cash: '])).
-	otherLead
-		emphasis: AbstractFont boldCode;
-		color: Color lightBrown;
-		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-	othersArea 
-		removeAllMorphs;
-		addMorph: otherLead.
-	others _ model players select: [:a | a ~= model currentPlayer].
-	others do: [:ea | | x |
-		x _ ' $', ea cash truncated printStringWithCommas.
-		othersArea addMorph: ((StringMorph contents: x) 
-			emphasis: AbstractFont boldCode;
-			color: ea color;
-			setBalloonText: 'cash held by ', ea identity;
-			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
-tourAt: anInterval 
-	"Take a tour of the board."
-	| limit i |
-	
-	limit _ model class describeSpaces size + 2.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :delta |
-		i _ i + 1.
-		i < limit 
-			ifTrue: [model positionBoardTo: i]
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep]].
-	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"! !
-
 !FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 12:10:45'!
 windowPosition
 	"Answer the position for a window"
@@ -3484,18 +3487,6 @@ windowPosition
 boardColor
 	"Answer the color of the board itself"
 	^Color yellow alpha: 0.5! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/2/2017 13:26:24'!
-buttonSize
-	"Answer the layoutSpec for buttons on the game board"
-	
-	^ LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:01:13'!
-cellColor
-	"Answer the color for a cell"
-	
-	^ Color r: 1.0 g: 0.93 b: 0.83! !
 
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 10:30'!
 debtLimit
@@ -3512,11 +3503,17 @@ goal
 		ifFalse: [^ normal]	"Answer the winning net asset goal"
 ! !
 
-!FarmingGame class methodsFor: 'documentation' stamp: 'dhn 8/29/2017 20:00:09'!
-how
-	"
-	FarmingGame start.
-	"! !
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/2/2017 13:26:24'!
+buttonSize
+	"Answer the layoutSpec for buttons on the game board"
+	
+	^ LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:01:13'!
+cellColor
+	"Answer the color for a cell"
+	
+	^ Color r: 1.0 g: 0.93 b: 0.83! !
 
 !FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:14:03'!
 includeInNewMorphMenu
@@ -3569,6 +3566,12 @@ start
 	^ win
 ! !
 
+!FarmingGame class methodsFor: 'documentation' stamp: 'dhn 8/29/2017 20:00:09'!
+how
+	"
+	FarmingGame start.
+	"! !
+
 !FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 aboutToBeGrabbedBy: aHand
 	"The receiver is being grabbed by a hand.
@@ -3594,12 +3597,6 @@ justGrabbedFrom: formerOwner
 	"This message is sent to the dragged morph, not to the owner.
 	It is included here just for reference."! !
 
-!FarmingView methodsFor: 'initialization' stamp: 'dhn 9/7/2017 12:18:32'!
-removeWindowMenu
-	"Remove the button in the title bar which brings up the window menu"
-	
-	(self findDeepSubmorphThat: [:s | s balloonText = 'window menu'] ifAbsent: [^ nil]) delete! !
-
 !FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 wantsToBeDroppedInto: aMorph
 	"Return true if it's okay to drop the receiver into aMorph. This check is symmetric to #wantsDroppedMorph:event: to give both parties a chance of figuring out whether they like each other."
@@ -3607,6 +3604,12 @@ wantsToBeDroppedInto: aMorph
 	It is included here just for reference."
 
 	^true! !
+
+!FarmingView methodsFor: 'initialization' stamp: 'dhn 9/7/2017 12:18:32'!
+removeWindowMenu
+	"Remove the button in the title bar which brings up the window menu"
+	
+	(self findDeepSubmorphThat: [:s | s balloonText = 'window menu'] ifAbsent: [^ nil]) delete! !
 
 !FarmingView class methodsFor: 'class initialization' stamp: 'dhn 9/7/2017 12:18:32'!
 open: aModel label: aString
@@ -3643,6 +3646,17 @@ ack
 	
 	self delete! !
 
+!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
+closeBoxHit
+
+	super closeBoxHit! !
+
+!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
 !AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
 buildMorphicWindow
 	"Lay out the window for player status"
@@ -3672,16 +3686,20 @@ buildMorphicWindow
 		addMorph: textPane;
 		addMorph: buttonArea! !
 
-!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
-closeBoxHit
-
-	super closeBoxHit! !
-
-!AllView methodsFor: 'termination' stamp: 'dhn 9/15/2017 16:08:04'!
-endIt
-	"Close the receiver"
+!AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
+startButtons
+	"Set the button for acknowledging an option"
 	
-	self delete! !
+	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
+	ackButton 
+		morphExtent: 70@20;
+		setBalloonText: 'acknowledge receipt'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: ackButton;
+		padding: #center.
+! !
 
 !AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:08:04'!
 player: anObject
@@ -3703,21 +3721,6 @@ reportAllPlayers
 				nextPutAll: ' net assets'; newLine;
 				nextPutAll: pl priorOptions size asString;
 				nextPutAll: ' options held'; newLine]]! !
-
-!AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
-startButtons
-	"Set the button for acknowledging an option"
-	
-	ackButton _ GameButtonMorph label: 'OK' action: #ack state: true model: self.
-	ackButton 
-		morphExtent: 70@20;
-		setBalloonText: 'acknowledge receipt'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: ackButton;
-		padding: #center.
-! !
 
 !AllView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 16:11:43'!
 updateEverybody
@@ -3765,6 +3768,32 @@ assetList
 	
 	^ self class statusList! !
 
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/14/2017 15:16:50'!
+reportFor: aName
+	"Answer the status report for anAsset"
+	| property asset col |
+	
+	property _ player assets at: aName ifAbsent: [^ 'No such asset named ', aName].
+	asset _ self class translate: aName.
+	col _ (player harvests) select: [:ea | ea assetName = asset].
+	
+	^ String streamContents: [:str |
+		str 
+			nextPutAll: property description,':'; newLine;
+			nextPutAll: (property reportAsAssetFor: player); newLine.
+		col ifNotEmpty: [
+			col do: [:ea | 
+				ea enabled ifFalse: [str nextPutAll: ea desc, ' - done.'; newLine]]]]! !
+
+!AssetView methodsFor: 'operating' stamp: 'dhn 9/18/2017 15:53:44'!
+updateStatus
+	"Show the latest status of the selected asset"
+
+	assetItem isZero 
+		ifFalse: [
+			assetReport _ self reportFor: (self class statusList at: assetItem).
+			textPane model actualContents: assetReport]! !
+
 !AssetView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 10:59:32'!
 buildMorphicWindow
 	"Lay out the window for asset status"
@@ -3811,40 +3840,6 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!AssetView methodsFor: 'termination' stamp: 'dhn 9/12/2017 20:55:38'!
-closeBoxHit
-
-	super closeBoxHit! !
-
-!AssetView methodsFor: 'termination' stamp: 'dhn 9/13/2017 11:36:23'!
-endIt
-	"Close the receiver"
-	
-	self delete! !
-
-!AssetView methodsFor: 'access' stamp: 'dhn 9/13/2017 10:46:58'!
-player: anObject
-	"Set the value of player"
-	
-	player _ anObject! !
-
-!AssetView methodsFor: 'operating' stamp: 'dhn 9/14/2017 15:16:50'!
-reportFor: aName
-	"Answer the status report for anAsset"
-	| property asset col |
-	
-	property _ player assets at: aName ifAbsent: [^ 'No such asset named ', aName].
-	asset _ self class translate: aName.
-	col _ (player harvests) select: [:ea | ea assetName = asset].
-	
-	^ String streamContents: [:str |
-		str 
-			nextPutAll: property description,':'; newLine;
-			nextPutAll: (property reportAsAssetFor: player); newLine.
-		col ifNotEmpty: [
-			col do: [:ea | 
-				ea enabled ifFalse: [str nextPutAll: ea desc, ' - done.'; newLine]]]]! !
-
 !AssetView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 10:43:31'!
 startButtons
 	"Set the button for acknowledging an asset status report"
@@ -3861,14 +3856,22 @@ startButtons
 		padding: #center.
 ! !
 
-!AssetView methodsFor: 'operating' stamp: 'dhn 9/18/2017 15:53:44'!
-updateStatus
-	"Show the latest status of the selected asset"
+!AssetView methodsFor: 'termination' stamp: 'dhn 9/12/2017 20:55:38'!
+closeBoxHit
 
-	assetItem isZero 
-		ifFalse: [
-			assetReport _ self reportFor: (self class statusList at: assetItem).
-			textPane model actualContents: assetReport]! !
+	super closeBoxHit! !
+
+!AssetView methodsFor: 'termination' stamp: 'dhn 9/13/2017 11:36:23'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
+!AssetView methodsFor: 'access' stamp: 'dhn 9/13/2017 10:46:58'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
 
 !AssetView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 15:27:25'!
 openOn: aModel
@@ -3921,33 +3924,6 @@ beat: aSymbol
 				self removeActionsForEvent: #morphicStep]].
 	self startSteppingStepTime: model chantBeat. 	"time between chants"! !
 
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/16/2017 12:58:35'!
-beginButton: aBool
-	"Change begin button state according to aBool"
-	
-	aBool
-		ifTrue: [beginButton enableButton]
-		ifFalse: [beginButton disableButton]! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 12:12:29'!
-buyers
-	"Answer the value of buyers"
-	
-	^ buyers! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 15:38:10'!
-currentBid
-	"Answer the value of currentBid"
-	
-	currentBid ifNil: [currentBid _ 0].
-	^ currentBid! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 20:53:45'!
-currentBid: anObject
-	"Set the value of currentBid"
-	
-	currentBid _ anObject! !
-
 !AuctionView methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:31:27'!
 going
 	"Answer the value of going"
@@ -3962,17 +3938,115 @@ going: anObject
 	going _ anObject
 ! !
 
-!AuctionView methodsFor: 'initialization' stamp: 'dhn 10/27/2016 19:53:59'!
-initialize
+!AuctionView methodsFor: 'operation' stamp: 'dhn 8/28/2018 17:47:47'!
+list: anObject
+	"Set the value of list"
+	
+	list _ anObject
+! !
 
-	super initialize.
-	begun _ false! !
+!AuctionView methodsFor: 'operation' stamp: 'dhn 8/20/2018 14:37:55'!
+offer: anObject by: aName
+	"State that an offer referred to by anObject was made by aName"
+
+	self currentBid: self currentBid + (model class bidBump at: anObject).
+	currentBidder _ aName.
+	self chant addFirst: (String streamContents: [:str |
+		str
+			nextPut: $$;
+			nextPutAll: self currentBid printStringWithCommas;
+			nextPutAll: ' was bid by '; 
+			nextPutAll: currentBidder; newLine]).
+	self showChant.
+	going _ 0.
+	buyers submorphsDo: [:ea | ea enableButton].
+	(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton
+! !
+
+!AuctionView methodsFor: 'operation' stamp: 'dhn 8/28/2018 17:47:03'!
+seller
+	"Answer the value of seller"
+	
+	^ seller! !
+
+!AuctionView methodsFor: 'operation' stamp: 'dhn 8/28/2018 17:46:15'!
+seller: anObject
+	"Set the value of seller"
+	
+	seller _ anObject
+! !
+
+!AuctionView methodsFor: 'operation' stamp: 'dhn 9/18/2016 16:16:04'!
+showChant
+	"Write the auction 'transcript' to the text pane"
+	| record |
+
+	record _ String new writeStream.
+	chant do: [:ea | record nextPutAll: ea].
+	textPane model actualContents: record contents! !
+
+!AuctionView methodsFor: 'access' stamp: 'dhn 9/16/2017 12:58:35'!
+beginButton: aBool
+	"Change begin button state according to aBool"
+	
+	aBool
+		ifTrue: [beginButton enableButton]
+		ifFalse: [beginButton disableButton]! !
+
+!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 12:12:29'!
+buyers
+	"Answer the value of buyers"
+	
+	^ buyers! !
+
+!AuctionView methodsFor: 'access' stamp: 'dhn 8/20/2018 14:40:22'!
+chant
+	"Answer the value of chant"
+	
+	^ chant ifNil: [chant _ OrderedCollection new]! !
+
+!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 15:38:10'!
+currentBid
+	"Answer the value of currentBid"
+	
+	currentBid ifNil: [currentBid _ 0].
+	^ currentBid! !
+
+!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 20:53:45'!
+currentBid: anObject
+	"Set the value of currentBid"
+	
+	currentBid _ anObject! !
 
 !AuctionView methodsFor: 'access' stamp: 'dhn 9/16/2017 12:54:23'!
 list
 	"Answer the value of list"
 	
 	^ list! !
+
+!AuctionView methodsFor: 'initialization' stamp: 'dhn 10/27/2016 19:53:59'!
+initialize
+
+	super initialize.
+	begun _ false! !
+
+!AuctionView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 21:32:56'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
+
+!AuctionView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 12:46:07'!
+setUpBuyers
+	"Answer the layout for the buyers buttons"
+	
+	^ (LayoutMorph newRow)
+		name: #buyers;
+		padding: #center;
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center)! !
 
 !AuctionView methodsFor: 'buttons' stamp: 'dhn 9/16/2016 11:36:50'!
 makeBeginButton
@@ -4001,33 +4075,6 @@ makeEndButton
 		morphExtent: 70@20;
 		setBalloonText: 'End the auction.'.
 	^ endButton! !
-
-!AuctionView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 21:32:56'!
-player: anObject
-	"Set the value of player"
-	
-	player _ anObject! !
-
-!AuctionView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 12:46:07'!
-setUpBuyers
-	"Answer the layout for the buyers buttons"
-	
-	^ (LayoutMorph newRow)
-		name: #buyers;
-		padding: #center;
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center)! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 9/18/2016 16:16:04'!
-showChant
-	"Write the auction 'transcript' to the text pane"
-	| record |
-
-	record _ String new writeStream.
-	chant do: [:ea | record nextPutAll: ea].
-	textPane model actualContents: record contents! !
 
 !AuctionView methodsFor: 'buttons' stamp: 'dhn 11/13/2016 13:55:05'!
 soldEndButtons
@@ -4120,12 +4167,6 @@ assetSold
 		model endTurnCheck].
 	model updatePlayer! !
 
-!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
-auctionList: anObject
-	"Set the value of auctionList"
-	
-	auctionList _ anObject! !
-
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 11:43:51'!
 beginAuction
 	"Show the bid increments and let the bidding begin"
@@ -4141,43 +4182,6 @@ beginAuction
 	begun _ true
 ! !
 
-!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 10/1/2016 15:33:53'!
-buildMorphicWindow
-	"Lay out the window for auctioning an asset"
-	
-	buttonsArea _ (LayoutMorph newRow)
-		name: #buttons;
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-			
-	self layoutMorph
-		addMorph: buttonsArea;
-		addMorph: self setUpMidRow;
-		addMorph: (buyers _ self setUpBuyers)! !
-
-!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 3/18/2017 20:18:17'!
-buyerButtons
-	"Set bidding buttons for the players"
-	| col |
-	
-	col _ OrderedCollection new.
-	model players do: [:ea |
-		col add: ((BidderButton label: ea identity action: #offer: state: true model: self)
-			morphExtent: 70@30;
-			color: ea color;
-			setBalloonText: 'bidder')].
-	buyers addAllMorphs: col reversed! !
-
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:44'!
-closeBoxHit
-
-	model enableAll: {'Auction'}.
-	model moveButton enabled
-		ifFalse: [begun ifFalse: [model endTurnCheck]].
-	super closeBoxHit! !
-
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 18:09:43'!
 details
 	"Set the contents of the chant pane"
@@ -4191,21 +4195,6 @@ details
 				chant _ ''.
 				self showChant.
 				beginButton disableButton]]! !
-
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:26'!
-endIt
-	
-	model enableAll: {'Auction'}.
-	model moveButton enabled
-		ifFalse: [begun ifFalse: [model endTurnCheck]].
-	self delete! !
-
-!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
-getList
-	"Update the list of assets"
-	
-	self assetAuctionItem: 0.
-	list updateList! !
 
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:42:27'!
 offer: aName
@@ -4252,6 +4241,35 @@ openingFor: anItem
 			nextPut: $$;
 			nextPutAll: opening printStringWithCommas;
 			nextPutAll: ' (half the list price).'; newLine])! !
+
+!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
+auctionList: anObject
+	"Set the value of auctionList"
+	
+	auctionList _ anObject! !
+
+!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
+getList
+	"Update the list of assets"
+	
+	self assetAuctionItem: 0.
+	list updateList! !
+
+!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 10/1/2016 15:33:53'!
+buildMorphicWindow
+	"Lay out the window for auctioning an asset"
+	
+	buttonsArea _ (LayoutMorph newRow)
+		name: #buttons;
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+			
+	self layoutMorph
+		addMorph: buttonsArea;
+		addMorph: self setUpMidRow;
+		addMorph: (buyers _ self setUpBuyers)! !
 
 !AuctionAsset methodsFor: 'initialization' stamp: 'dhn 9/15/2017 22:03:39'!
 setUpMidRow
@@ -4315,6 +4333,19 @@ setUpMidRow
 
 ! !
 
+!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 3/18/2017 20:18:17'!
+buyerButtons
+	"Set bidding buttons for the players"
+	| col |
+	
+	col _ OrderedCollection new.
+	model players do: [:ea |
+		col add: ((BidderButton label: ea identity action: #offer: state: true model: self)
+			morphExtent: 70@30;
+			color: ea color;
+			setBalloonText: 'bidder')].
+	buyers addAllMorphs: col reversed! !
+
 !AuctionAsset methodsFor: 'buttons' stamp: 'dhn 9/20/2016 13:16:38'!
 startButtons
 	"Set the initial buttons for asset auction"
@@ -4325,6 +4356,22 @@ startButtons
 		addMorph: self makeCancelButton;
 		padding: #center
 ! !
+
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:44'!
+closeBoxHit
+
+	model enableAll: {'Auction'}.
+	model moveButton enabled
+		ifFalse: [begun ifFalse: [model endTurnCheck]].
+	super closeBoxHit! !
+
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:26'!
+endIt
+	
+	model enableAll: {'Auction'}.
+	model moveButton enabled
+		ifFalse: [begun ifFalse: [model endTurnCheck]].
+	self delete! !
 
 !AuctionAsset class methodsFor: 'data base' stamp: 'dhn 9/15/2017 20:38:56'!
 bankName
@@ -4352,6 +4399,17 @@ ack
 	model endFlag: true.
 	model triggerEvent: #optionDrawn.
 	model triggerEvent: #itemChange.
+	self delete! !
+
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 20:13:44'!
+closeBoxHit
+
+	super closeBoxHit! !
+
+!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 17:05:16'!
+endIt
+	"Close the receiver"
+	
 	self delete! !
 
 !DrawView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:45:20'!
@@ -4383,23 +4441,6 @@ buildMorphicWindow
 		addMorph: textPane;
 		addMorph: buttonArea! !
 
-!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 20:13:44'!
-closeBoxHit
-
-	super closeBoxHit! !
-
-!DrawView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 17:57:56'!
-details: aString
-	"Set the content of the text pane"
-	
-	textPane model actualContents: aString! !
-
-!DrawView methodsFor: 'termination' stamp: 'dhn 9/10/2017 17:05:16'!
-endIt
-	"Close the receiver"
-	
-	self delete! !
-
 !DrawView methodsFor: 'initialization' stamp: 'dhn 9/12/2017 09:32:37'!
 startButtons
 	"Set the button for acknowledging an option"
@@ -4414,6 +4455,12 @@ startButtons
 		addMorph: ackButton;
 		padding: #center.
 ! !
+
+!DrawView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 17:57:56'!
+details: aString
+	"Set the content of the text pane"
+	
+	textPane model actualContents: aString! !
 
 !DrawView class methodsFor: 'class initialization' stamp: 'dhn 9/10/2017 16:56:28'!
 openOn: aModel
@@ -4474,6 +4521,27 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
+!LoanView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 16:30:09'!
+startButtons
+	"Set the Loan Payment buttons"
+	
+	payButton _ GameButtonMorph label: 'Pay' action: #pay state: false model: self.
+	payButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Make the selected payment.'.
+		
+	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
+	cancelButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Forget about reducing debt.'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: payButton;
+		addMorph: cancelButton;
+		padding: #center.
+! !
+
 !LoanView methodsFor: 'termination' stamp: 'dhn 9/12/2016 17:01:31'!
 closeBoxHit
 
@@ -4482,18 +4550,32 @@ closeBoxHit
 		enableAll: {'Pay Loan'}.
 	super closeBoxHit! !
 
-!LoanView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 11:48:00'!
-details
-	"Set the loan report in the textPane"
-	
-	textPane model actualContents: (self loanReportFor: self loanItem)	"note that the textPane model differs from the model for this view"! !
-
 !LoanView methodsFor: 'termination' stamp: 'dhn 9/14/2017 11:48:54'!
 endIt
 	"Close the receiver"
 	
 	model enableAll: {'Pay Loan'}.
 	self delete! !
+
+!LoanView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 11:48:00'!
+details
+	"Set the loan report in the textPane"
+	
+	textPane model actualContents: (self loanReportFor: self loanItem)	"note that the textPane model differs from the model for this view"! !
+
+!LoanView methodsFor: 'accessing' stamp: 'dhn 9/16/2016 14:57:28'!
+payButton: aBool
+	"Change Pay button state according to aBool"
+	
+	aBool
+		ifTrue: [payButton enableButton]
+		ifFalse: [payButton disableButton]! !
+
+!LoanView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:14:36'!
+player: anObject
+	"Set the value of player to anObject"
+	
+	player _ anObject! !
 
 !LoanView methodsFor: 'operating' stamp: 'dhn 9/14/2017 11:00:58'!
 loanItem
@@ -4576,41 +4658,6 @@ pay
 		ifTrue: [model updateHistory].
 	self details! !
 
-!LoanView methodsFor: 'accessing' stamp: 'dhn 9/16/2016 14:57:28'!
-payButton: aBool
-	"Change Pay button state according to aBool"
-	
-	aBool
-		ifTrue: [payButton enableButton]
-		ifFalse: [payButton disableButton]! !
-
-!LoanView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:14:36'!
-player: anObject
-	"Set the value of player to anObject"
-	
-	player _ anObject! !
-
-!LoanView methodsFor: 'initialization' stamp: 'dhn 9/16/2016 16:30:09'!
-startButtons
-	"Set the Loan Payment buttons"
-	
-	payButton _ GameButtonMorph label: 'Pay' action: #pay state: false model: self.
-	payButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Make the selected payment.'.
-		
-	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
-	cancelButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Forget about reducing debt.'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: payButton;
-		addMorph: cancelButton;
-		padding: #center.
-! !
-
 !LoanView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:59'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
@@ -4676,6 +4723,27 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
+!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 10:20:02'!
+startButtons
+	"Set the buttons for buying assets"
+	
+	buyButton _ GameButtonMorph label: 'Buy' action: #buy state: false model: self.
+	buyButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Make the purchase.'.
+		
+	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
+	cancelButton 
+		morphExtent: 70@20;
+		setBalloonText: 'Forget about shopping for now.'.
+
+	buttonArea
+		removeAllMorphs;
+		addMorph: buyButton;
+		addMorph: cancelButton;
+		padding: #center.
+! !
+
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 15:12:22'!
 buy
 	"Purchase an asset"
@@ -4719,12 +4787,6 @@ buyButton: aBool
 				ifFalse: [buyButton enableButton]]
 		ifFalse: [buyButton disableButton]! !
 
-!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:25'!
-closeBoxHit
-
-	model enableAll: {'Purchase'}.
-	super closeBoxHit! !
-
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:26:01'!
 details
 	"Set the content of the text pane"
@@ -4733,13 +4795,6 @@ details
 		(player priorOptions
 			ifEmpty: ['']
 			ifNotEmpty: [self optionsReport])! !
-
-!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:41'!
-endIt
-	"Close the receiver"
-	
-	model enableAll: {'Purchase'}.
-	self delete! !
 
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 09:41:12'!
 getList
@@ -4759,6 +4814,25 @@ list: aCollection
 	"Set the value of list"
 	
 	list _ aCollection! !
+
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
+
+!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:25'!
+closeBoxHit
+
+	model enableAll: {'Purchase'}.
+	super closeBoxHit! !
+
+!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:41'!
+endIt
+	"Close the receiver"
+	
+	model enableAll: {'Purchase'}.
+	self delete! !
 
 !OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:13:20'!
 optionsItem
@@ -4816,33 +4890,6 @@ optionsReport: anAsset
 	
 	^ player optionDescription: (model class anotherNameFor: anAsset)! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
-player: anObject
-	"Set the value of player"
-	
-	player _ anObject! !
-
-!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 10:20:02'!
-startButtons
-	"Set the buttons for buying assets"
-	
-	buyButton _ GameButtonMorph label: 'Buy' action: #buy state: false model: self.
-	buyButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Make the purchase.'.
-		
-	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
-	cancelButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Forget about shopping for now.'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: buyButton;
-		addMorph: cancelButton;
-		padding: #center.
-! !
-
 !OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:33'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
@@ -4897,6 +4944,17 @@ ack
 	
 	self delete! !
 
+!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:34:54'!
+closeBoxHit
+
+	super closeBoxHit! !
+
+!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:34:54'!
+endIt
+	"Close the receiver"
+	
+	self delete! !
+
 !YouView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:44:33'!
 buildMorphicWindow
 	"Lay out the window for player status"
@@ -4926,23 +4984,6 @@ buildMorphicWindow
 		addMorph: textPane;
 		addMorph: buttonArea! !
 
-!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:34:54'!
-closeBoxHit
-
-	super closeBoxHit! !
-
-!YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:34:54'!
-endIt
-	"Close the receiver"
-	
-	self delete! !
-
-!YouView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 14:36:00'!
-player: anObject
-	"Set the value of player"
-	
-	player _ anObject! !
-
 !YouView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 14:34:54'!
 startButtons
 	"Set the button for acknowledging an option"
@@ -4957,6 +4998,12 @@ startButtons
 		addMorph: ackButton;
 		padding: #center.
 ! !
+
+!YouView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 14:36:00'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
 
 !YouView methodsFor: 'accessing' stamp: 'dhn 9/15/2017 14:40:37'!
 updatePerformance
@@ -5058,11 +5105,6 @@ factor: anObject
 
 	factor := anObject! !
 
-!Crop methodsFor: 'initialize-release' stamp: 'dhn 9/25/2011 05:14'!
-initialize
-	super initialize.
-! !
-
 !Crop methodsFor: 'accessing' stamp: 'dhn 9/25/2011 10:35'!
 rate
 	"Answer the value of rate"
@@ -5075,6 +5117,11 @@ rate: anObject
 	"Set the value of rate"
 
 	rate := anObject! !
+
+!Crop methodsFor: 'initialize-release' stamp: 'dhn 9/25/2011 05:14'!
+initialize
+	super initialize.
+! !
 
 !Crop methodsFor: 'operating' stamp: 'dhn 9/15/2017 17:44:49'!
 reportAsAssetFor: aPlayer 
@@ -5112,6 +5159,10 @@ units
 auctionQuantity
 	"Answer the default quantity that can be auctioned"
 	^ 10! !
+
+!Crop class methodsFor: 'database' stamp: 'dhn 9/18/2017 18:13:42'!
+lotDescription: aString 
+	^ self auctionQuantity asString , ' Acres of ' , aString! !
 
 !Crop class methodsFor: 'expense-related' stamp: 'dhn 9/18/2017 15:25:20'!
 expense: anExpense for: aPlayer
@@ -5190,10 +5241,6 @@ income: aRoll from: anAsset for: aPlayer
 					GamePopUp inform: tale title: asset description, ' quantity ', asset quantity asString.
 					aPlayer mgr endTurnCheck]].
 		^ yield! !
-
-!Crop class methodsFor: 'database' stamp: 'dhn 9/18/2017 18:13:42'!
-lotDescription: aString 
-	^ self auctionQuantity asString , ' Acres of ' , aString! !
 
 !Fruit methodsFor: 'initialize-release' stamp: 'dhn 9/18/2011 15:34'!
 initialize
@@ -5349,24 +5396,6 @@ assetValue
 	
 	^ self class price * self quantity! !
 
-!Equipment methodsFor: 'accessing' stamp: 'dhn 9/25/2011 10:34'!
-costAvoided
-	"Answer the value of costAvoided"
-
-	costAvoided ifNil: [costAvoided := 0].
-	^ costAvoided! !
-
-!Equipment methodsFor: 'accessing' stamp: 'dhn 9/20/2011 21:18'!
-costAvoided: anObject
-	"Set the value of costAvoided"
-
-	costAvoided := anObject! !
-
-!Equipment methodsFor: 'initialize-release' stamp: 'dhn 9/25/2011 05:16'!
-initialize
-	super initialize.
-! !
-
 !Equipment methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:37:16'!
 reportAsAssetFor: aPlayer
 	| str |
@@ -5396,6 +5425,24 @@ units
 	"Answer the value of units"
 	
 	^ ' each'! !
+
+!Equipment methodsFor: 'accessing' stamp: 'dhn 9/25/2011 10:34'!
+costAvoided
+	"Answer the value of costAvoided"
+
+	costAvoided ifNil: [costAvoided := 0].
+	^ costAvoided! !
+
+!Equipment methodsFor: 'accessing' stamp: 'dhn 9/20/2011 21:18'!
+costAvoided: anObject
+	"Set the value of costAvoided"
+
+	costAvoided := anObject! !
+
+!Equipment methodsFor: 'initialize-release' stamp: 'dhn 9/25/2011 05:16'!
+initialize
+	super initialize.
+! !
 
 !Equipment class methodsFor: 'as yet unclassified' stamp: 'dhn 9/25/2011 15:18'!
 at: aRoll for: aQuantity
@@ -5499,6 +5546,27 @@ auctionQuantity
 	"Answer the quantity that can be auctioned"
 	^ 10! !
 
+!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/9/2017 16:03:41'!
+lotQuantity 
+
+	^ self auctionQuantity! !
+
+!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 12:23:48'!
+optionText
+	^ 'LIVESTOCK AUCTION
+10 pregnant cows
+at $500 each
+Total $', self optionCost printStringWithCommas! !
+
+!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/18/2011 13:45'!
+price
+	"Per head"
+	^500! !
+
+!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 09:19'!
+yieldVector
+	^#(1400 2000 2800 3800 5000 7500)! !
+
 !Livestock class methodsFor: 'expense-related' stamp: 'dhn 9/18/2017 16:27:31'!
 expense: anExpense for: aPlayer
 	"Record  anExpense in aPlayer assets, apportioning according to head count"
@@ -5562,43 +5630,22 @@ income: aRoll from: anAsset for: aPlayer
 
 	^ total! !
 
-!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/9/2017 16:03:41'!
-lotQuantity 
-
-	^ self auctionQuantity! !
-
-!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 12:23:48'!
-optionText
-	^ 'LIVESTOCK AUCTION
-10 pregnant cows
-at $500 each
-Total $', self optionCost printStringWithCommas! !
-
-!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/18/2011 13:45'!
-price
-	"Per head"
-	^500! !
-
-!Livestock class methodsFor: 'as yet unclassified' stamp: 'dhn 9/19/2011 09:19'!
-yieldVector
-	^#(1400 2000 2800 3800 5000 7500)! !
-
 !CattleOnFarm methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:44:48'!
 assetValue
 	"Answer the value of the receiver"
 	
 	^ self class price * self quantity! !
 
-!CattleOnFarm methodsFor: 'initialize-release' stamp: 'dhn 1/18/2014 12:22'!
-initialize
-	super initialize.
-	description := 'Cattle on Farm'! !
-
 !CattleOnFarm methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:43:57'!
 units
 	"Answer the value of units"
 	
 	^ ' head'! !
+
+!CattleOnFarm methodsFor: 'initialize-release' stamp: 'dhn 1/18/2014 12:22'!
+initialize
+	super initialize.
+	description := 'Cattle on Farm'! !
 
 !CattleOnFarm class methodsFor: 'as yet unclassified' stamp: 'dhn 1/11/2014 14:46'!
 auctionQuantity
@@ -5730,51 +5777,6 @@ addOption: anObject
 	anObject notNil ifTrue: [self options addFirst: anObject].
 ! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:18:14'!
-allocateFruitCost: anAmount
-	"Allocate anAmount cost for fruit"
-	| f1 f2 amt |
-
-	amt _ anAmount // 2.
-	f1 _ assets at: #Cherries.
-	f1 quantity > 0
-		ifTrue: [
-			f1 cost: amt + f1 cost.
-			self  tally: amt negated].
-	f2 _ assets at: #Apples.
-	f2 quantity > 0
-		ifTrue: [
-			f2 cost: amt + f2 cost.
-			self  tally: amt negated].
-	mgr triggerEvent: #itemChange
-! !
-
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 14:53:41'!
-allocateHarvesterLease: anAmount 
-	"When a player incurs anAmount for not owning a harvester, parcel
-	anAmount out to those who do."
-	| col |
-
-	col _ self mgr players select: [:pl | pl ifHarvester].
-	col do: [:pl | 
-		| machine |
-		machine _ pl assets at: #Harvester.
-		machine gross: machine gross + (anAmount // col size).
-		pl tally: anAmount // col size]! !
-
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 14:48:43'!
-allocateTractorLease: anAmount 
-	"When a player incurs anAmount for not owning a tractor, parcel
-	anAmount out to those who do."
-	| col |
-
-	col _ self mgr players select: [:pl | pl ifTractor].
-	col do: [:pl | 
-		| machine |
-		machine _ pl assets at: #Tractor.
-		machine gross: machine gross + (anAmount // col size).
-		pl tally: anAmount // col size]! !
-
 !Farmer methodsFor: 'accessing' stamp: 'dhn 8/31/2017 16:59:05'!
 appendHistory
 	"Add to the end of history"
@@ -5796,55 +5798,6 @@ auctionable
 						ifFalse: [list add: each , '(' , (assets at: subs first asString) quantity asString , ')']]].
 	^ list! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:13:51'!
-boostWheat: anAmount
-	"Account for a boost of anAmount in wheat income"
-
-	(assets at: #Wheat) gross: anAmount + (assets at: #Wheat) gross.
-	self tally: anAmount.
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:09:57'!
-bumpWheat: aRate 
-	"Change the rate for harvesting wheat by aRate per acre"
-
-	(assets at: #Wheat) rate: aRate + (assets at: #Wheat) rate.
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/19/2017 16:02:02'!
-buyAsset: aString for: aNumber 
-	| lot subs |
-	self tally: aNumber negated.
-	subs := (Smalltalk at: aString asSymbol) subclasses.
-	subs isEmpty
-		ifTrue: [lot := assets at: aString.
-			lot cost: lot cost + aNumber.
-			lot quantity: lot quantity + lot class auctionQuantity]
-		ifFalse: [subs
-				do: [:each | |n|
-					n := assets at: each name asString.
-					n cost: n cost + aNumber / subs size.
-					n quantity: n quantity + each auctionQuantity]]! !
-
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/19/2017 16:02:22'!
-buyOption: aName for: aNumber 
-	self tally: aNumber negated.
-	self options addFirst: aName.
-! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:15:36'!
-calfWeights: aParm
-	"Record the effect of aParm increase in livestock income over the next 2 years"
-	| eachHerd |
-
-	eachHerd _ assets select: [:ea | ea class inheritsFrom: Livestock].
-	eachHerd do: [:each | 
-		each factor: aParm.
-		"yearCount increased by 3 so that factor will be in effect for the NEXT 2 years"
-		each yearCount: 3 + each yearCount].
-	mgr triggerEvent: #itemChange
-! !
-
 !Farmer methodsFor: 'accessing' stamp: 'dhn 9/25/2017 15:07:50'!
 cowsOnLeases
 	"Answer a collection of cattle numbers on leases"
@@ -5860,91 +5813,6 @@ cowsOnLeases
 				yourself].
 			^ temp]! !
 
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:17:14'!
-customHire: anAmount 
-	"Collect anAmount from each player who does not have a harvester"
-	| cnt ttl |
-
-	(assets at: #Harvester) quantity > 0
-		ifFalse: [^ nil].
-	cnt _ 0.
-	mgr players
-		do: [:pl | 
-			pl ~= self
-				ifTrue: [
-					(pl assets at: #Harvester) quantity = 0
-						ifTrue: [
-							cnt _ cnt + 1.
-							pl tally: anAmount negated.
-							(pl assets at: #Harvester)
-								cost: (pl assets at: #Harvester) cost + anAmount]]].
-	ttl _ anAmount * cnt.
-	self tally: ttl.
-	(assets at: #Harvester) gross: (assets at: #Harvester) gross + ttl.
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:55:58'!
-cutworms: anAmount 
-	"Allocate anAmount per acre for cutworm damage"
-	| a1 a2 |
-
-	a1 _ anAmount * (assets at: #Cherries) quantity // 2.
-	a2 _ anAmount * (assets at: #Apples) quantity // 2.
-	self allocateFruitCost: a1 + a2! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:18:43'!
-disasterPmt: aParm 
-	"Allocate a disaster payment of aParm per acre for grain"
-	| amt |
-
-	amt _ (assets at: #Wheat) quantity * aParm.
-
-	(assets at: #Wheat) gross: amt / 2 + (assets at: #Wheat) gross.
-	(assets at: #Corn) gross: amt / 2 + (assets at: #Corn) gross.
-
-	self tally: amt.
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:19:52'!
-doubleCorn
-	"Increase the factor for harvesting corn"
-
-	(assets at: #Corn) factor: 2 * (assets at: #Corn) factor.
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:20:52'!
-doubleCorn: anObject 
-self halt: 'how did we get here?'.
-	(assets at: #Corn)
-		factor: 2 * (assets at: #Corn) factor! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:02:58'!
-doubleHay
-	"Increase the factor for hay"
-
-	(assets at: #Hay) factor: 2 * (assets at: #Hay) factor.
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:21:23'!
-doubleHay: anObject 
-self halt: 'how did we get here?'.
-	(assets at: #Hay)
-		factor: 2 * (assets at: #Hay) factor! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 8/31/2017 15:32:48'!
-doubledString
-	"Answer the string signifying whether the market is doubled for the receiver"
-	| mkt |
-	
-	mkt _ (mgr seasonAt: self position) desc asSymbol.
-	markets
-		ifNil: [^ '']
-		ifNotNil: [^ (markets at: mkt ifAbsent: [^ '']) > 1 ifTrue: ['(doubled)'] ifFalse:['']]! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 10/6/2011 20:31'!
-drawExpense: anObject
-	^self mgr drawExpense! !
-
 !Farmer methodsFor: 'accessing' stamp: 'dhn 9/25/2011 10:39'!
 emergencies
 	"Answer the value of emergencies"
@@ -5957,61 +5825,6 @@ emergencies: anObject
 	"Set the value of emergencies"
 
 	emergencies := anObject! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:25:54'!
-emergencyLoan
-	"Account for an emergency loan"
-	| loan str |
-
-	str _ String new writeStream.
-	str nextPutAll: self identity;
-		nextPutAll: ' is out of money.'; newLine;
-		nextPutAll: self identity;
-		nextPutAll: ' will receive $4,000 cash and a bank note for $5,000.'.
-	GamePopUp inform: str contents title: 'Emergency Loan'.
-	loan _ 5000 negated.
-	self debt: loan + self debt.
-	self interestPd: 1000 + self interestPd.
-	self paidInterest: 1 + self paidInterest.
-	self emergencies: 1 + self emergencies.
-	mgr triggerEvent: #itemChange.
-	^ (loan + 1000) negated! !
-
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:28:00'!
-feedBill: anAmount 
-	"Account for a feed bill of anAmount per cow"
-	| penalty total |
-
-	total _ 0.
-	assets do: [:ea | 
-		(ea class inheritsFrom: Livestock)
-			ifTrue: [total _ total + ea quantity]].
-	^ total > 0
-		ifTrue: [
-			penalty _ anAmount * total.
-			self tally: penalty.
-			mgr triggerEvent: #itemChange.
-			penalty]
-		ifFalse: [0]! !
-
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:28:59'!
-fertilizer: aRate
-	"Account for fertilizer at aRate per acre" 
-	| p1 p2 p3 p4 p5 |
-
-	p1 _ aRate * (assets at: #Hay) quantity.
-	(assets at: #Hay) cost: p1 negated + (assets at: #Hay) cost.
-	p2 _ aRate * (assets at: #Wheat) quantity.
-	(assets at: #Wheat) cost: p2 negated / 2 + (assets at: #Wheat) cost.
-	p3 _ aRate * (assets at: #Wheat) quantity.
-	(assets at: #Corn) cost: p3 negated / 2 + (assets at: #Corn) cost.
-	p4 _ aRate * (assets at: #Cherries) quantity.
-	(assets at: #Cherries) cost: p4 negated / 2 + (assets at: #Cherries) cost.
-	p5 _ aRate * (assets at: #Cherries) quantity.
-	(assets at: #Apples) cost: p5 negated / 2 + (assets at: #Apples) cost.
-	self tally: (p1 + p2 + p3 + p4 + p5).
-	mgr triggerEvent: #itemChange.
-	^ 0 	"no further cost allocation is needed" ! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 9/25/2011 10:38'!
 garnish
@@ -6026,277 +5839,10 @@ garnish: aBoolean
 	garnish _ aBoolean.
 	mgr triggerEvent: #itemChange! !
 
-!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:02:55'!
-garnishSpiel
-	GamePopUp inform: 'The IRS is garnishing your income.' title: 'Loss of Income'.
-! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/19/2017 16:07:54'!
-goBackToJan2
-	"Move the token back to Jan 2"
-	
-	GamePopUp inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
-	self mgr token jan2MoveFrom: position! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 10/10/2017 11:38:40'!
-goDirectly: aPosition 
-	"Move backward to Jan 2"
-
-	self goBackToJan2.
-	self mgr disableAll: {'Move'. 'Expense'. 'Fate'. 'Harvest'}! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:30:50'!
-halveCherries: aRate 
-	"Reduce cherry harvest by aRate"
-
-	(assets at: #Cherries) factor: aRate * (assets at: #Cherries) factor.
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:37:18'!
-halveCows
-	"Adjust the factor for harvesting cattle"
-
-	assets do: [:each | 
-		(each class inheritsFrom: Livestock)
-			ifTrue: [each factor: 0.5 * each factor]].
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 10:03:03'!
-halveHay
-	"Change the factor for hay"
-
-	(assets at: #Hay) factor: 0.5 * (assets at: #Hay) factor.
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:38:07'!
-halveHay: anObject 
-self halt: 'how did we get here?'.
-	(assets at: #Hay)
-		factor: 0.5 * (assets at: #Hay) factor! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/20/2017 13:04:06'!
-harvest: anAsset 
-	"Answer the result of harvesting anAsset"
-	| bone |
-
-	harvesting _ anAsset.
-	bone _ DieMorph new openInWorld: mgr world.
-	bone model: mgr.
-	self die: bone.
-	bone adjustTo: mgr token.
-	bone showEffect: bone class faces shuffled! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/20/2017 18:26:37'!
-harvest: anAsset then: aSymbol
-	"Answer the result of harvesting anAsset"
-	| bone |
-
-	harvesting _ anAsset.
-	bone _ DieMorph new openInWorld: mgr world.
-	bone model: mgr.
-	self die: bone.
-	bone adjustTo: mgr token.
-	bone showEffect: bone class faces shuffled then: aSymbol! !
-
-!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:03:43'!
-harvestEnabled
-	"Answer true if player has not previosly harvested this season and 	owns the asset."
-	| season asset caseA caseB sum |
-	
-	season _ self mgr seasonAt: self position.
-	
-	caseA _ season desc = 'WINTER'
-		ifTrue: [^ false]
-		ifFalse: [(harvests detect: [:ea | ea desc = season desc] ifNone: [self halt]) enabled].
-		
-	caseB _ true.
-	season assetName
-		ifNotNil: [:name | 
-			asset _ assets
-						at: name
-						ifAbsent: [
-							assets values
-								select: [:ea | ea class inheritsFrom: (Smalltalk at: name asSymbol)]].
-			(asset class inheritsFrom: Collection)
-				ifTrue: [sum _ 0.
-					asset
-						do: [:ea | sum _ sum + ea quantity].
-					caseB _ 0 < sum]
-				ifFalse: [caseB _ 0 < asset quantity]].
-			
-	^ caseA and: caseB! !
-
-!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:04:13'!
-harvested
-	"Indicate that the player has harvested this season."
-	| sea |
-	sea := harvests detect: [:ea | ea desc = (self mgr seasonAt: self position) desc] 
-		ifNone: [self halt].
-	sea enabled: false! !
-
-!Farmer methodsFor: 'income-related' stamp: 'dhn 9/20/2017 13:17:01'!
-harvesting
-	"Answer the value of harvesting"
-
-	^ harvesting! !
-
 !Farmer methodsFor: 'accessing' stamp: 'dhn 11/30/2014 17:40'!
 harvests
 	"Answer the value of harvests"
 	^ harvests! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:39:54'!
-hasFruit
-self halt: 'how did we get here?'.
-	self ifFruit
-		ifTrue: [self tally: 500 negated.
-			(assets at: #Cherries)
-				cost: 250 + (assets at: #Cherries) cost.
-			(assets at: #Apples)
-				cost: 250 + (assets at: #Apples) cost.
-			^ true].
-	^ false! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:40'!
-hasHarvester
-	self ifHarvester
-		ifTrue: [self tally: 1000.
-			(assets at: #Harvester)
-				gross: 1000 + (assets at: #Harvester) gross.
-			^ true].
-	^ false! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:42:11'!
-heldCalves: anAmount 
-	"Allocate anAmount for holding some calves"
-	| q1 q2 eachHerd headCount portion ix |
-
-	q1 _ self cowsOnLeases.
-	q2 _ (assets at: #CattleOnFarm) quantity.
-	headCount _ q1 inject: q2 into: [:a :b | a + b].
-	headCount > 0
-		ifTrue: [self tally: anAmount.
-			eachHerd _ self leasesHeld add: #CattleOnFarm
-							-> (assets at: #CattleOnFarm);
-						 yourself.
-			portion _ anAmount * ((q1 asOrderedCollection add: q2;
-							 yourself) / headCount).
-			ix _ 0.
-			eachHerd
-				do: [:each | each gross: each gross
-							+ (portion at: (ix _ ix + 1))]].
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:43:07'!
-helens: anObject 
-	"Account for Natural Disaster"
-	| rolls r amt |
-
-	amt _ 500 * (assets at: #Hay) quantity.
-	self tally: amt.
-	(assets at: #Hay) gross: amt + (assets at: #Hay) gross.
-	rolls _ OrderedCollection new.
-	self mgr players
-		do: [:pl | 
-			pl ~= self
-				ifTrue: [
-					r _ (1 to: 2) atRandom.
-					rolls addLast: r.
-					"to facilitate testing"
-					r = 1
-						ifTrue: [
-							amt _ 100 * (pl assets at: #Hay) quantity.
-							pl tally: amt negated.
-							(pl assets at: #Hay) cost: (pl assets at: #Hay) cost + amt]]].
-	mgr triggerEvent: #itemChange.
-	^ rolls! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:43:23'!
-horseHay: anAmount 
-	"Receive anAmount per acre for horse hay"
-	| qty gross |
-
-	qty _ (assets at: #Hay) quantity.
-	0 < qty
-		ifTrue: [
-			gross _ anAmount * qty.
-			self tally: gross.
-			(assets at: #Hay) gross: gross + (assets at: #Hay) gross].
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:57'!
-ifCows
-	| q1 q2 |
-	q1 := self cowsOnLeases.
-	q2 := (assets at: #CattleOnFarm) quantity.
-	^ 0
-		< (q1
-				inject: q2
-				into: [:a :b | a + b])! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 10:16:35'!
-ifCows: anAmount 
-	"Account for veterinary expense of anAmount"
-	| total |
-
-	total _ 0.
-	assets do: [:ea | 
-		(ea class inheritsFrom: Livestock)
-			ifTrue: [total _ total + ea quantity]].
-	^ total > 0
-		ifTrue: [
-			self tally: anAmount.
-			anAmount]
-		ifFalse: [0]! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:57'!
-ifFruit
-	^ 0 < (assets at: #Cherries) quantity! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:58'!
-ifHarvester
-	^ 0 < (assets at: #Harvester) quantity! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:46:28'!
-ifHarvester: anAmount 
-self halt: 'how did we get here?'.
-	self IfHarvester
-		ifTrue: [self tally: anAmount.
-			(assets at: #Harvester)
-				gross: anAmount + (assets at: #Harvester) gross]! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:58'!
-ifTractor
-	^ 0 < (assets at: #Tractor) quantity! !
-
-!Farmer methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 17:23:55'!
-initialize
-
-	FarmerTest isNil
-		ifFalse: [identity _ FarmerTest].
-	cash _ 5000.
-	debt _ 5000 negated.
-	assets _ self setUpAssets.
-	harvests _ Farm season copy.
-	options _ OrderedCollection new.
-	history _ OrderedCollection with: self netAssets! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:47:55'!
-interest: aRate
-	"Answer the amount of interest = debt * aRate"
-	| int |
-	
-	0 > self debt
-		ifTrue: [
-			int _ (aRate * self debt negated) roundTo:  1.
-			self tally: int negated.
-			self paidInterest: 1 + self paidInterest.
-			self interestPd: int + self interestPd]
-		ifFalse: [
-			int _ 0.
-			self avoidedDebt: 1 + self avoidedDebt].
-	mgr triggerEvent: #itemChange.
-	^ int negated! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 9/26/2017 11:50:07'!
 leasesHeld
@@ -6306,58 +5852,6 @@ leasesHeld
 	leases _ assets select: [:ea | ea class inheritsFrom: CattleOnLease].
 	^ leases select: [:each | 0 < (each quantity)].
 ! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 15:12:33'!
-maggotFly: anAmount 
-	"Allocate anAmount per fruit acre for maggot fly"
-	| q1 q2 c1 c2 |
-
-	q1 _ (assets at: #Cherries) quantity // 2.
-	q2 _ (assets at: #Apples) quantity // 2.
-	c1 _ anAmount * q1.
-	c2 _ anAmount * q2.
-	self allocateFruitCost: c1 + c2! !
-
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:56:25'!
-missedCattleHarvest
-	"Record that a harvest was missed for livestock assets"
-
-	assets do: [:each | 
-		(each class inheritsFrom: Livestock)
-			ifTrue: [each missed: each missed + 1]].
-	mgr triggerEvent: #itemChanged! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:59:48'!
-noHarvester: anAmount 
-	"Account for whether a player owns a harvester"
-
-	^ 0 < (assets at: #Harvester) quantity
-		ifTrue: [
-			(assets at: #Harvester) costAvoided: anAmount negated + (assets at: #Harvester) costAvoided.
-			mgr triggerEvent: #itemChange.
-			0]
-		ifFalse: [
-			self tally: anAmount.
-			(assets at: #Harvester) cost: anAmount negated + (assets at: #Harvester) cost.
-			self allocateHarvesterLease: anAmount negated.
-			mgr triggerEvent: #itemChange.
-			anAmount]! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:00:25'!
-noTractor: anAmount 
-	"Account for whether the receiver has a tractor"
-	
-	^ 0 < (assets at: #Tractor) quantity
-		ifTrue: [
-			(assets at: #Tractor) costAvoided: anAmount negated + (assets at: #Tractor) costAvoided.
-			mgr triggerEvent: #itemChange.
-			0]
-		ifFalse: [
-			self tally: anAmount.
-			(assets at: #Tractor) cost: anAmount negated + (assets at: #Tractor) cost.
-			self allocateTractorLease: anAmount negated.
-			mgr triggerEvent: #itemChange.
-			anAmount]! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 12/7/2011 16:16'!
 offFarm
@@ -6370,46 +5864,6 @@ offFarm: anObject
 	"Set the value of offFarm"
 
 	offFarm := anObject! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:02:25'!
-oilLease: aParm 
-	"Allocate lease payment of aParm per acre from oil company"
-	| acres qty delta |
-
-	acres _ 0.
-	assets do: [:a | 
-		(a class inheritsFrom: Crop)
-			ifTrue: [
-				qty _ ((a class inheritsFrom: Fruit) or: [a class inheritsFrom: Grain])
-					ifTrue: [a quantity // 2]
-					ifFalse: [a quantity].
-				delta _ aParm * qty.
-				a gross: delta + a gross.
-				acres _ acres + qty]].
-	mgr triggerEvent: #itemChange.
-
-	self tally: aParm * acres! !
-
-!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 11:56:30'!
-optionDescription: aString 
-	"Report the effect of buying the option named aString"
-	| cost down asset |
-	
-	asset _ self assets at: aString.
-	cost _ Compiler evaluate: aString , ' optionCost'.
-	down _ cost * 0.2.
-	^ String new writeStream
-		nextPutAll: (Compiler evaluate: aString , ' optionText'); newLine;
-		nextPutAll: 'You have ';
-		nextPutAll: asset quantity asString; 
-		nextPutAll: asset units; 
-		nextPut: $.; newLine; newLine;
-		nextPutAll: 'Exercising this option requires $';
-		nextPutAll: down asInteger printStringWithCommas;
-		nextPutAll: ' cash'; newLine;
-		nextPutAll: 'and a loan for $';
-		nextPutAll: (cost - down) asInteger printStringWithCommas;
-		contents! !
 
 !Farmer methodsFor: 'accessing' stamp: 'dhn 9/10/2011 13:04'!
 options
@@ -6503,6 +5957,356 @@ reportYourself
 		newLine;
 		contents! !
 
+!Farmer methodsFor: 'accessing' stamp: 'dhn 8/31/2017 16:57:40'!
+updateHistory
+	"Change current history"
+	
+	history at: history size put: self netAssets! !
+
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:18:14'!
+allocateFruitCost: anAmount
+	"Allocate anAmount cost for fruit"
+	| f1 f2 amt |
+
+	amt _ anAmount // 2.
+	f1 _ assets at: #Cherries.
+	f1 quantity > 0
+		ifTrue: [
+			f1 cost: amt + f1 cost.
+			self  tally: amt negated].
+	f2 _ assets at: #Apples.
+	f2 quantity > 0
+		ifTrue: [
+			f2 cost: amt + f2 cost.
+			self  tally: amt negated].
+	mgr triggerEvent: #itemChange
+! !
+
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 14:53:41'!
+allocateHarvesterLease: anAmount 
+	"When a player incurs anAmount for not owning a harvester, parcel
+	anAmount out to those who do."
+	| col |
+
+	col _ self mgr players select: [:pl | pl ifHarvester].
+	col do: [:pl | 
+		| machine |
+		machine _ pl assets at: #Harvester.
+		machine gross: machine gross + (anAmount // col size).
+		pl tally: anAmount // col size]! !
+
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/25/2017 14:48:43'!
+allocateTractorLease: anAmount 
+	"When a player incurs anAmount for not owning a tractor, parcel
+	anAmount out to those who do."
+	| col |
+
+	col _ self mgr players select: [:pl | pl ifTractor].
+	col do: [:pl | 
+		| machine |
+		machine _ pl assets at: #Tractor.
+		machine gross: machine gross + (anAmount // col size).
+		pl tally: anAmount // col size]! !
+
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:13:51'!
+boostWheat: anAmount
+	"Account for a boost of anAmount in wheat income"
+
+	(assets at: #Wheat) gross: anAmount + (assets at: #Wheat) gross.
+	self tally: anAmount.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/19/2017 16:02:02'!
+buyAsset: aString for: aNumber 
+	| lot subs |
+	self tally: aNumber negated.
+	subs := (Smalltalk at: aString asSymbol) subclasses.
+	subs isEmpty
+		ifTrue: [lot := assets at: aString.
+			lot cost: lot cost + aNumber.
+			lot quantity: lot quantity + lot class auctionQuantity]
+		ifFalse: [subs
+				do: [:each | |n|
+					n := assets at: each name asString.
+					n cost: n cost + aNumber / subs size.
+					n quantity: n quantity + each auctionQuantity]]! !
+
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/19/2017 16:02:22'!
+buyOption: aName for: aNumber 
+	self tally: aNumber negated.
+	self options addFirst: aName.
+! !
+
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:28:00'!
+feedBill: anAmount 
+	"Account for a feed bill of anAmount per cow"
+	| penalty total |
+
+	total _ 0.
+	assets do: [:ea | 
+		(ea class inheritsFrom: Livestock)
+			ifTrue: [total _ total + ea quantity]].
+	^ total > 0
+		ifTrue: [
+			penalty _ anAmount * total.
+			self tally: penalty.
+			mgr triggerEvent: #itemChange.
+			penalty]
+		ifFalse: [0]! !
+
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 11:28:59'!
+fertilizer: aRate
+	"Account for fertilizer at aRate per acre" 
+	| p1 p2 p3 p4 p5 |
+
+	p1 _ aRate * (assets at: #Hay) quantity.
+	(assets at: #Hay) cost: p1 negated + (assets at: #Hay) cost.
+	p2 _ aRate * (assets at: #Wheat) quantity.
+	(assets at: #Wheat) cost: p2 negated / 2 + (assets at: #Wheat) cost.
+	p3 _ aRate * (assets at: #Wheat) quantity.
+	(assets at: #Corn) cost: p3 negated / 2 + (assets at: #Corn) cost.
+	p4 _ aRate * (assets at: #Cherries) quantity.
+	(assets at: #Cherries) cost: p4 negated / 2 + (assets at: #Cherries) cost.
+	p5 _ aRate * (assets at: #Cherries) quantity.
+	(assets at: #Apples) cost: p5 negated / 2 + (assets at: #Apples) cost.
+	self tally: (p1 + p2 + p3 + p4 + p5).
+	mgr triggerEvent: #itemChange.
+	^ 0 	"no further cost allocation is needed" ! !
+
+!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 12:08:22'!
+wireWorms: aRate
+	"Account for grain damage of aRate per acre" 
+	| p1 p2 ttl |
+
+	p1 _ aRate * (assets at: #Wheat) quantity // 2.
+	(assets at: #Wheat) cost: p1 negated + (assets at: #Wheat) cost.
+	p2 _ aRate * (assets at: #Corn) quantity // 2.
+	(assets at: #Corn) cost: p2 negated + (assets at: #Corn) cost.
+	self tally: (ttl _ p1 + p2).
+	mgr triggerEvent: #itemChange.
+	^ ttl! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:09:57'!
+bumpWheat: aRate 
+	"Change the rate for harvesting wheat by aRate per acre"
+
+	(assets at: #Wheat) rate: aRate + (assets at: #Wheat) rate.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:19:52'!
+doubleCorn
+	"Increase the factor for harvesting corn"
+
+	(assets at: #Corn) factor: 2 * (assets at: #Corn) factor.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:20:52'!
+doubleCorn: anObject 
+self halt: 'how did we get here?'.
+	(assets at: #Corn)
+		factor: 2 * (assets at: #Corn) factor! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:02:58'!
+doubleHay
+	"Increase the factor for hay"
+
+	(assets at: #Hay) factor: 2 * (assets at: #Hay) factor.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:21:23'!
+doubleHay: anObject 
+self halt: 'how did we get here?'.
+	(assets at: #Hay)
+		factor: 2 * (assets at: #Hay) factor! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 8/31/2017 15:32:48'!
+doubledString
+	"Answer the string signifying whether the market is doubled for the receiver"
+	| mkt |
+	
+	mkt _ (mgr seasonAt: self position) desc asSymbol.
+	markets
+		ifNil: [^ '']
+		ifNotNil: [^ (markets at: mkt ifAbsent: [^ '']) > 1 ifTrue: ['(doubled)'] ifFalse:['']]! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:25:54'!
+emergencyLoan
+	"Account for an emergency loan"
+	| loan str |
+
+	str _ String new writeStream.
+	str nextPutAll: self identity;
+		nextPutAll: ' is out of money.'; newLine;
+		nextPutAll: self identity;
+		nextPutAll: ' will receive $4,000 cash and a bank note for $5,000.'.
+	GamePopUp inform: str contents title: 'Emergency Loan'.
+	loan _ 5000 negated.
+	self debt: loan + self debt.
+	self interestPd: 1000 + self interestPd.
+	self paidInterest: 1 + self paidInterest.
+	self emergencies: 1 + self emergencies.
+	mgr triggerEvent: #itemChange.
+	^ (loan + 1000) negated! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/19/2017 16:07:54'!
+goBackToJan2
+	"Move the token back to Jan 2"
+	
+	GamePopUp inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
+	self mgr token jan2MoveFrom: position! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 10/10/2017 11:38:40'!
+goDirectly: aPosition 
+	"Move backward to Jan 2"
+
+	self goBackToJan2.
+	self mgr disableAll: {'Move'. 'Expense'. 'Fate'. 'Harvest'}! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:30:50'!
+halveCherries: aRate 
+	"Reduce cherry harvest by aRate"
+
+	(assets at: #Cherries) factor: aRate * (assets at: #Cherries) factor.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:37:18'!
+halveCows
+	"Adjust the factor for harvesting cattle"
+
+	assets do: [:each | 
+		(each class inheritsFrom: Livestock)
+			ifTrue: [each factor: 0.5 * each factor]].
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 10:03:03'!
+halveHay
+	"Change the factor for hay"
+
+	(assets at: #Hay) factor: 0.5 * (assets at: #Hay) factor.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:38:07'!
+halveHay: anObject 
+self halt: 'how did we get here?'.
+	(assets at: #Hay)
+		factor: 0.5 * (assets at: #Hay) factor! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/20/2017 13:04:06'!
+harvest: anAsset 
+	"Answer the result of harvesting anAsset"
+	| bone |
+
+	harvesting _ anAsset.
+	bone _ DieMorph new openInWorld: mgr world.
+	bone model: mgr.
+	self die: bone.
+	bone adjustTo: mgr token.
+	bone showEffect: bone class faces shuffled! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/20/2017 18:26:37'!
+harvest: anAsset then: aSymbol
+	"Answer the result of harvesting anAsset"
+	| bone |
+
+	harvesting _ anAsset.
+	bone _ DieMorph new openInWorld: mgr world.
+	bone model: mgr.
+	self die: bone.
+	bone adjustTo: mgr token.
+	bone showEffect: bone class faces shuffled then: aSymbol! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:39:54'!
+hasFruit
+self halt: 'how did we get here?'.
+	self ifFruit
+		ifTrue: [self tally: 500 negated.
+			(assets at: #Cherries)
+				cost: 250 + (assets at: #Cherries) cost.
+			(assets at: #Apples)
+				cost: 250 + (assets at: #Apples) cost.
+			^ true].
+	^ false! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:40'!
+hasHarvester
+	self ifHarvester
+		ifTrue: [self tally: 1000.
+			(assets at: #Harvester)
+				gross: 1000 + (assets at: #Harvester) gross.
+			^ true].
+	^ false! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:57'!
+ifCows
+	| q1 q2 |
+	q1 := self cowsOnLeases.
+	q2 := (assets at: #CattleOnFarm) quantity.
+	^ 0
+		< (q1
+				inject: q2
+				into: [:a :b | a + b])! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 10:16:35'!
+ifCows: anAmount 
+	"Account for veterinary expense of anAmount"
+	| total |
+
+	total _ 0.
+	assets do: [:ea | 
+		(ea class inheritsFrom: Livestock)
+			ifTrue: [total _ total + ea quantity]].
+	^ total > 0
+		ifTrue: [
+			self tally: anAmount.
+			anAmount]
+		ifFalse: [0]! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:57'!
+ifFruit
+	^ 0 < (assets at: #Cherries) quantity! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:58'!
+ifHarvester
+	^ 0 < (assets at: #Harvester) quantity! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:46:28'!
+ifHarvester: anAmount 
+self halt: 'how did we get here?'.
+	self IfHarvester
+		ifTrue: [self tally: anAmount.
+			(assets at: #Harvester)
+				gross: anAmount + (assets at: #Harvester) gross]! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 1/15/2014 17:58'!
+ifTractor
+	^ 0 < (assets at: #Tractor) quantity! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:47:55'!
+interest: aRate
+	"Answer the amount of interest = debt * aRate"
+	| int |
+	
+	0 > self debt
+		ifTrue: [
+			int _ (aRate * self debt negated) roundTo:  1.
+			self tally: int negated.
+			self paidInterest: 1 + self paidInterest.
+			self interestPd: int + self interestPd]
+		ifFalse: [
+			int _ 0.
+			self avoidedDebt: 1 + self avoidedDebt].
+	mgr triggerEvent: #itemChange.
+	^ int negated! !
+
+!Farmer methodsFor: 'space-related' stamp: 'dhn 9/26/2017 11:56:25'!
+missedCattleHarvest
+	"Record that a harvest was missed for livestock assets"
+
+	assets do: [:each | 
+		(each class inheritsFrom: Livestock)
+			ifTrue: [each missed: each missed + 1]].
+	mgr triggerEvent: #itemChanged! !
+
 !Farmer methodsFor: 'space-related' stamp: 'dhn 11/30/2014 15:24'!
 reset
 	garnish := false.
@@ -6524,60 +6328,6 @@ salary
 	self triggerEvent: #itemChange
 ! !
 
-!Farmer methodsFor: 'income-related' stamp: 'dhn 9/26/2017 12:04:18'!
-sellAsset: aString for: aNumber
-	"Record the sale of the asset named aString at aNumber price"
-	| lot subs |
-
-	self tally: aNumber.
-	subs _ (assets at: aString) class subclasses.
-	self halt.
-	subs isEmpty
-		ifTrue: [
-			lot _ assets at: aString.
-			lot gross: lot gross + aNumber.
-			lot quantity: lot quantity - lot class auctionQuantity]
-		ifFalse: [subs
-				do: [:each | 
-					| n |
-					n _ assets at: each name asString.
-					n gross: n gross + aNumber / subs size.
-					n quantity: n quantity - each auctionQuantity]].
-	mgr triggerEvent: #itemChange! !
-
-!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:01:25'!
-sellOption: aName for: aNumber 
-	self tally: aNumber.
-	^ self removeOptionAt: aName! !
-
-!Farmer methodsFor: 'initialize-release' stamp: 'dhn 9/17/2017 20:37:27'!
-setUpAssets
-	"Answer the assets, current and future, of the receiver"
-
-	^ Dictionary new
-		at: #Hay put: (Hay new quantity: 10; cost: 20000; owner: self);
-		at: #Wheat put: ( Wheat new quantity: 10; cost: 10000; owner: self);
-		at: #Corn put: (Corn new quantity: 10; cost: 10000; owner: self);
-		at: #Cherries put: (Cherries new owner: self);
-		at: #Apples put: (Apples new owner: self);
-		at: #CattleOnFarm put: (CattleOnFarm new owner: self);
-		at: #Ahtanum put: (Ahtanum new owner: self);
-		at: #Rattlesnake put: (Rattlesnake new owner: self);
-		at: #Cascade put: (Cascade new owner: self);
-		at: #Toppenish put: (Toppenish new owner: self);
-		at: #Tractor put: (Tractor new owner: self);
-		at: #Harvester put: (Harvester new owner: self);
-		yourself
-	! !
-
-!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:05:20'!
-slaughterCows: aParm
-	"Slaughter all livestock at farm"
-
-	(assets at: #CattleOnFarm) quantity: 0.
-	mgr triggerEvent: #itemChange
-! !
-
 !Farmer methodsFor: 'space-related' stamp: 'dhn 9/1/2017 09:44:03'!
 spaceEffect
 	"Answer the value of spaceEffect"
@@ -6589,6 +6339,196 @@ spaceEffect: anObject
 	"Set the value of spaceEffect"
 	
 	spaceEffect _ anObject
+! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:15:36'!
+calfWeights: aParm
+	"Record the effect of aParm increase in livestock income over the next 2 years"
+	| eachHerd |
+
+	eachHerd _ assets select: [:ea | ea class inheritsFrom: Livestock].
+	eachHerd do: [:each | 
+		each factor: aParm.
+		"yearCount increased by 3 so that factor will be in effect for the NEXT 2 years"
+		each yearCount: 3 + each yearCount].
+	mgr triggerEvent: #itemChange
+! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:17:14'!
+customHire: anAmount 
+	"Collect anAmount from each player who does not have a harvester"
+	| cnt ttl |
+
+	(assets at: #Harvester) quantity > 0
+		ifFalse: [^ nil].
+	cnt _ 0.
+	mgr players
+		do: [:pl | 
+			pl ~= self
+				ifTrue: [
+					(pl assets at: #Harvester) quantity = 0
+						ifTrue: [
+							cnt _ cnt + 1.
+							pl tally: anAmount negated.
+							(pl assets at: #Harvester)
+								cost: (pl assets at: #Harvester) cost + anAmount]]].
+	ttl _ anAmount * cnt.
+	self tally: ttl.
+	(assets at: #Harvester) gross: (assets at: #Harvester) gross + ttl.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:55:58'!
+cutworms: anAmount 
+	"Allocate anAmount per acre for cutworm damage"
+	| a1 a2 |
+
+	a1 _ anAmount * (assets at: #Cherries) quantity // 2.
+	a2 _ anAmount * (assets at: #Apples) quantity // 2.
+	self allocateFruitCost: a1 + a2! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:18:43'!
+disasterPmt: aParm 
+	"Allocate a disaster payment of aParm per acre for grain"
+	| amt |
+
+	amt _ (assets at: #Wheat) quantity * aParm.
+
+	(assets at: #Wheat) gross: amt / 2 + (assets at: #Wheat) gross.
+	(assets at: #Corn) gross: amt / 2 + (assets at: #Corn) gross.
+
+	self tally: amt.
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 10/6/2011 20:31'!
+drawExpense: anObject
+	^self mgr drawExpense! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:42:11'!
+heldCalves: anAmount 
+	"Allocate anAmount for holding some calves"
+	| q1 q2 eachHerd headCount portion ix |
+
+	q1 _ self cowsOnLeases.
+	q2 _ (assets at: #CattleOnFarm) quantity.
+	headCount _ q1 inject: q2 into: [:a :b | a + b].
+	headCount > 0
+		ifTrue: [self tally: anAmount.
+			eachHerd _ self leasesHeld add: #CattleOnFarm
+							-> (assets at: #CattleOnFarm);
+						 yourself.
+			portion _ anAmount * ((q1 asOrderedCollection add: q2;
+							 yourself) / headCount).
+			ix _ 0.
+			eachHerd
+				do: [:each | each gross: each gross
+							+ (portion at: (ix _ ix + 1))]].
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:43:07'!
+helens: anObject 
+	"Account for Natural Disaster"
+	| rolls r amt |
+
+	amt _ 500 * (assets at: #Hay) quantity.
+	self tally: amt.
+	(assets at: #Hay) gross: amt + (assets at: #Hay) gross.
+	rolls _ OrderedCollection new.
+	self mgr players
+		do: [:pl | 
+			pl ~= self
+				ifTrue: [
+					r _ (1 to: 2) atRandom.
+					rolls addLast: r.
+					"to facilitate testing"
+					r = 1
+						ifTrue: [
+							amt _ 100 * (pl assets at: #Hay) quantity.
+							pl tally: amt negated.
+							(pl assets at: #Hay) cost: (pl assets at: #Hay) cost + amt]]].
+	mgr triggerEvent: #itemChange.
+	^ rolls! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:43:23'!
+horseHay: anAmount 
+	"Receive anAmount per acre for horse hay"
+	| qty gross |
+
+	qty _ (assets at: #Hay) quantity.
+	0 < qty
+		ifTrue: [
+			gross _ anAmount * qty.
+			self tally: gross.
+			(assets at: #Hay) gross: gross + (assets at: #Hay) gross].
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 15:12:33'!
+maggotFly: anAmount 
+	"Allocate anAmount per fruit acre for maggot fly"
+	| q1 q2 c1 c2 |
+
+	q1 _ (assets at: #Cherries) quantity // 2.
+	q2 _ (assets at: #Apples) quantity // 2.
+	c1 _ anAmount * q1.
+	c2 _ anAmount * q2.
+	self allocateFruitCost: c1 + c2! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 11:59:48'!
+noHarvester: anAmount 
+	"Account for whether a player owns a harvester"
+
+	^ 0 < (assets at: #Harvester) quantity
+		ifTrue: [
+			(assets at: #Harvester) costAvoided: anAmount negated + (assets at: #Harvester) costAvoided.
+			mgr triggerEvent: #itemChange.
+			0]
+		ifFalse: [
+			self tally: anAmount.
+			(assets at: #Harvester) cost: anAmount negated + (assets at: #Harvester) cost.
+			self allocateHarvesterLease: anAmount negated.
+			mgr triggerEvent: #itemChange.
+			anAmount]! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:00:25'!
+noTractor: anAmount 
+	"Account for whether the receiver has a tractor"
+	
+	^ 0 < (assets at: #Tractor) quantity
+		ifTrue: [
+			(assets at: #Tractor) costAvoided: anAmount negated + (assets at: #Tractor) costAvoided.
+			mgr triggerEvent: #itemChange.
+			0]
+		ifFalse: [
+			self tally: anAmount.
+			(assets at: #Tractor) cost: anAmount negated + (assets at: #Tractor) cost.
+			self allocateTractorLease: anAmount negated.
+			mgr triggerEvent: #itemChange.
+			anAmount]! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:02:25'!
+oilLease: aParm 
+	"Allocate lease payment of aParm per acre from oil company"
+	| acres qty delta |
+
+	acres _ 0.
+	assets do: [:a | 
+		(a class inheritsFrom: Crop)
+			ifTrue: [
+				qty _ ((a class inheritsFrom: Fruit) or: [a class inheritsFrom: Grain])
+					ifTrue: [a quantity // 2]
+					ifFalse: [a quantity].
+				delta _ aParm * qty.
+				a gross: delta + a gross.
+				acres _ acres + qty]].
+	mgr triggerEvent: #itemChange.
+
+	self tally: aParm * acres! !
+
+!Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:05:20'!
+slaughterCows: aParm
+	"Slaughter all livestock at farm"
+
+	(assets at: #CattleOnFarm) quantity: 0.
+	mgr triggerEvent: #itemChange
 ! !
 
 !Farmer methodsFor: 'fate-related' stamp: 'dhn 9/25/2017 16:19:19'!
@@ -6617,12 +6557,6 @@ Do you want to inherit?')
 			mgr triggerEvent: #itemChange].
 ! !
 
-!Farmer methodsFor: 'accessing' stamp: 'dhn 8/31/2017 16:57:40'!
-updateHistory
-	"Change current history"
-	
-	history at: history size put: self netAssets! !
-
 !Farmer methodsFor: 'fate-related' stamp: 'dhn 9/26/2017 12:07:50'!
 wheatWeeds: aParm 
 	"Reduce wheat yield by aParm"
@@ -6631,18 +6565,131 @@ wheatWeeds: aParm
 	mgr triggerEvent: #itemChange
 ! !
 
-!Farmer methodsFor: 'expense-related' stamp: 'dhn 9/26/2017 12:08:22'!
-wireWorms: aRate
-	"Account for grain damage of aRate per acre" 
-	| p1 p2 ttl |
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:02:55'!
+garnishSpiel
+	GamePopUp inform: 'The IRS is garnishing your income.' title: 'Loss of Income'.
+! !
 
-	p1 _ aRate * (assets at: #Wheat) quantity // 2.
-	(assets at: #Wheat) cost: p1 negated + (assets at: #Wheat) cost.
-	p2 _ aRate * (assets at: #Corn) quantity // 2.
-	(assets at: #Corn) cost: p2 negated + (assets at: #Corn) cost.
-	self tally: (ttl _ p1 + p2).
-	mgr triggerEvent: #itemChange.
-	^ ttl! !
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:03:43'!
+harvestEnabled
+	"Answer true if player has not previosly harvested this season and 	owns the asset."
+	| season asset caseA caseB sum |
+	
+	season _ self mgr seasonAt: self position.
+	
+	caseA _ season desc = 'WINTER'
+		ifTrue: [^ false]
+		ifFalse: [(harvests detect: [:ea | ea desc = season desc] ifNone: [self halt]) enabled].
+		
+	caseB _ true.
+	season assetName
+		ifNotNil: [:name | 
+			asset _ assets
+						at: name
+						ifAbsent: [
+							assets values
+								select: [:ea | ea class inheritsFrom: (Smalltalk at: name asSymbol)]].
+			(asset class inheritsFrom: Collection)
+				ifTrue: [sum _ 0.
+					asset
+						do: [:ea | sum _ sum + ea quantity].
+					caseB _ 0 < sum]
+				ifFalse: [caseB _ 0 < asset quantity]].
+			
+	^ caseA and: caseB! !
+
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:04:13'!
+harvested
+	"Indicate that the player has harvested this season."
+	| sea |
+	sea := harvests detect: [:ea | ea desc = (self mgr seasonAt: self position) desc] 
+		ifNone: [self halt].
+	sea enabled: false! !
+
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/20/2017 13:17:01'!
+harvesting
+	"Answer the value of harvesting"
+
+	^ harvesting! !
+
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/26/2017 12:04:18'!
+sellAsset: aString for: aNumber
+	"Record the sale of the asset named aString at aNumber price"
+	| lot subs |
+
+	self tally: aNumber.
+	subs _ (assets at: aString) class subclasses.
+	self halt.
+	subs isEmpty
+		ifTrue: [
+			lot _ assets at: aString.
+			lot gross: lot gross + aNumber.
+			lot quantity: lot quantity - lot class auctionQuantity]
+		ifFalse: [subs
+				do: [:each | 
+					| n |
+					n _ assets at: each name asString.
+					n gross: n gross + aNumber / subs size.
+					n quantity: n quantity - each auctionQuantity]].
+	mgr triggerEvent: #itemChange! !
+
+!Farmer methodsFor: 'income-related' stamp: 'dhn 9/19/2017 16:01:25'!
+sellOption: aName for: aNumber 
+	self tally: aNumber.
+	^ self removeOptionAt: aName! !
+
+!Farmer methodsFor: 'initialize-release' stamp: 'dhn 8/31/2017 17:23:55'!
+initialize
+
+	FarmerTest isNil
+		ifFalse: [identity _ FarmerTest].
+	cash _ 5000.
+	debt _ 5000 negated.
+	assets _ self setUpAssets.
+	harvests _ Farm season copy.
+	options _ OrderedCollection new.
+	history _ OrderedCollection with: self netAssets! !
+
+!Farmer methodsFor: 'initialize-release' stamp: 'dhn 9/17/2017 20:37:27'!
+setUpAssets
+	"Answer the assets, current and future, of the receiver"
+
+	^ Dictionary new
+		at: #Hay put: (Hay new quantity: 10; cost: 20000; owner: self);
+		at: #Wheat put: ( Wheat new quantity: 10; cost: 10000; owner: self);
+		at: #Corn put: (Corn new quantity: 10; cost: 10000; owner: self);
+		at: #Cherries put: (Cherries new owner: self);
+		at: #Apples put: (Apples new owner: self);
+		at: #CattleOnFarm put: (CattleOnFarm new owner: self);
+		at: #Ahtanum put: (Ahtanum new owner: self);
+		at: #Rattlesnake put: (Rattlesnake new owner: self);
+		at: #Cascade put: (Cascade new owner: self);
+		at: #Toppenish put: (Toppenish new owner: self);
+		at: #Tractor put: (Tractor new owner: self);
+		at: #Harvester put: (Harvester new owner: self);
+		yourself
+	! !
+
+!Farmer methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 11:56:30'!
+optionDescription: aString 
+	"Report the effect of buying the option named aString"
+	| cost down asset |
+	
+	asset _ self assets at: aString.
+	cost _ Compiler evaluate: aString , ' optionCost'.
+	down _ cost * 0.2.
+	^ String new writeStream
+		nextPutAll: (Compiler evaluate: aString , ' optionText'); newLine;
+		nextPutAll: 'You have ';
+		nextPutAll: asset quantity asString; 
+		nextPutAll: asset units; 
+		nextPut: $.; newLine; newLine;
+		nextPutAll: 'Exercising this option requires $';
+		nextPutAll: down asInteger printStringWithCommas;
+		nextPutAll: ' cash'; newLine;
+		nextPutAll: 'and a loan for $';
+		nextPutAll: (cost - down) asInteger printStringWithCommas;
+		contents! !
 
 !Farmer class methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 11:13'!
 called: aName
@@ -6689,6 +6736,16 @@ describeMarket
 	"Answer a string containing the market name"
 	^ label, Character newLine	! !
 
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:26:00'!
+heading: string1 with: string2
+	"Set the heading to string1, newLine, string2"
+	| str |
+	
+	str := String new writeStream.
+	str nextPutAll: string1; newLine;
+		nextPutAll: string2.
+	self heading: str contents! !
+
 !Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
 description
 	"Answer the description for the cell of this site"
@@ -6712,16 +6769,6 @@ heading
 heading: anObject
 	"Set the short heading describing this site"
 	heading := anObject! !
-
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:26:00'!
-heading: string1 with: string2
-	"Set the heading to string1, newLine, string2"
-	| str |
-	
-	str := String new writeStream.
-	str nextPutAll: string1; newLine;
-		nextPutAll: string2.
-	self heading: str contents! !
 
 !Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:54:42'!
 label
