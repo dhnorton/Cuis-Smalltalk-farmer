@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:31:30 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:39:56 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 17!
+!provides: 'Farm' 1 18!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -3584,18 +3584,18 @@ assetAuctionItem: anObject
 		self beginButton: enab.
 		self changed: #assetAuctionItem]! !
 
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 12:07:07'!
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/28/2018 20:34:27'!
 assetAuctionList
 	"Answer a list for the asset auction window"
 	
-	^ player
-		ifNotNil: [player auctionable]
+	^ seller
+		ifNotNil: [seller auctionable]
 		ifNil: [OrderedCollection new]! !
 
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/9/2017 17:53:58'!
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/28/2018 20:35:09'!
 assetSold
 	"Record the sale; enable End button"
-	| seller purchase recipient |
+	| purchase recipient |
 	
 	cancelButton disableButton.
 	endButton enableButton.
@@ -3727,12 +3727,12 @@ buildMorphicWindow
 		addMorph: self setUpMidRow;
 		addMorph: (buyers _ self setUpBuyers)! !
 
-!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 9/15/2017 22:03:39'!
+!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 8/28/2018 20:38:28'!
 setUpMidRow
 	"Answer the layout for the middle row of the Job Auction window"
-	| row leftPane headingArea |
+	| listMorph row leftPane headingArea |
 	
-	list _ (PluggableListMorph
+	listMorph _ (PluggableListMorph
 		model: self
 		listGetter: #assetAuctionList
 		indexGetter: #assetAuctionItem
@@ -3762,7 +3762,7 @@ setUpMidRow
 	leftPane _ (LayoutMorph newColumn)
 		name: 'left pane';
 		addMorph: headingArea;
-		addMorph: list.
+		addMorph: listMorph.
 
 	textPane _ (TextModelMorph
 		withModel: (TextModel withText: '')) 	"note the different model specification"
