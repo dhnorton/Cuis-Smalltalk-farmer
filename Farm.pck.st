@@ -1,10 +1,20 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 7:54:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:03:18 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 9!
+!provides: 'Farm' 1 10!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
 
+
+!classDefinition: #FarmingGame category: #'Farm-Graphics'!
+GameBoard subclass: #FarmingGame
+	instanceVariableNames: 'seasons namesCache numbersArea othersArea seasonsArea'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'FarmingGame class' category: #'Farm-Graphics'!
+FarmingGame class
+	instanceVariableNames: ''!
 
 !classDefinition: #FarmingView category: #'Farm-Graphics'!
 SystemWindow subclass: #FarmingView
@@ -386,16 +396,17 @@ ProtoObject subclass: #FarmToken
 FarmToken class
 	instanceVariableNames: ''!
 
-!classDefinition: #FarmingGame category: #'Farm-Graphics'!
-ProtoObject subclass: #FarmingGame
-	instanceVariableNames: 'seasons namesCache numbersArea othersArea seasonsArea'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'FarmingGame class' category: #'Farm-Graphics'!
-FarmingGame class
-	instanceVariableNames: ''!
 
+!FarmingGame commentStamp: '<historical>' prior: 0!
+Manage the visual effects of the Farming Game.
+
+Start the game from the New morph... window or in a workspace do:
+
+	FarmingGame start.
+
+http://farmgame.com/product/woo-single-2/
+
+!
 
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
@@ -494,16 +505,761 @@ A button which can have its action selector changed.!
 !FarmToken commentStamp: '<historical>' prior: 0!
 The game piece for a farmer - a player in the Farming Game.!
 
-!FarmingGame commentStamp: '<historical>' prior: 0!
-Manage the visual effects of the Farming Game.
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 10/9/2017 18:00:30'!
+buildMorphicWindow
 
-Start the game from the New morph... window or in a workspace do:
+	pasteup _ PasteUpMorph new
+		name: #pasteup;
+		color: Color transparent.
+		
+	layoutMorph addMorph: pasteup layoutSpec: LayoutSpec useAll.
+	board _ LayoutMorph newColumn name: #board.
+	board color:  (Color r: 0.986 g: 0.986 b: 0.986).
+	pasteup addMorph: board.
+	model world: pasteup.
+	FarmTheme beCurrent.
+	Theme current model: model.
+	
+	model when: #quitGame send: #delete to: self.
+	model when: #itemChange send: #displayNumbers to: self.
+	model when: #titleChange send: #titleChange: to: self with: #player.
+	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
+	model when: #showToken send: #showToken to: self.
+	model when: #showSeasons: send: #showSeasons: to: self with: #index.
+	model when: #showDraw send: #showDraw: to: self with: #option.
+	model when: #optionDrawn send: #checkEnd to: self.
+	model when: #showAssets send: #showAssets to: self.
+	model when: #showYourself send: #showYourself to: self.
+	model when: #showEverybody send: #showEverybody to: self.
+	model when: #showAuctionAssets send: #showAuctionAssets to: self.
+	model when: #showAuctionOptions send: #showAuctionOptions to: self.
+! !
 
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
+getPlayers
+	"Get the names of two to six players"
+	| x y cnt clrs |
+
+	model disableAll: {'Players'. 'Tour'}.
+	clrs _ Token colors shuffled.
+	cnt _ 0.
+	x _ FillInTheBlankMorph request: 'First player''s name?' initialAnswer: ''.
+	x 
+		ifEmpty: [
+			model enableAll: {'Players'. 'Tour'}.
+			^ nil]
+		ifNotEmpty: [
+			cnt _ cnt + 1.
+			model setupPlayer: x color: (clrs at: cnt)].
+	
+	[cnt < 6] whileTrue: [
+		y _ FillInTheBlankMorph request: 'Next player''s name?' initialAnswer: ''.
+		y
+			ifEmpty: [
+				cnt > 1 
+					ifTrue: [self startGame]
+					ifFalse: [
+						model players: OrderedCollection new.
+						model enableAll: {'Players'. 'Tour'}].
+				^ nil]
+			ifNotEmpty: [
+				cnt _ cnt + 1.
+				model setupPlayer: y color: (clrs at: cnt)]].
+		
+	self startGame
+! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:28:09'!
+initialize
+
+	super initialize! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:38:25'!
+layoutSubmorphs
+
+    super layoutSubmorphs.
+    self board morphExtent: self board owner morphExtent! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:23'!
+makeAddPlayerButton
+	"Answer the 'Players' button"
+
+	^ (FarmButton label: 'Players' action: #getPlayers state: true model: self)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Use this button to enter names of two to six players;
+entering an empty name or cancel will start the game'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:43'!
+makeAuctionButton
+	"Answer the 'Auction' button"
+
+	^ (FarmButton label: 'Auction' action: #doAuction state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Auction options and equipment'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:29:09'!
+makeButtonArea
+	"Lay out the area for buttons"
+	
+	buttonArea _ (LayoutMorph newRow separation: 5)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	buttonArea
+			color: Color transparent;
+			name: #buttons;
+			padding: #center.
+			
+	board addMorph: buttonArea.
+	
+	^ buttonArea
+		! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/7/2017 14:49:58'!
+makeBuyOptionButton
+	"Answer the 'Option' button"
+
+	^ (GameButtonMorph label: 'Purchase' action: #showOpts state: true model: self)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'See what options you have and make purchases during WINTER.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 18:49:08'!
+makeCellsArea
+	"Lay out the area which shows some spaces of the board"
+	| cellArea view mm mt |
+	
+	cellArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 1.0
+			minorDirectionPadding: #center);
+		name: #'cell area'.
+	
+	1 to: model class cellsForGame do: [:ix |
+		view _ (CellView newColumn
+			layoutSpec: (LayoutSpec proportionalWidth: 1 / model class cellsForGame);
+			name: #cell).
+		view addMorph: (mt _ (GameCell 
+			textProvider: self
+			textGetter: #describe)
+				layoutSpec: (LayoutSpec proportionalWidth: 1.0);
+				color: self class cellColor;
+				borderWidth: 1;
+				name: 'cell text').
+		view addMorph: (mm _ (LayoutMorph newRow separation: 4)
+			layoutSpec: (LayoutSpec 
+				proportionalWidth: 1.0
+				fixedHeight: 20
+				minorDirectionPadding: #center);
+			color: self class cellColor;
+			padding: #center;
+			name: #marks).
+		view 
+			marksPane: mm;
+			textPane: mt.
+		model cells add: view].
+		
+	^ cellArea addAllMorphs: model cells reversed
+		
+! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:15'!
+makeDrawFateButton
+	"Answer the 'Fate' button"
+
+	^ (FarmButton label: 'Fate' action: #drawFate state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Determine your Farmer''s Fate.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:28'!
+makeEndTurnButton
+	"Answer the 'End Turn' button"
+
+	^ (FarmButton label: 'End Turn' action: #endTurn state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:40'!
+makeHarvestButton
+	"Answer the 'Harvest' button"
+
+	^ (FarmButton label: 'Harvest' action: #harvest state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Harvest the crop for the season indicated above the space.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:53'!
+makeMoveButton
+	"Answer the 'Move' button"
+
+	^ (FarmButton label: 'Move' action: #move state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:31:59'!
+makeNumbersArea
+	"Lay out the area for player cash on hand"
+	
+	numbersArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	numbersArea
+			color: Color transparent;
+			name: #numbers;
+			padding: #center.
+			
+	^ numbersArea addMorph: ((StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 22))
+		! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:32:44'!
+makeOthersArea
+	"Lay out the area for player cash on hand"
+	
+	othersArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	^ othersArea
+		color: Color transparent;
+		name: #others;
+		padding: #center! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:07'!
+makePayExpenseButton
+	"Answer the 'Expense' button"
+
+	^ (FarmButton label: 'Expense' action: #payExpense state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Pay the farming expenses which are owed.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/7/2017 13:59:47'!
+makePayLoanButton
+	"Answer the 'Pay Loan' button"
+
+	^ (FarmButton label: 'Pay Loan' action: #showLoan state: true model: self)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Transfer cash to pay off some debt.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:41'!
+makeQuitGameButton
+	"Answer the 'Quit' button"
+	
+	^ (FarmButton label: 'Quit' action: #quitGame state: true model: self)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Completely ends the game. Nothing is saved.';
+		color: (Color orange alpha: 0.9)! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:33:14'!
+makeSeasonsArea
+	"Lay out the area for seasons"
+	
+	seasonsArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.08
+			minorDirectionPadding: #center).
+	^ seasonsArea
+			color: Color lightGreen;
+			name: #seasons! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:55'!
+makeSettingsButton
+	"Answer the 'Settings' button"
+	
+	^ (FarmButton label: 'Settings' action: #doSettings state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Change some of the game parameters'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:36:04'!
+makeShowStatsButton
+	"Answer the 'Stats' button"
+
+	^ (FarmButton label: 'Stats' action: #doStats state: true model: model)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:36:17'!
+makeTourButton
+	"Answer the 'Tour' button"
+	
+	^ (FarmButton label: 'Tour' action: #doTour state: true model: self)
+		layoutSpec: self class buttonSize;
+		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:34:48'!
+playButtonSet
+	"Answer the buttons used to play the game"
+
+	buttonArea 
+		removeAllMorphs;
+		addMorph: self makeShowStatsButton;
+		addMorph: self makeAuctionButton;
+		addMorph: self makePayLoanButton;
+		addMorph: self makeBuyOptionButton;
+		addMorph: self makeEndTurnButton;
+		addMorph: self makePayExpenseButton;
+		addMorph: self makeDrawFateButton;
+		addMorph: self makeHarvestButton;
+		addMorph: (model moveButton: self makeMoveButton);
+		addMorph: self makeQuitGameButton! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:36:41'!
+setupToken: aPlayer
+	"Place the player's token on the board"
+	| w h |
+	
+	w _ owner morphExtent x * 0.13.
+	h _ w * 0.5.
+	model token id contents: aPlayer identity.
+	model token doubled contents: aPlayer doubledString.
+	model token 
+		color: aPlayer color;
+		morphExtent: w@h;
+		morphPosition: owner morphExtent * (0.006@0.72).
+	pasteup addMorph: model token.
+	^ model token who: aPlayer! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 20:41:28'!
+showSeasons: associations 
+	"Display the seasons contained in associations"
+	| width set bm txt |
+			
+	seasonsArea removeAllMorphs.
+	width _ layoutMorph morphWidth / model class cellsForGame.
+	set _ OrderedCollection new.
+	associations do: [:k | 	| first last sea |
+			first _ k key x - 1.
+			last _ k key y.
+			bm _ LayoutMorph newRow
+				padding: #center;
+				name: #season.
+			seasonsArea addMorph: bm
+				layoutSpec: (LayoutSpec proportionalWidth: width * (last - first) proportionalHeight: 1.0).
+			sea _ k value.
+			bm color: sea color.
+			txt _ StringMorph new
+				emphasis: 1;  "emphasis: bold=1"
+				font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+			bm addMorph: txt..
+			txt color: (sea textColor
+				ifTrue: [Color white]
+				ifFalse: [Color black]).
+			txt contents: sea desc.
+			set add: txt].
+	^ set! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:35:45'!
+startButtonSet
+	"Answer the buttons used to start the game"
+
+	buttonArea 
+		removeAllMorphs;
+		addMorph: self makeAddPlayerButton;
+		addMorph: self makeSettingsButton;
+		addMorph: self makeTourButton;
+		addMorph: self makeQuitGameButton.
+! !
+
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 12:58:40'!
+startGame
+	"Change the buttons and start the game"
+	
+	self playButtonSet.
+	model players do: [:ea | 
+		ea 
+			when: #displayInvoice 
+			send: #displayInvoice:title: 
+			to: self 
+			withArguments: #(#invoice #heading)].
+	model playerIndex: 0. "retain players in order of entry"
+	model 
+		testGoal;
+		nextPlayer.
+	model initialButtonState! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 10/9/2017 18:02:37'!
+checkEnd
+	"Enable End Turn after an option is acknowledged"
+
+	model endTurnCheck! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 9/9/2017 16:29:41'!
+displayNumbers
+	"Display cash, debt, and goal progress"
+	| pl c d net otherLead pluralForm others |
+	
+	(pl _ model currentPlayer) ifNotNil: [
+		c _ '$', pl cash truncated printStringWithCommas.
+		d _ '$', pl debt negated asInteger printStringWithCommas.
+		net _ (pl netAssets / model goal * 100 roundDownTo: 0.1) asString.
+		numbersArea submorphs first 
+			contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+			color: pl color.
+		pluralForm _ model players size = 2
+			ifTrue: ['Player''s']
+			ifFalse: ['Players'''].
+		otherLead _ (StringMorph contents: (String streamContents: [:string |
+			string
+				nextPutAll: 'Other ';
+				nextPutAll: pluralForm;
+				nextPutAll: ' Cash: '])).
+		otherLead
+			emphasis: AbstractFont boldCode;
+			color: Color lightBrown;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+		othersArea 
+			removeAllMorphs;
+			addMorph: otherLead.
+		others _ model players select: [:a | a ~= pl].
+		others do: [:ea | | x |
+			x _ ' $', ea cash truncated printStringWithCommas.
+			othersArea addMorph: ((StringMorph contents: x) 
+				emphasis: AbstractFont boldCode;
+				color: ea color;
+				setBalloonText: 'cash held by ', ea identity;
+				font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]]! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:38:51'!
+doTour
+	"Start the tour of the board"
+	| choice resp |
+	
+	model disableAll: {'Players'. 'Tour'}.
+	choice _ (PopUpMenu labelArray: #('Automatic' 'Interactive')) startUpWithCaption: nil.
+	choice = 1 ifTrue: [self tourAt: 500].
+	choice = 2 ifTrue: [
+		resp _ '1'.
+		[resp ~= ''] whileTrue: [
+			resp _ FillInTheBlankMorph request: 'Board starting where?' initialAnswer: resp.
+			(resp notEmpty and: [resp asNumber > 0]) ifTrue: [
+				self showSeasons: (model parseSeasonsAt: resp asNumber).
+				self model cellsAt: resp asNumber]]].
+	model enableAll: {'Players'. 'Tour'}! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 15:04:10'!
+titleChange: aPlayer
+	"Change the title, showing player data in color"
+	"Display cash, debt, and goal progress"
+	| c d net otherLead pluralForm others |
+	
+	gameTitle contents: aPlayer identity , '''s turn.'.
+	gameTitle color: aPlayer color.
+	
+	c _ '$', model currentPlayer cash truncated printStringWithCommas.
+	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
+	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
+	numbersArea submorphs first 
+		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+		color: model currentPlayer color.
+	pluralForm _ model players size = 2
+		ifTrue: ['Player''s']
+		ifFalse: ['Players'''].
+	otherLead _ (StringMorph contents: (String streamContents: [:string |
+		string
+			nextPutAll: 'Other ';
+			nextPutAll: pluralForm;
+			nextPutAll: ' Cash: '])).
+	otherLead
+		emphasis: AbstractFont boldCode;
+		color: Color lightBrown;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+	othersArea 
+		removeAllMorphs;
+		addMorph: otherLead.
+	others _ model players select: [:a | a ~= model currentPlayer].
+	others do: [:ea | | x |
+		x _ ' $', ea cash truncated printStringWithCommas.
+		othersArea addMorph: ((StringMorph contents: x) 
+			emphasis: AbstractFont boldCode;
+			color: ea color;
+			setBalloonText: 'cash held by ', ea identity;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
+tourAt: anInterval 
+	"Take a tour of the board."
+	| limit i |
+	
+	limit _ model class describeSpaces size + 2.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		i < limit 
+			ifTrue: [model positionBoardTo: i]
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep]].
+	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
+describe
+
+	^ ''! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
+namesCache
+	"Answer the value of namesCache"
+
+	^ namesCache! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
+namesCache: anObject
+	"Set the value of namesCache"
+
+	namesCache := anObject! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
+seasons
+	"Answer the value of seasons"
+
+	^ seasons! !
+
+!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
+seasons: anObject
+	"Set the value of seasons"
+
+	seasons := anObject! !
+
+!FarmingGame methodsFor: 'termination' stamp: 'dhn 8/31/2017 17:58:24'!
+quitGame
+
+	(self confirm: 'Are you sure you want to quit ', FarmingGame asString, '?')
+		ifTrue: [model quitGame]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 10:48:39'!
+showAssets
+	"Show window for status of assets"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ AssetView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: (pl identity, '''s Assets');
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 220]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/16/2017 12:05:36'!
+showAuctionAssets
+	"Show window for auctioning assets"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ AuctionAsset openOn: model.
+			win openInWorld: pasteup.
+			win
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 220.
+			model triggerEvent: #itemChange]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/17/2017 20:33:22'!
+showAuctionOptions
+	"Show window for auctioning options"
+	| pl |
+
+	pl _ model currentPlayer.
+	pl options do: [:ea | {(pl assets at: (Farm anotherNameFor: ea)) forOptionAuction} print]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 10/9/2017 15:36:33'!
+showDraw: anObject
+	"Show window with description of an option"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	win _ DrawView openOn: model.
+	win openInWorld: pasteup.
+	model disableAll: {'End Turn'}.
+	win
+		setLabel: ('Option for ', pl identity);
+		setWindowColor: pl color;
+		startButtons;
+		morphPosition: self windowPosition;
+		details: anObject;
+		morphExtent: 300 @ 220! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 16:19:24'!
+showEverybody
+	"Show window for all player's statistics"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ AllView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: 'All Players';
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				updateEverybody;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 250]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 17:12:17'!
+showLoan
+	"Show window for reducing debt"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	win _ LoanView openOn: model.
+	win openInWorld: pasteup.
+	win
+		setLabel: pl identity, '''s Debt';
+		player: pl;
+		setWindowColor: pl color;
+		startButtons;
+		morphPosition: self windowPosition;
+		morphExtent: 300 @ 220.
+				
+	model disableAll: {'Pay Loan'}! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/14/2017 13:28:25'!
+showOpts
+	"Show window for buying assets"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl priorOptions notEmpty
+		ifTrue: [
+			win _ OptionsView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: (pl identity, '''s Shopping');
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 220.
+			win list updateList.
+			model disableAll: {'Purchase'}]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 15:13:33'!
+showYourself
+	"Show window for player's statistics"
+	| pl win |
+		
+	pl _ model currentPlayer.
+	pl assets notEmpty
+		ifTrue: [
+			win _ YouView openOn: model.
+			win openInWorld: pasteup.
+			win
+				setLabel: (pl identity, '''s Status');
+				player: pl;
+				setWindowColor: pl color;
+				startButtons;
+				updatePerformance;
+				morphPosition: self windowPosition;
+				morphExtent: 300 @ 280]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 12:10:45'!
+windowPosition
+	"Answer the position for a window"
+	
+	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
+
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:39'!
+boardColor
+	"Answer the color of the board itself"
+	^Color yellow alpha: 0.5! !
+
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 10:30'!
+debtLimit
+	"Answer the debt limit for a player to stay in the game."
+	^ -50000! !
+
+!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 16:55'!
+goal
+	"Answer the winning net asset goal"
+	| normal |
+	normal := 250000.
+	Game testMode
+		ifTrue: [^ normal * 10]
+		ifFalse: [^ normal]	"Answer the winning net asset goal"
+! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/2/2017 13:26:24'!
+buttonSize
+	"Answer the layoutSpec for buttons on the game board"
+	
+	^ LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:01:13'!
+cellColor
+	"Answer the color for a cell"
+	
+	^ Color r: 1.0 g: 0.93 b: 0.83! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:14:03'!
+includeInNewMorphMenu
+	"Instantiate from the menu"
+	
+	^ true! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:12:41'!
+labelAreaHeight
+
+	^ 50! !
+
+!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:11:50'!
+start
+	"Start the Farming Game"
+	| win world |
+	
+	win _ self new.
+	win 
+		widgetsColor: win windowColor; "standard color for the window frame"
+		color:  (Color r: 0.986 g: 0.986 b: 0.986); "background color"
+		model: Farm new;
+		buildMorphicWindow;
+		setLabel: 'A Board Game'.
+		
+	win board
+		addMorph: win makeTitleArea;
+		addMorph: win makeNumbersArea;
+		addMorph: win makeOthersArea.
+		
+	win gameTitle
+		contents: 'Farming';
+		color: Color lightBrown.
+	win model buttons: win makeButtonArea.
+	win board
+		addMorph: win makeSeasonsArea;
+		addMorph: win makeCellsArea.
+	win model positionBoardTo: 1.
+	win startButtonSet.
+	win showSeasons: (win model parseSeasonsAt: 1).
+	
+	"Now do open it"
+	world _ Processor activeProcess animatedUI.
+	win morphExtent: (world morphExtent * (0.99@0.8)).
+	world addMorph: win position: 0@60.
+	win someSubmorphPositionOrExtentChanged.
+
+	win model token: win model setUpToken.
+	
+	^ win
+! !
+
+!FarmingGame class methodsFor: 'documentation' stamp: 'dhn 8/29/2017 20:00:09'!
+how
+	"
 	FarmingGame start.
-
-http://farmgame.com/product/woo-single-2/
-
-!
+	"! !
 
 !FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 aboutToBeGrabbedBy: aHand
@@ -6276,759 +7032,3 @@ makeIdArea
 	area addMorph: id.
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 10/9/2017 18:00:30'!
-buildMorphicWindow
-
-	pasteup _ PasteUpMorph new
-		name: #pasteup;
-		color: Color transparent.
-		
-	layoutMorph addMorph: pasteup layoutSpec: LayoutSpec useAll.
-	board _ LayoutMorph newColumn name: #board.
-	board color:  (Color r: 0.986 g: 0.986 b: 0.986).
-	pasteup addMorph: board.
-	model world: pasteup.
-	FarmTheme beCurrent.
-	Theme current model: model.
-	
-	model when: #quitGame send: #delete to: self.
-	model when: #itemChange send: #displayNumbers to: self.
-	model when: #titleChange send: #titleChange: to: self with: #player.
-	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
-	model when: #showToken send: #showToken to: self.
-	model when: #showSeasons: send: #showSeasons: to: self with: #index.
-	model when: #showDraw send: #showDraw: to: self with: #option.
-	model when: #optionDrawn send: #checkEnd to: self.
-	model when: #showAssets send: #showAssets to: self.
-	model when: #showYourself send: #showYourself to: self.
-	model when: #showEverybody send: #showEverybody to: self.
-	model when: #showAuctionAssets send: #showAuctionAssets to: self.
-	model when: #showAuctionOptions send: #showAuctionOptions to: self.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
-getPlayers
-	"Get the names of two to six players"
-	| x y cnt clrs |
-
-	model disableAll: {'Players'. 'Tour'}.
-	clrs _ Token colors shuffled.
-	cnt _ 0.
-	x _ FillInTheBlankMorph request: 'First player''s name?' initialAnswer: ''.
-	x 
-		ifEmpty: [
-			model enableAll: {'Players'. 'Tour'}.
-			^ nil]
-		ifNotEmpty: [
-			cnt _ cnt + 1.
-			model setupPlayer: x color: (clrs at: cnt)].
-	
-	[cnt < 6] whileTrue: [
-		y _ FillInTheBlankMorph request: 'Next player''s name?' initialAnswer: ''.
-		y
-			ifEmpty: [
-				cnt > 1 
-					ifTrue: [self startGame]
-					ifFalse: [
-						model players: OrderedCollection new.
-						model enableAll: {'Players'. 'Tour'}].
-				^ nil]
-			ifNotEmpty: [
-				cnt _ cnt + 1.
-				model setupPlayer: y color: (clrs at: cnt)]].
-		
-	self startGame
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:28:09'!
-initialize
-
-	super initialize! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:38:25'!
-layoutSubmorphs
-
-    super layoutSubmorphs.
-    self board morphExtent: self board owner morphExtent! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:23'!
-makeAddPlayerButton
-	"Answer the 'Players' button"
-
-	^ (FarmButton label: 'Players' action: #getPlayers state: true model: self)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Use this button to enter names of two to six players;
-entering an empty name or cancel will start the game'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:43'!
-makeAuctionButton
-	"Answer the 'Auction' button"
-
-	^ (FarmButton label: 'Auction' action: #doAuction state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Auction options and equipment'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:29:09'!
-makeButtonArea
-	"Lay out the area for buttons"
-	
-	buttonArea _ (LayoutMorph newRow separation: 5)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: self class titleHeight
-			minorDirectionPadding: #center).
-	buttonArea
-			color: Color transparent;
-			name: #buttons;
-			padding: #center.
-			
-	board addMorph: buttonArea.
-	
-	^ buttonArea
-		! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/7/2017 14:49:58'!
-makeBuyOptionButton
-	"Answer the 'Option' button"
-
-	^ (GameButtonMorph label: 'Purchase' action: #showOpts state: true model: self)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'See what options you have and make purchases during WINTER.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 18:49:08'!
-makeCellsArea
-	"Lay out the area which shows some spaces of the board"
-	| cellArea view mm mt |
-	
-	cellArea _ (LayoutMorph newRow separation: 0)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 1.0
-			minorDirectionPadding: #center);
-		name: #'cell area'.
-	
-	1 to: model class cellsForGame do: [:ix |
-		view _ (CellView newColumn
-			layoutSpec: (LayoutSpec proportionalWidth: 1 / model class cellsForGame);
-			name: #cell).
-		view addMorph: (mt _ (GameCell 
-			textProvider: self
-			textGetter: #describe)
-				layoutSpec: (LayoutSpec proportionalWidth: 1.0);
-				color: self class cellColor;
-				borderWidth: 1;
-				name: 'cell text').
-		view addMorph: (mm _ (LayoutMorph newRow separation: 4)
-			layoutSpec: (LayoutSpec 
-				proportionalWidth: 1.0
-				fixedHeight: 20
-				minorDirectionPadding: #center);
-			color: self class cellColor;
-			padding: #center;
-			name: #marks).
-		view 
-			marksPane: mm;
-			textPane: mt.
-		model cells add: view].
-		
-	^ cellArea addAllMorphs: model cells reversed
-		
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:15'!
-makeDrawFateButton
-	"Answer the 'Fate' button"
-
-	^ (FarmButton label: 'Fate' action: #drawFate state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Determine your Farmer''s Fate.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:28'!
-makeEndTurnButton
-	"Answer the 'End Turn' button"
-
-	^ (FarmButton label: 'End Turn' action: #endTurn state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Let the next player have a turn. Not enabled as long as Expense, Fate, Harvest, or Move are enabled.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:40'!
-makeHarvestButton
-	"Answer the 'Harvest' button"
-
-	^ (FarmButton label: 'Harvest' action: #harvest state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Harvest the crop for the season indicated above the space.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:34:53'!
-makeMoveButton
-	"Answer the 'Move' button"
-
-	^ (FarmButton label: 'Move' action: #move state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:31:59'!
-makeNumbersArea
-	"Lay out the area for player cash on hand"
-	
-	numbersArea _ (LayoutMorph newRow separation: 0)
-		layoutSpec: (LayoutSpec proportionalWidth: 1.0
-			proportionalHeight: self class titleHeight
-			minorDirectionPadding: #center).
-	numbersArea
-			color: Color transparent;
-			name: #numbers;
-			padding: #center.
-			
-	^ numbersArea addMorph: ((StringMorph contents: '') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' pointSize: 22))
-		! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:32:44'!
-makeOthersArea
-	"Lay out the area for player cash on hand"
-	
-	othersArea _ (LayoutMorph newRow separation: 0)
-		layoutSpec: (LayoutSpec proportionalWidth: 1.0
-			proportionalHeight: self class titleHeight
-			minorDirectionPadding: #center).
-	^ othersArea
-		color: Color transparent;
-		name: #others;
-		padding: #center! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:07'!
-makePayExpenseButton
-	"Answer the 'Expense' button"
-
-	^ (FarmButton label: 'Expense' action: #payExpense state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Pay the farming expenses which are owed.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/7/2017 13:59:47'!
-makePayLoanButton
-	"Answer the 'Pay Loan' button"
-
-	^ (FarmButton label: 'Pay Loan' action: #showLoan state: true model: self)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Transfer cash to pay off some debt.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:41'!
-makeQuitGameButton
-	"Answer the 'Quit' button"
-	
-	^ (FarmButton label: 'Quit' action: #quitGame state: true model: self)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Completely ends the game. Nothing is saved.';
-		color: (Color orange alpha: 0.9)! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:33:14'!
-makeSeasonsArea
-	"Lay out the area for seasons"
-	
-	seasonsArea _ (LayoutMorph newRow separation: 0)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.08
-			minorDirectionPadding: #center).
-	^ seasonsArea
-			color: Color lightGreen;
-			name: #seasons! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:35:55'!
-makeSettingsButton
-	"Answer the 'Settings' button"
-	
-	^ (FarmButton label: 'Settings' action: #doSettings state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Change some of the game parameters'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:36:04'!
-makeShowStatsButton
-	"Answer the 'Stats' button"
-
-	^ (FarmButton label: 'Stats' action: #doStats state: true model: model)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:36:17'!
-makeTourButton
-	"Answer the 'Tour' button"
-	
-	^ (FarmButton label: 'Tour' action: #doTour state: true model: self)
-		layoutSpec: self class buttonSize;
-		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 14:34:48'!
-playButtonSet
-	"Answer the buttons used to play the game"
-
-	buttonArea 
-		removeAllMorphs;
-		addMorph: self makeShowStatsButton;
-		addMorph: self makeAuctionButton;
-		addMorph: self makePayLoanButton;
-		addMorph: self makeBuyOptionButton;
-		addMorph: self makeEndTurnButton;
-		addMorph: self makePayExpenseButton;
-		addMorph: self makeDrawFateButton;
-		addMorph: self makeHarvestButton;
-		addMorph: (model moveButton: self makeMoveButton);
-		addMorph: self makeQuitGameButton! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:36:41'!
-setupToken: aPlayer
-	"Place the player's token on the board"
-	| w h |
-	
-	w _ owner morphExtent x * 0.13.
-	h _ w * 0.5.
-	model token id contents: aPlayer identity.
-	model token doubled contents: aPlayer doubledString.
-	model token 
-		color: aPlayer color;
-		morphExtent: w@h;
-		morphPosition: owner morphExtent * (0.006@0.72).
-	pasteup addMorph: model token.
-	^ model token who: aPlayer! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 20:41:28'!
-showSeasons: associations 
-	"Display the seasons contained in associations"
-	| width set bm txt |
-			
-	seasonsArea removeAllMorphs.
-	width _ layoutMorph morphWidth / model class cellsForGame.
-	set _ OrderedCollection new.
-	associations do: [:k | 	| first last sea |
-			first _ k key x - 1.
-			last _ k key y.
-			bm _ LayoutMorph newRow
-				padding: #center;
-				name: #season.
-			seasonsArea addMorph: bm
-				layoutSpec: (LayoutSpec proportionalWidth: width * (last - first) proportionalHeight: 1.0).
-			sea _ k value.
-			bm color: sea color.
-			txt _ StringMorph new
-				emphasis: 1;  "emphasis: bold=1"
-				font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-			bm addMorph: txt..
-			txt color: (sea textColor
-				ifTrue: [Color white]
-				ifFalse: [Color black]).
-			txt contents: sea desc.
-			set add: txt].
-	^ set! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:35:45'!
-startButtonSet
-	"Answer the buttons used to start the game"
-
-	buttonArea 
-		removeAllMorphs;
-		addMorph: self makeAddPlayerButton;
-		addMorph: self makeSettingsButton;
-		addMorph: self makeTourButton;
-		addMorph: self makeQuitGameButton.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/31/2017 12:58:40'!
-startGame
-	"Change the buttons and start the game"
-	
-	self playButtonSet.
-	model players do: [:ea | 
-		ea 
-			when: #displayInvoice 
-			send: #displayInvoice:title: 
-			to: self 
-			withArguments: #(#invoice #heading)].
-	model playerIndex: 0. "retain players in order of entry"
-	model 
-		testGoal;
-		nextPlayer.
-	model initialButtonState! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 10/9/2017 18:02:37'!
-checkEnd
-	"Enable End Turn after an option is acknowledged"
-
-	model endTurnCheck! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 9/9/2017 16:29:41'!
-displayNumbers
-	"Display cash, debt, and goal progress"
-	| pl c d net otherLead pluralForm others |
-	
-	(pl _ model currentPlayer) ifNotNil: [
-		c _ '$', pl cash truncated printStringWithCommas.
-		d _ '$', pl debt negated asInteger printStringWithCommas.
-		net _ (pl netAssets / model goal * 100 roundDownTo: 0.1) asString.
-		numbersArea submorphs first 
-			contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
-			color: pl color.
-		pluralForm _ model players size = 2
-			ifTrue: ['Player''s']
-			ifFalse: ['Players'''].
-		otherLead _ (StringMorph contents: (String streamContents: [:string |
-			string
-				nextPutAll: 'Other ';
-				nextPutAll: pluralForm;
-				nextPutAll: ' Cash: '])).
-		otherLead
-			emphasis: AbstractFont boldCode;
-			color: Color lightBrown;
-			font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-		othersArea 
-			removeAllMorphs;
-			addMorph: otherLead.
-		others _ model players select: [:a | a ~= pl].
-		others do: [:ea | | x |
-			x _ ' $', ea cash truncated printStringWithCommas.
-			othersArea addMorph: ((StringMorph contents: x) 
-				emphasis: AbstractFont boldCode;
-				color: ea color;
-				setBalloonText: 'cash held by ', ea identity;
-				font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]]! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:38:51'!
-doTour
-	"Start the tour of the board"
-	| choice resp |
-	
-	model disableAll: {'Players'. 'Tour'}.
-	choice _ (PopUpMenu labelArray: #('Automatic' 'Interactive')) startUpWithCaption: nil.
-	choice = 1 ifTrue: [self tourAt: 500].
-	choice = 2 ifTrue: [
-		resp _ '1'.
-		[resp ~= ''] whileTrue: [
-			resp _ FillInTheBlankMorph request: 'Board starting where?' initialAnswer: resp.
-			(resp notEmpty and: [resp asNumber > 0]) ifTrue: [
-				self showSeasons: (model parseSeasonsAt: resp asNumber).
-				self model cellsAt: resp asNumber]]].
-	model enableAll: {'Players'. 'Tour'}! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 15:04:10'!
-titleChange: aPlayer
-	"Change the title, showing player data in color"
-	"Display cash, debt, and goal progress"
-	| c d net otherLead pluralForm others |
-	
-	gameTitle contents: aPlayer identity , '''s turn.'.
-	gameTitle color: aPlayer color.
-	
-	c _ '$', model currentPlayer cash truncated printStringWithCommas.
-	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
-	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
-	numbersArea submorphs first 
-		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
-		color: model currentPlayer color.
-	pluralForm _ model players size = 2
-		ifTrue: ['Player''s']
-		ifFalse: ['Players'''].
-	otherLead _ (StringMorph contents: (String streamContents: [:string |
-		string
-			nextPutAll: 'Other ';
-			nextPutAll: pluralForm;
-			nextPutAll: ' Cash: '])).
-	otherLead
-		emphasis: AbstractFont boldCode;
-		color: Color lightBrown;
-		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-	othersArea 
-		removeAllMorphs;
-		addMorph: otherLead.
-	others _ model players select: [:a | a ~= model currentPlayer].
-	others do: [:ea | | x |
-		x _ ' $', ea cash truncated printStringWithCommas.
-		othersArea addMorph: ((StringMorph contents: x) 
-			emphasis: AbstractFont boldCode;
-			color: ea color;
-			setBalloonText: 'cash held by ', ea identity;
-			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
-
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
-tourAt: anInterval 
-	"Take a tour of the board."
-	| limit i |
-	
-	limit _ model class describeSpaces size + 2.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :delta |
-		i _ i + 1.
-		i < limit 
-			ifTrue: [model positionBoardTo: i]
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep]].
-	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 8/29/2017 20:46:56'!
-describe
-
-	^ ''! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
-namesCache
-	"Answer the value of namesCache"
-
-	^ namesCache! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
-namesCache: anObject
-	"Set the value of namesCache"
-
-	namesCache := anObject! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
-seasons
-	"Answer the value of seasons"
-
-	^ seasons! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
-seasons: anObject
-	"Set the value of seasons"
-
-	seasons := anObject! !
-
-!FarmingGame methodsFor: 'termination' stamp: 'dhn 8/31/2017 17:58:24'!
-quitGame
-
-	(self confirm: 'Are you sure you want to quit ', FarmingGame asString, '?')
-		ifTrue: [model quitGame]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 10:48:39'!
-showAssets
-	"Show window for status of assets"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	pl assets notEmpty
-		ifTrue: [
-			win _ AssetView openOn: model.
-			win openInWorld: pasteup.
-			win
-				setLabel: (pl identity, '''s Assets');
-				player: pl;
-				setWindowColor: pl color;
-				startButtons;
-				morphPosition: self windowPosition;
-				morphExtent: 300 @ 220]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/16/2017 12:05:36'!
-showAuctionAssets
-	"Show window for auctioning assets"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	pl assets notEmpty
-		ifTrue: [
-			win _ AuctionAsset openOn: model.
-			win openInWorld: pasteup.
-			win
-				player: pl;
-				setWindowColor: pl color;
-				startButtons;
-				morphPosition: self windowPosition;
-				morphExtent: 300 @ 220.
-			model triggerEvent: #itemChange]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/17/2017 20:33:22'!
-showAuctionOptions
-	"Show window for auctioning options"
-	| pl |
-
-	pl _ model currentPlayer.
-	pl options do: [:ea | {(pl assets at: (Farm anotherNameFor: ea)) forOptionAuction} print]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 10/9/2017 15:36:33'!
-showDraw: anObject
-	"Show window with description of an option"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	win _ DrawView openOn: model.
-	win openInWorld: pasteup.
-	model disableAll: {'End Turn'}.
-	win
-		setLabel: ('Option for ', pl identity);
-		setWindowColor: pl color;
-		startButtons;
-		morphPosition: self windowPosition;
-		details: anObject;
-		morphExtent: 300 @ 220! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 16:19:24'!
-showEverybody
-	"Show window for all player's statistics"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	pl assets notEmpty
-		ifTrue: [
-			win _ AllView openOn: model.
-			win openInWorld: pasteup.
-			win
-				setLabel: 'All Players';
-				player: pl;
-				setWindowColor: pl color;
-				startButtons;
-				updateEverybody;
-				morphPosition: self windowPosition;
-				morphExtent: 300 @ 250]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 17:12:17'!
-showLoan
-	"Show window for reducing debt"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	win _ LoanView openOn: model.
-	win openInWorld: pasteup.
-	win
-		setLabel: pl identity, '''s Debt';
-		player: pl;
-		setWindowColor: pl color;
-		startButtons;
-		morphPosition: self windowPosition;
-		morphExtent: 300 @ 220.
-				
-	model disableAll: {'Pay Loan'}! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/14/2017 13:28:25'!
-showOpts
-	"Show window for buying assets"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	pl priorOptions notEmpty
-		ifTrue: [
-			win _ OptionsView openOn: model.
-			win openInWorld: pasteup.
-			win
-				setLabel: (pl identity, '''s Shopping');
-				player: pl;
-				setWindowColor: pl color;
-				startButtons;
-				morphPosition: self windowPosition;
-				morphExtent: 300 @ 220.
-			win list updateList.
-			model disableAll: {'Purchase'}]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/15/2017 15:13:33'!
-showYourself
-	"Show window for player's statistics"
-	| pl win |
-		
-	pl _ model currentPlayer.
-	pl assets notEmpty
-		ifTrue: [
-			win _ YouView openOn: model.
-			win openInWorld: pasteup.
-			win
-				setLabel: (pl identity, '''s Status');
-				player: pl;
-				setWindowColor: pl color;
-				startButtons;
-				updatePerformance;
-				morphPosition: self windowPosition;
-				morphExtent: 300 @ 280]! !
-
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 12:10:45'!
-windowPosition
-	"Answer the position for a window"
-	
-	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:39'!
-boardColor
-	"Answer the color of the board itself"
-	^Color yellow alpha: 0.5! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 3/22/2012 10:30'!
-debtLimit
-	"Answer the debt limit for a player to stay in the game."
-	^ -50000! !
-
-!FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 9/17/2014 16:55'!
-goal
-	"Answer the winning net asset goal"
-	| normal |
-	normal := 250000.
-	Game testMode
-		ifTrue: [^ normal * 10]
-		ifFalse: [^ normal]	"Answer the winning net asset goal"
-! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 9/2/2017 13:26:24'!
-buttonSize
-	"Answer the layoutSpec for buttons on the game board"
-	
-	^ LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:01:13'!
-cellColor
-	"Answer the color for a cell"
-	
-	^ Color r: 1.0 g: 0.93 b: 0.83! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:14:03'!
-includeInNewMorphMenu
-	"Instantiate from the menu"
-	
-	^ true! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:12:41'!
-labelAreaHeight
-
-	^ 50! !
-
-!FarmingGame class methodsFor: 'instance creation' stamp: 'dhn 8/29/2017 20:11:50'!
-start
-	"Start the Farming Game"
-	| win world |
-	
-	win _ self new.
-	win 
-		widgetsColor: win windowColor; "standard color for the window frame"
-		color:  (Color r: 0.986 g: 0.986 b: 0.986); "background color"
-		model: Farm new;
-		buildMorphicWindow;
-		setLabel: 'A Board Game'.
-		
-	win board
-		addMorph: win makeTitleArea;
-		addMorph: win makeNumbersArea;
-		addMorph: win makeOthersArea.
-		
-	win gameTitle
-		contents: 'Farming';
-		color: Color lightBrown.
-	win model buttons: win makeButtonArea.
-	win board
-		addMorph: win makeSeasonsArea;
-		addMorph: win makeCellsArea.
-	win model positionBoardTo: 1.
-	win startButtonSet.
-	win showSeasons: (win model parseSeasonsAt: 1).
-	
-	"Now do open it"
-	world _ Processor activeProcess animatedUI.
-	win morphExtent: (world morphExtent * (0.99@0.8)).
-	world addMorph: win position: 0@60.
-	win someSubmorphPositionOrExtentChanged.
-
-	win model token: win model setUpToken.
-	
-	^ win
-! !
-
-!FarmingGame class methodsFor: 'documentation' stamp: 'dhn 8/29/2017 20:00:09'!
-how
-	"
-	FarmingGame start.
-	"! !
