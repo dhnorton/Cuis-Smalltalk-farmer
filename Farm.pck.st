@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:39:56 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 9:30:59 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 18!
+!provides: 'Farm' 1 19!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -899,7 +899,7 @@ doSettings
 	ans > 0 ifTrue: [self perform: (#(#setGoal #setTestMode) at: ans)]
 ! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/12/2017 08:17:27'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2018 09:17:54'!
 doStats
 	"Display the Stats button menu."
 	| ans |
@@ -909,7 +909,7 @@ doStats
 		('Yourself'	                  showYourself)
 		('All Players'                  showEverybody)
 		-
-		('Progress Graph'          showProgress)
+		('Progress Graph'          showHistory)
 		('Space Histogram'        showSpaceHistogram)
 		)) startUpWithCaption: '  Statistics  '.
 		
@@ -2804,7 +2804,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 10/9/2017 18:00:30'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2018 09:22:27'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2830,6 +2830,7 @@ buildMorphicWindow
 	model when: #showAssets send: #showAssets to: self.
 	model when: #showYourself send: #showYourself to: self.
 	model when: #showEverybody send: #showEverybody to: self.
+	model when: #showHistory send: #showHistory to: self.
 	model when: #showAuctionAssets send: #showAuctionAssets to: self.
 	model when: #showAuctionOptions send: #showAuctionOptions to: self.
 ! !
