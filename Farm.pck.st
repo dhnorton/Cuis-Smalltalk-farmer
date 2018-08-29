@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 9:38:39 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 9:49:30 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 20!
+!provides: 'Farm' 1 21!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -988,26 +988,6 @@ limit and is out of the game'
 			self disableAll: {'Pay Loan'. 'End Turn'. 'Option'. 'Expense'. 'Fate'. 'Harvest'. 'Move'}.
 			self won: true]! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/19/2014 16:20'!
-reportProgress
-	"Plot players' progress"
-	| window plot relation target |	
-	window := self windowNamed: 'Progress'.
-	plot := window findA: FarmPlot.
-	target := boardMgr class goal.
-	relation := GameRelation new 
-		continuous;
-		collection: {0@target. 15000@target}. "Goal of the game"
-	relation color: Color black.
-	plot addRelation: relation.
-	players do: [:each |
-		relation := GameRelation new 
-			continuous.
-		relation color: each tokenColor.
-		relation collection: (each history select: [:a | a ~= nil]). "a player's progress"
-		plot addRelation: relation.].
-! !
-
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:31:59'!
 seasonAt: aPosition
 	"Answer the season at aPosition."
@@ -1016,57 +996,11 @@ seasonAt: aPosition
 	y _ self class season select: [:a | a range x <= aPosition].
 	^ y last ! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/20/2014 09:50'!
-showProgress
-	"Plot all player's net worth vs number of turns."
-	| xw name plot |
-	name := 'Progress'.
-	(xw := self windowNamed: name)
-		ifNil: [
-			windows add: (xw := (CustomSystemWindow labelled: 'Players'' Net Assets vs Turns')
-				refreshMessage: #updateProgressIn:;
-				endReceiver: self;
-				endMessage: #deleteWindow: with: name;
-				setWindowColor: currentPlayer tokenColor;
-				extent: 375 @ 380;
-				removeMenuBox;
-				model: self;
-				layoutPolicy: ProportionalLayout new;
-				center: self arena center).
-			self arena addMorph: xw.
-			xw extension externalName: name.
-			plot := FarmPlot new
-				mgr: self;
-				setUpPlotFor: goal.
-			plot layoutFrame: (LayoutFrame new
-					leftFraction: 0;
-					topFraction: 0.15;
-					bottomFraction: 1;
-					rightFraction: 1;
-					topOffset: xw labelHeight * 2 negated).
-			plot hResizing: #spaceFill; vResizing: #spaceFill.
-			xw addMorph: plot fullFrame: (LayoutFrame fractions: (0 @ 0 corner: 1 @ 1)).
-			xw model reportProgress]
-		ifNotNil: [xw comeToFront].
-! !
-
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/3/2017 12:25:39'!
 updatePlayer
 	"Make the screen show the latest numbers."
 	
 	self triggerEvent: #itemChange! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 11/19/2014 16:53'!
-updateProgressIn: aWindow
-	"Bring window showing players' progress toward goal up to date"
-	| plot pl |
-	plot := aWindow findA: FarmPlot.
-	plot removeAllRelations;
-		changed.
-	pl := aWindow model currentPlayer.
-	pl history at: pl turns put: pl turns @ pl netAssets.
-	aWindow model reportProgress.
-! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 22:10'!
 wonButtonsState
