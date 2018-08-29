@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:23:52 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:27:50 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 15!
+!provides: 'Farm' 1 16!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -24,6 +24,16 @@ Token subclass: #FarmToken
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmToken class' category: #'Farm-Graphics'!
 FarmToken class
+	instanceVariableNames: ''!
+
+!classDefinition: #FarmButton category: #'Farm-Graphics'!
+GameButtonMorph subclass: #FarmButton
+	instanceVariableNames: 'deferred'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'FarmButton class' category: #'Farm-Graphics'!
+FarmButton class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmingGame category: #'Farm-Graphics'!
@@ -366,16 +376,6 @@ ProtoObject subclass: #FarmAuctionList
 FarmAuctionList class
 	instanceVariableNames: ''!
 
-!classDefinition: #FarmButton category: #'Farm-Graphics'!
-ProtoObject subclass: #FarmButton
-	instanceVariableNames: 'deferred'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'FarmButton class' category: #'Farm-Graphics'!
-FarmButton class
-	instanceVariableNames: ''!
-
 !classDefinition: #FarmPlot category: #'Farm-Graphics'!
 ProtoObject subclass: #FarmPlot
 	instanceVariableNames: ''
@@ -402,6 +402,9 @@ The model for FarmingGame!
 
 !FarmToken commentStamp: '<historical>' prior: 0!
 The game piece for a farmer - a player in the Farming Game.!
+
+!FarmButton commentStamp: '<historical>' prior: 0!
+A button which can have its action selector changed.!
 
 !FarmingGame commentStamp: '<historical>' prior: 0!
 Manage the visual effects of the Farming Game.
@@ -501,9 +504,6 @@ A JobSite describes the attributes of a space on the game board!
 
 !FarmSeason commentStamp: '<historical>' prior: 0!
 The model for a season of the year on the farm.!
-
-!FarmButton commentStamp: '<historical>' prior: 0!
-A button which can have its action selector changed.!
 
 !Farm methodsFor: 'initialize-release' stamp: 'dhn 10/27/2014 20:26'!
 addTestPlayer: aString
@@ -2761,6 +2761,48 @@ makeIdArea
 	area addMorph: id.
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)! !
+
+!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/2/2017 20:38:50'!
+actionSelector: anObject
+	"Set the value of actionSelector"
+	
+	actionSelector _ anObject! !
+
+!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/5/2017 12:33:32'!
+deferred
+	"Answer the value of deferred"
+
+	^ deferred! !
+
+!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/5/2017 12:33:32'!
+deferred: anObject
+	"Set the value of deferred"
+
+	deferred _ anObject! !
+
+!FarmButton methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:09:21'!
+disableButton
+	"Change to the disabled state, caching the actionSelector"
+	
+	self enabled 
+		ifTrue: [
+			self deferred
+				ifNil: [self oldTarget: self actionSelector]
+				ifNotNil: [
+					self oldTarget: self deferred.
+					self deferred: nil].
+			self action: nil.
+			self enabled: false.
+			self color: GameButtonMorph disabledColor]! !
+
+!FarmButton methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:08:41'!
+enableButton
+	"Change to the enabled state"
+	
+	self enabled ifFalse: [
+		oldTarget ifNotNil: [self action: oldTarget].
+		self enabled: true.
+		self color: GameButtonMorph enabledColor]! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 10/9/2017 18:00:30'!
 buildMorphicWindow
@@ -6945,48 +6987,6 @@ windowLabelled: aString for: anObject
 	biddersPane color: Color white.
 	self removeWindowMenu: window.
 	^ window! !
-
-!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/2/2017 20:38:50'!
-actionSelector: anObject
-	"Set the value of actionSelector"
-	
-	actionSelector _ anObject! !
-
-!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/5/2017 12:33:32'!
-deferred
-	"Answer the value of deferred"
-
-	^ deferred! !
-
-!FarmButton methodsFor: 'accessing' stamp: 'dhn 9/5/2017 12:33:32'!
-deferred: anObject
-	"Set the value of deferred"
-
-	deferred _ anObject! !
-
-!FarmButton methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:09:21'!
-disableButton
-	"Change to the disabled state, caching the actionSelector"
-	
-	self enabled 
-		ifTrue: [
-			self deferred
-				ifNil: [self oldTarget: self actionSelector]
-				ifNotNil: [
-					self oldTarget: self deferred.
-					self deferred: nil].
-			self action: nil.
-			self enabled: false.
-			self color: GameButtonMorph disabledColor]! !
-
-!FarmButton methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:08:41'!
-enableButton
-	"Change to the enabled state"
-	
-	self enabled ifFalse: [
-		oldTarget ifNotNil: [self action: oldTarget].
-		self enabled: true.
-		self color: GameButtonMorph enabledColor]! !
 
 !FarmPlot methodsFor: 'as yet unclassified' stamp: 'dhn 9/26/2014 13:40'!
 initialize
