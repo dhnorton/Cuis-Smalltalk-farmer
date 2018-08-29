@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:17:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:21:50 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 13!
+!provides: 'Farm' 1 14!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -126,18 +126,8 @@ Theme subclass: #FarmTheme
 FarmTheme class
 	instanceVariableNames: ''!
 
-!classDefinition: #Field category: #'Farm-Model'!
-Object subclass: #Field
-	instanceVariableNames: 'heading description label'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Model'!
-!classDefinition: 'Field class' category: #'Farm-Model'!
-Field class
-	instanceVariableNames: ''!
-
 !classDefinition: #FarmAsset category: #'Farm-Model'!
-ProtoObject subclass: #FarmAsset
+Asset subclass: #FarmAsset
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -326,6 +316,16 @@ CattleOnLease subclass: #Toppenish
 Toppenish class
 	instanceVariableNames: ''!
 
+!classDefinition: #Field category: #'Farm-Model'!
+Object subclass: #Field
+	instanceVariableNames: 'heading description label'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Model'!
+!classDefinition: 'Field class' category: #'Farm-Model'!
+Field class
+	instanceVariableNames: ''!
+
 !classDefinition: #FarmAuctioneer category: #'Farm-Model'!
 ProtoObject subclass: #FarmAuctioneer
 	instanceVariableNames: ''
@@ -438,9 +438,6 @@ A FarmingGame view which makes it possible for farmers to exercise options.!
 !YouView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the current player's status.!
 
-!Field commentStamp: '<historical>' prior: 0!
-A JobSite describes the attributes of a space on the game board!
-
 !FarmAsset commentStamp: '<historical>' prior: 0!
 The model for an asset of the farm.!
 
@@ -494,6 +491,9 @@ The model for the Rattlesnake Ridge lease.!
 
 !Toppenish commentStamp: '<historical>' prior: 0!
 The model for the Toppenish Ridge lease.!
+
+!Field commentStamp: '<historical>' prior: 0!
+A JobSite describes the attributes of a space on the game board!
 
 !FarmSeason commentStamp: '<historical>' prior: 0!
 The model for a season of the year on the farm.!
@@ -4794,65 +4794,6 @@ model: anObject
 
 	model _ anObject! !
 
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 10/21/2014 20:11'!
-describe
-	"Answer a string which describes the field"
-	^ String new writeStream
-		nextPutAll: self heading;
-		nextPutAll: self description;
-		contents	! !
-
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:58:29'!
-describeMarket
-	"Answer a string containing the market name"
-	^ label, Character newLine	! !
-
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:26:00'!
-heading: string1 with: string2
-	"Set the heading to string1, newLine, string2"
-	| str |
-	
-	str := String new writeStream.
-	str nextPutAll: string1; newLine;
-		nextPutAll: string2.
-	self heading: str contents! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
-description
-	"Answer the description for the cell of this site"
-	^ description! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 8/29/2017 21:34:55'!
-description: anObject
-	"Set the description for the cell of this site"
-	| str |
-	
-	str _ String new writeStream.
-	str newLine; newLine; nextPutAll: anObject.
-	description _ str contents! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
-heading
-	"Answer the short heading describing this site"
-	^ heading! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
-heading: anObject
-	"Set the short heading describing this site"
-	heading := anObject! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:54:42'!
-label
-	"Answer the value of label"
-
-	^ label! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:55:38'!
-label: anObject
-	"Set the value of label"
-
-	label _ anObject! !
-
 !FarmAsset methodsFor: 'operating' stamp: 'dhn 9/17/2017 16:43:54'!
 assetValue
 	^self class price * (self quantity / 2)! !
@@ -5574,6 +5515,65 @@ for lifetime at $25,000 and
 buy 50 pregnant cows to stock it
 at $500 each
 Total $', self optionCost printStringWithCommas! !
+
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 10/21/2014 20:11'!
+describe
+	"Answer a string which describes the field"
+	^ String new writeStream
+		nextPutAll: self heading;
+		nextPutAll: self description;
+		contents	! !
+
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:58:29'!
+describeMarket
+	"Answer a string containing the market name"
+	^ label, Character newLine	! !
+
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:26:00'!
+heading: string1 with: string2
+	"Set the heading to string1, newLine, string2"
+	| str |
+	
+	str := String new writeStream.
+	str nextPutAll: string1; newLine;
+		nextPutAll: string2.
+	self heading: str contents! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
+description
+	"Answer the description for the cell of this site"
+	^ description! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 8/29/2017 21:34:55'!
+description: anObject
+	"Set the description for the cell of this site"
+	| str |
+	
+	str _ String new writeStream.
+	str newLine; newLine; nextPutAll: anObject.
+	description _ str contents! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
+heading
+	"Answer the short heading describing this site"
+	^ heading! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
+heading: anObject
+	"Set the short heading describing this site"
+	heading := anObject! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:54:42'!
+label
+	"Answer the value of label"
+
+	^ label! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:55:38'!
+label: anObject
+	"Set the value of label"
+
+	label _ anObject! !
 
 !FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:17'!
 assetLabel
