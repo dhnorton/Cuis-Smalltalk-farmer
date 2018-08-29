@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 5:47:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 5:50:17 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 29!
+!provides: 'Farm' 1 30!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -816,17 +816,6 @@ disabledAll: aCollection
 	(self buttonsNamed: aCollection) do: [:ea | ans _ ans and: ea enabled not].
 	^ ans! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:45'!
-doAssetAuction
-	"Open the window for auctioning assets and leases."
-	self auctioneers add: ((FarmAuctioneer new)
-		name: 'Asset';
-		mgr: self;
-		saveButtonState: {'End Turn'};
-		showAssetAuction).
-	self disableAll: {'Auction'. 'End Turn'}.
-! !
-
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 20:20:04'!
 doAuction
 	"Display the Auction button menu."
@@ -838,17 +827,6 @@ doAuction
 		)) startUpWithCaption: 'Start an Auction'.
 		
 	ans ifNotNil: [self triggerEvent: ans]! !
-
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 10/27/2014 20:46'!
-doOptionAuction
-	"Open the window for auctioning options."
-	self auctioneers add: ((FarmAuctioneer new)
-		name: 'Option';
-		mgr: self;
-		saveButtonState: {'End Turn'};
-		showOptionAuction).
-	self disableAll: {'End Turn'}.
-! !
 
 !Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/5/2017 21:19:23'!
 doSettings
