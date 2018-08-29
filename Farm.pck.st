@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:12:06 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:17:10 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 12!
+!provides: 'Farm' 1 13!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -14,6 +14,16 @@ Game subclass: #Farm
 	category: 'Farm-Model'!
 !classDefinition: 'Farm class' category: #'Farm-Model'!
 Farm class
+	instanceVariableNames: ''!
+
+!classDefinition: #FarmToken category: #'Farm-Graphics'!
+Token subclass: #FarmToken
+	instanceVariableNames: 'doubled'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'FarmToken class' category: #'Farm-Graphics'!
+FarmToken class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmingGame category: #'Farm-Graphics'!
@@ -386,19 +396,12 @@ ProtoObject subclass: #FarmRelation
 FarmRelation class
 	instanceVariableNames: ''!
 
-!classDefinition: #FarmToken category: #'Farm-Graphics'!
-ProtoObject subclass: #FarmToken
-	instanceVariableNames: 'doubled'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'FarmToken class' category: #'Farm-Graphics'!
-FarmToken class
-	instanceVariableNames: ''!
-
 
 !Farm commentStamp: '<historical>' prior: 0!
 The model for FarmingGame!
+
+!FarmToken commentStamp: '<historical>' prior: 0!
+The game piece for a farmer - a player in the Farming Game.!
 
 !FarmingGame commentStamp: '<historical>' prior: 0!
 Manage the visual effects of the Farming Game.
@@ -501,9 +504,6 @@ A player in the Farming Game.
 
 !FarmButton commentStamp: '<historical>' prior: 0!
 A button which can have its action selector changed.!
-
-!FarmToken commentStamp: '<historical>' prior: 0!
-The game piece for a farmer - a player in the Farming Game.!
 
 !Farm methodsFor: 'initialize-release' stamp: 'dhn 10/27/2014 20:26'!
 addTestPlayer: aString
@@ -2547,6 +2547,220 @@ season
 			enabled: true;
 			color: Color yellow; range: 47 @ 49);
 		yourself! !
+
+!FarmToken methodsFor: 'accessing' stamp: 'dhn 8/31/2017 15:21:13'!
+doubled
+	"Answer the value of doubled"
+
+	^ doubled! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:37:41'!
+feb4MoveFrom: aPosition
+	"Animate relocation of self when player moves ahead to Feb 4 from aPosition"
+	| oldPos newPos index n posns limit i final |
+	
+	final _ 9.
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ index atWrap: aPosition.
+	model positionBoardTo: oldPos.
+	self position: 1.
+	newPos _ final + 1.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
+	
+	self arrowRight.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer 
+					position: final;
+					years: 1 + model currentPlayer years;
+					salary.
+				model
+					setActionSelectorFor: #Harvest to: {model class harvestNormal};
+					setActionSelectorFor: #Expense to: {model class expenseNormal};
+					doSpace.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 10/10/2017 11:38:27'!
+jan2MoveFrom: aPosition
+	"Animate relocation of self when player must go BACK to Jan. 2 from aPosition"
+	| oldPos newPos index n posns limit i final |
+	
+	final _ 3.
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ index atWrap: aPosition - 6.
+	model positionBoardTo: oldPos.
+	self position: 7.
+	newPos _ index atWrap: final - 7.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n - 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
+	
+	self arrowLeft.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: final.
+				model doSpace.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 10/9/2017 17:43:57'!
+moonMove
+	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
+	| oldPos newPos index n posns limit i final |
+	
+	final _ 37.
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ model currentPlayer oldPosition.
+	model positionBoardTo: oldPos.
+	self position: 1.
+	newPos _ final + 1.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
+	
+	self arrowRight.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: final.
+				model
+					setActionSelectorFor: #Harvest to: {model class harvestNormal};
+					setActionSelectorFor: #Expense to: {model class expenseNormal}.
+				model currentPlayer ifCows
+					ifTrue: [model currentPlayer harvestEnabled
+							ifTrue: [model enableAll: {'Harvest'. 'Expense'}]]
+					ifFalse: [model endTurnCheck].
+				model doSpace.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/5/2017 21:58:48'!
+moved
+	"Perform the results of the move"
+	| pl |
+	
+	pl _ self who.
+	doubled contents: who doubledString.
+	model doSpace.
+	pl harvestEnabled ifFalse: [model updateHistory]! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 19:44:24'!
+position: aCell
+	"Position the receiver over the board cell numbered by aCell"
+	| horiz |
+	
+	self morphPosition: self posAdjust.
+	horiz _ (model cells at: aCell) morphPosition x.
+	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
+
+!FarmToken methodsFor: 'operations' stamp: 'dhn 9/14/2017 19:04:41'!
+springMove
+	"Animate relocation to Spring Planting when player lands on space 8"
+	| oldPos posns limit i final |
+	
+	final _ 15.
+	oldPos _ model currentPlayer oldPosition.
+	self arrowRight.
+	posns _ (Interval from: oldPos to: final - who roll by: 1) asArray.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: final.
+				model space15.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 9/2/2017 11:18:41'!
+initialize
+
+	super initialize.
+	
+	labelArea _ LayoutMorph newColumn 
+		layoutSpec: LayoutSpec useAll;
+		color: Color transparent;
+		name: 'label area';
+		separation: 1;
+		padding: #center.
+	labelArea
+		addMorph: self makeIdArea;
+		addMorph: self makeDoubledArea.
+
+	self addMorphFront: labelArea! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:13:17'!
+makeDoubledArea
+	"Lay out the area for the arrow"
+	| area |
+	
+	area _ LayoutMorph newRow
+		color: Color transparent;
+		name: #doubled;
+		padding: #center.
+	
+	doubled _ (StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
+		
+	area addMorph: doubled.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0)! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:11:56'!
+makeIdArea
+	"Lay out the area for the arrow"
+	| area |
+	
+	area _ LayoutMorph newRow
+		color: Color transparent;
+		name: #id;
+		padding: #center.
+	
+	id _ (StringMorph contents: 'Player') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
+		
+	area addMorph: id.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0)! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 10/9/2017 18:00:30'!
 buildMorphicWindow
@@ -6818,217 +7032,3 @@ lineWidth
 lineWidth: anObject
 
 	lineWidth := anObject! !
-
-!FarmToken methodsFor: 'accessing' stamp: 'dhn 8/31/2017 15:21:13'!
-doubled
-	"Answer the value of doubled"
-
-	^ doubled! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:37:41'!
-feb4MoveFrom: aPosition
-	"Animate relocation of self when player moves ahead to Feb 4 from aPosition"
-	| oldPos newPos index n posns limit i final |
-	
-	final _ 9.
-	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
-	oldPos _ index atWrap: aPosition.
-	model positionBoardTo: oldPos.
-	self position: 1.
-	newPos _ final + 1.
-	posns _ OrderedCollection new.
-	n _ oldPos.
-	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
-	posns _ posns asArray.
-	model positionBoardTo: posns first.
-	
-	self arrowRight.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer 
-					position: final;
-					years: 1 + model currentPlayer years;
-					salary.
-				model
-					setActionSelectorFor: #Harvest to: {model class harvestNormal};
-					setActionSelectorFor: #Expense to: {model class expenseNormal};
-					doSpace.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 10/10/2017 11:38:27'!
-jan2MoveFrom: aPosition
-	"Animate relocation of self when player must go BACK to Jan. 2 from aPosition"
-	| oldPos newPos index n posns limit i final |
-	
-	final _ 3.
-	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
-	oldPos _ index atWrap: aPosition - 6.
-	model positionBoardTo: oldPos.
-	self position: 7.
-	newPos _ index atWrap: final - 7.
-	posns _ OrderedCollection new.
-	n _ oldPos.
-	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n - 1].
-	posns _ posns asArray.
-	model positionBoardTo: posns first.
-	
-	self arrowLeft.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer position: final.
-				model doSpace.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 10/9/2017 17:43:57'!
-moonMove
-	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
-	| oldPos newPos index n posns limit i final |
-	
-	final _ 37.
-	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
-	oldPos _ model currentPlayer oldPosition.
-	model positionBoardTo: oldPos.
-	self position: 1.
-	newPos _ final + 1.
-	posns _ OrderedCollection new.
-	n _ oldPos.
-	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
-	posns _ posns asArray.
-	model positionBoardTo: posns first.
-	
-	self arrowRight.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer position: final.
-				model
-					setActionSelectorFor: #Harvest to: {model class harvestNormal};
-					setActionSelectorFor: #Expense to: {model class expenseNormal}.
-				model currentPlayer ifCows
-					ifTrue: [model currentPlayer harvestEnabled
-							ifTrue: [model enableAll: {'Harvest'. 'Expense'}]]
-					ifFalse: [model endTurnCheck].
-				model doSpace.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/5/2017 21:58:48'!
-moved
-	"Perform the results of the move"
-	| pl |
-	
-	pl _ self who.
-	doubled contents: who doubledString.
-	model doSpace.
-	pl harvestEnabled ifFalse: [model updateHistory]! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 19:44:24'!
-position: aCell
-	"Position the receiver over the board cell numbered by aCell"
-	| horiz |
-	
-	self morphPosition: self posAdjust.
-	horiz _ (model cells at: aCell) morphPosition x.
-	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/14/2017 19:04:41'!
-springMove
-	"Animate relocation to Spring Planting when player lands on space 8"
-	| oldPos posns limit i final |
-	
-	final _ 15.
-	oldPos _ model currentPlayer oldPosition.
-	self arrowRight.
-	posns _ (Interval from: oldPos to: final - who roll by: 1) asArray.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer position: final.
-				model space15.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'initialization' stamp: 'dhn 9/2/2017 11:18:41'!
-initialize
-
-	super initialize.
-	
-	labelArea _ LayoutMorph newColumn 
-		layoutSpec: LayoutSpec useAll;
-		color: Color transparent;
-		name: 'label area';
-		separation: 1;
-		padding: #center.
-	labelArea
-		addMorph: self makeIdArea;
-		addMorph: self makeDoubledArea.
-
-	self addMorphFront: labelArea! !
-
-!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:13:17'!
-makeDoubledArea
-	"Lay out the area for the arrow"
-	| area |
-	
-	area _ LayoutMorph newRow
-		color: Color transparent;
-		name: #doubled;
-		padding: #center.
-	
-	doubled _ (StringMorph contents: '') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
-		
-	area addMorph: doubled.
-	^ area	layoutSpec: (LayoutSpec  
-		proportionalWidth: 1.0)! !
-
-!FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:11:56'!
-makeIdArea
-	"Lay out the area for the arrow"
-	| area |
-	
-	area _ LayoutMorph newRow
-		color: Color transparent;
-		name: #id;
-		padding: #center.
-	
-	id _ (StringMorph contents: 'Player') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
-		
-	area addMorph: id.
-	^ area	layoutSpec: (LayoutSpec  
-		proportionalWidth: 1.0)! !
