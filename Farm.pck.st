@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 4:33:33 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 4:37:19 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 26!
+!provides: 'Farm' 1 27!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -3470,21 +3470,19 @@ assetAuctionItem
 	assetAuctionItem ifNil: [assetAuctionItem _ 0]. 	"nil is unacceptable during model initialization"
 	^ assetAuctionItem! !
 
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 19:53:09'!
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/29/2018 15:48:29'!
 assetAuctionItem: anObject
 	"Set the value of assetAuctionItem"
-	| enab |
 	
 	(assetAuctionItem _ anObject) ifNotNil: [
 		anObject isZero 
 			ifTrue: [
 				chant _ OrderedCollection with: ''.
-				enab _ false]
+				self beginButton disableButton]
 			ifFalse: [
 				self openingFor: assetAuctionItem.
-				enab _ true].
+				self beginButton enableButton].
 		self showChant.
-		self beginButton: enab.
 		self changed: #assetAuctionItem]! !
 
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/28/2018 20:34:27'!
