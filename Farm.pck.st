@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 9:56:53 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 10:00:11 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 22!
+!provides: 'Farm' 1 23!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -374,16 +374,6 @@ ProtoObject subclass: #FarmAuctionList
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmAuctionList class' category: #'Farm-Graphics'!
 FarmAuctionList class
-	instanceVariableNames: ''!
-
-!classDefinition: #FarmRelation category: #'Farm-Graphics'!
-ProtoObject subclass: #FarmRelation
-	instanceVariableNames: 'lineWidth'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'FarmRelation class' category: #'Farm-Graphics'!
-FarmRelation class
 	instanceVariableNames: ''!
 
 
@@ -6912,24 +6902,3 @@ windowLabelled: aString for: anObject
 	biddersPane color: Color white.
 	self removeWindowMenu: window.
 	^ window! !
-
-!FarmRelation methodsFor: 'as yet unclassified' stamp: 'dhn 1/3/2014 18:31'!
-drawContinuousOn: aCanvas transformation: aPlotToFormTransformation
-	collection overlappingPairsDo:
-	[:firstPoint :secondPoint|
-		aCanvas 
-			line: (aPlotToFormTransformation toFormPoint: firstPoint) asIntegerPoint
-			to: (aPlotToFormTransformation toFormPoint: secondPoint) asIntegerPoint
-			width: self lineWidth
-			color: color
-	]! !
-
-!FarmRelation methodsFor: 'accessing' stamp: 'dhn 1/3/2014 18:31'!
-lineWidth
-	lineWidth ifNil: [lineWidth := 2].
-	^ lineWidth! !
-
-!FarmRelation methodsFor: 'accessing' stamp: 'dhn 1/3/2014 18:31'!
-lineWidth: anObject
-
-	lineWidth := anObject! !
