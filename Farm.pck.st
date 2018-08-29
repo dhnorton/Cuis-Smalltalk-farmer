@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 9:30:59 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 9:38:39 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 19!
+!provides: 'Farm' 1 20!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -374,16 +374,6 @@ ProtoObject subclass: #FarmAuctionList
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmAuctionList class' category: #'Farm-Graphics'!
 FarmAuctionList class
-	instanceVariableNames: ''!
-
-!classDefinition: #FarmPlot category: #'Farm-Graphics'!
-ProtoObject subclass: #FarmPlot
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'FarmPlot class' category: #'Farm-Graphics'!
-FarmPlot class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmRelation category: #'Farm-Graphics'!
@@ -6988,30 +6978,6 @@ windowLabelled: aString for: anObject
 	biddersPane color: Color white.
 	self removeWindowMenu: window.
 	^ window! !
-
-!FarmPlot methodsFor: 'as yet unclassified' stamp: 'dhn 9/26/2014 13:40'!
-initialize
-	super initialize.
-
-! !
-
-!FarmPlot methodsFor: 'as yet unclassified' stamp: 'dhn 11/2/2014 11:47'!
-setUpPlotFor: aTarget
-	"Set up a plot of players' progress toward aTarget (goal) of the game"
-	| depth width |
-	self extent: 400@400.
-	depth := 1.2 * aTarget negated.
-	width := (#(120 200 600) at: self scaleXAxis).
-	plotRectangle := -2@depth corner: width@ 50000.
-	coordinatesUnitRectangle := 0@0  corner: 1@1.
-	relations := OrderedCollection new.
-	backgroundColor := Color white.
-	axesColor := Color black.
-	xLabelsAbove := true.
-	yLabelsLeft := false.
-	self xUnit: (#(10 20 50) at: self scaleXAxis).
-	self yUnit: ({20000. 50000. 100000. 200000. 500000. 1000000. 1500000. 2000000. 2500000. 3500000. 5000000} at: (1 + (mgr goal / mgr boardMgr class defaultGoal * 1.0) floor)).
-! !
 
 !FarmRelation methodsFor: 'as yet unclassified' stamp: 'dhn 1/3/2014 18:31'!
 drawContinuousOn: aCanvas transformation: aPlotToFormTransformation
