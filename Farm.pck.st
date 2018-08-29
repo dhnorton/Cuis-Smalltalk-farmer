@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:03:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:07:34 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 10!
+!provides: 'Farm' 1 11!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -14,6 +14,16 @@ GameBoard subclass: #FarmingGame
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmingGame class' category: #'Farm-Graphics'!
 FarmingGame class
+	instanceVariableNames: ''!
+
+!classDefinition: #AuctionAsset category: #'Farm-Graphics'!
+AuctionView subclass: #AuctionAsset
+	instanceVariableNames: 'asset auctionList assetAuctionItem assetAuctionReport'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'AuctionAsset class' category: #'Farm-Graphics'!
+AuctionAsset class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmingView category: #'Farm-Graphics'!
@@ -44,16 +54,6 @@ FarmingView subclass: #AssetView
 	category: 'Farm-Graphics'!
 !classDefinition: 'AssetView class' category: #'Farm-Graphics'!
 AssetView class
-	instanceVariableNames: ''!
-
-!classDefinition: #AuctionAsset category: #'Farm-Graphics'!
-FarmingView subclass: #AuctionAsset
-	instanceVariableNames: 'asset auctionList assetAuctionItem assetAuctionReport'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'AuctionAsset class' category: #'Farm-Graphics'!
-AuctionAsset class
 	instanceVariableNames: ''!
 
 !classDefinition: #DrawView category: #'Farm-Graphics'!
@@ -408,6 +408,9 @@ http://farmgame.com/product/woo-single-2/
 
 !
 
+!AuctionAsset commentStamp: '<historical>' prior: 0!
+A FarmingGame window which makes it possible for players to raise cash by selling assets.!
+
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
 
@@ -416,9 +419,6 @@ A FarmingGame view which shows a report on all players.!
 
 !AssetView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the status of a player's assets.!
-
-!AuctionAsset commentStamp: '<historical>' prior: 0!
-A FarmingGame window which makes it possible for players to raise cash by selling assets.!
 
 !DrawView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the option which was drawn.!
@@ -1261,6 +1261,293 @@ how
 	FarmingGame start.
 	"! !
 
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 12:37:01'!
+assetAuctionItem
+	"Answer the value of assetAuctionItem"
+
+	assetAuctionItem ifNil: [assetAuctionItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ assetAuctionItem! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 19:53:09'!
+assetAuctionItem: anObject
+	"Set the value of assetAuctionItem"
+	| enab |
+	
+	(assetAuctionItem _ anObject) ifNotNil: [
+		anObject isZero 
+			ifTrue: [
+				chant _ OrderedCollection with: ''.
+				enab _ false]
+			ifFalse: [
+				self openingFor: assetAuctionItem.
+				enab _ true].
+		self showChant.
+		self beginButton: enab.
+		self changed: #assetAuctionItem]! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 12:07:07'!
+assetAuctionList
+	"Answer a list for the asset auction window"
+	
+	^ player
+		ifNotNil: [player auctionable]
+		ifNil: [OrderedCollection new]! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/9/2017 17:53:58'!
+assetSold
+	"Record the sale; enable End button"
+	| seller purchase recipient |
+	
+	cancelButton disableButton.
+	endButton enableButton.
+	buyers removeAllMorphs.
+	chant addFirst: (String streamContents: [:str |
+		str
+			nextPutAll: 'SOLD!! to ';
+			nextPutAll: currentBidder;
+			nextPutAll: ' for $';
+			nextPutAll: self currentBid printStringWithCommas; newLine]).
+	self showChant.
+	seller _ model currentPlayer.
+	seller sellAsset: asset description for: currentBid.
+	currentBidder = self class bankName
+		ifTrue: [recipient _ currentBidder]
+		ifFalse: [
+			recipient _ model players detect: [:pl | pl identity = currentBidder] ifNone: [].
+			recipient tally: currentBid negated.
+			purchase _ recipient assets at: asset description.
+			purchase cost: purchase cost + currentBid.
+			purchase quantity: purchase quantity + 1.
+			(model availableOptions at: purchase description) owner: recipient].
+	model currentPlayer cash < 0 ifFalse: [
+		model updateHistory.
+		model endTurnCheck].
+	model updatePlayer! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 11:43:51'!
+beginAuction
+	"Show the bid increments and let the bidding begin"
+	
+	self 
+		soldEndButtons;
+		beat: #assetSold;
+		buyerButtons;
+		auctionList: self class bidIncrement;
+		assetAuctionItem: 1;
+		changed: #assetAuctionList.
+	heading contents: 'Bid Increment'.
+	begun _ true
+! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 18:09:43'!
+details
+	"Set the contents of the chant pane"
+	
+	self assetAuctionItem > 0
+		ifTrue: [
+			self openingFor: self assetAuctionItem.
+			beginButton enableButton]
+		ifFalse: [
+			begun ifFalse: [
+				chant _ ''.
+				self showChant.
+				beginButton disableButton]]! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:42:27'!
+offer: aName
+	"Record a bid by aName"
+	
+	assetAuctionItem > 0 
+		ifTrue: [
+			currentBid _ currentBid + (self class bidBump at: assetAuctionItem).
+			currentBidder _ aName.
+			chant addFirst: (String streamContents: [:str |
+				str
+					nextPut: $$;
+					nextPutAll: self currentBid printStringWithCommas;
+					nextPutAll: ' was bid.'; newLine]).
+			self showChant.
+			self going: 0.
+			buyers submorphsDo: [:ea | ea enableButton].
+			(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton]
+		ifFalse: [
+			buyers submorphsDo: [:ea | ea enableButton].
+			(buyers findDeepSubmorphThat: [:mm | mm label = currentBidder] ifAbsent: [^ self]) disableButton]! !
+
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:17:04'!
+openingFor: anItem
+	"Form the opening bid for anItem"
+	| listItem item opening xlation |
+	
+	{assetAuctionItem} print.
+	listItem _ self assetAuctionList at: anItem.
+	item _ (listItem findTokens: '()' keep: ($A to:$Z), ($a to: $z)) first.
+	xlation _ model class translate: item.
+	asset _ player assets at: xlation asSymbol ifAbsent: [self halt].
+	opening _ (asset class price * asset class lotQuantity) // 2.
+	self currentBid: opening.
+	currentBidder _ self class bankName.
+	chant _ OrderedCollection new.
+	chant addFirst: (String streamContents: [:string |
+		string
+			nextPutAll: 'The opening bid for ';
+			nextPutAll: item;
+			nextPutAll: ' by ';
+			nextPutAll: self class bankName;
+			nextPutAll: ' will be for ';
+			nextPut: $$;
+			nextPutAll: opening printStringWithCommas;
+			nextPutAll: ' (half the list price).'; newLine])! !
+
+!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
+auctionList: anObject
+	"Set the value of auctionList"
+	
+	auctionList _ anObject! !
+
+!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
+getList
+	"Update the list of assets"
+	
+	self assetAuctionItem: 0.
+	list updateList! !
+
+!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 10/1/2016 15:33:53'!
+buildMorphicWindow
+	"Lay out the window for auctioning an asset"
+	
+	buttonsArea _ (LayoutMorph newRow)
+		name: #buttons;
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+			
+	self layoutMorph
+		addMorph: buttonsArea;
+		addMorph: self setUpMidRow;
+		addMorph: (buyers _ self setUpBuyers)! !
+
+!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 9/15/2017 22:03:39'!
+setUpMidRow
+	"Answer the layout for the middle row of the Job Auction window"
+	| row leftPane headingArea |
+	
+	list _ (PluggableListMorph
+		model: self
+		listGetter: #assetAuctionList
+		indexGetter: #assetAuctionItem
+		indexSetter: #assetAuctionItem:
+		mainView: self
+		menuGetter: nil
+		keystrokeAction: nil)
+			name: #catalog;
+			layoutSpec: (LayoutSpec 
+				proportionalWidth: 1.0
+				proportionalHeight: 0.9
+				minorDirectionPadding: #center).
+
+	heading _ ((StringMorph contents: 'Assets') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 10)).
+	headingArea _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.1
+			minorDirectionPadding: #center);
+		name: 'heading area';
+		padding: #left.
+	headingArea addMorph: heading.
+
+	
+	leftPane _ (LayoutMorph newColumn)
+		name: 'left pane';
+		addMorph: headingArea;
+		addMorph: list.
+
+	textPane _ (TextModelMorph
+		withModel: (TextModel withText: '')) 	"note the different model specification"
+			askBeforeDiscardingEdits: false;	"discard changes to the text"
+			name: 'chant'. 	"give the TextModelMorph a name which will appear in the halos"
+	textPane 
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 0.6
+			proportionalHeight: 1.0
+			minorDirectionPadding: #center).
+
+	row _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.7
+			minorDirectionPadding: #center).
+	row
+		name: 'mid row';
+		addMorph: leftPane proportionalWidth: 0.4;
+		addAdjusterAndMorph: textPane layoutSpec: (LayoutSpec useAll).
+		
+	^ row
+	
+
+! !
+
+!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 3/18/2017 20:18:17'!
+buyerButtons
+	"Set bidding buttons for the players"
+	| col |
+	
+	col _ OrderedCollection new.
+	model players do: [:ea |
+		col add: ((BidderButton label: ea identity action: #offer: state: true model: self)
+			morphExtent: 70@30;
+			color: ea color;
+			setBalloonText: 'bidder')].
+	buyers addAllMorphs: col reversed! !
+
+!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 9/20/2016 13:16:38'!
+startButtons
+	"Set the initial buttons for asset auction"
+	
+	buttonsArea
+		removeAllMorphs;
+		addMorph: self makeBeginButton;
+		addMorph: self makeCancelButton;
+		padding: #center
+! !
+
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:44'!
+closeBoxHit
+
+	model enableAll: {'Auction'}.
+	model moveButton enabled
+		ifFalse: [begun ifFalse: [model endTurnCheck]].
+	super closeBoxHit! !
+
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:26'!
+endIt
+	
+	model enableAll: {'Auction'}.
+	model moveButton enabled
+		ifFalse: [begun ifFalse: [model endTurnCheck]].
+	self delete! !
+
+!AuctionAsset class methodsFor: 'data base' stamp: 'dhn 9/15/2017 20:38:56'!
+bankName
+	^ 'First Friendly Bank'! !
+
+!AuctionAsset class methodsFor: 'class initialization' stamp: 'dhn 9/16/2017 11:50:18'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel label: 'Asset Auction'.
+	win removeWindowMenu.
+			
+	aModel when: #itemChange send: #getList to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
 !FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 aboutToBeGrabbedBy: aHand
 	"The receiver is being grabbed by a hand.
@@ -1589,293 +1876,6 @@ translate: aName
 	{'CattleOnFarm'. 'Ahtanum'. 'Rattlesnake'. 'Cascade'. 'Toppenish'}
 		detect: [:a | a = aName] ifNone: [^ aName].
 	^ 'Livestock'
-! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 12:37:01'!
-assetAuctionItem
-	"Answer the value of assetAuctionItem"
-
-	assetAuctionItem ifNil: [assetAuctionItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ assetAuctionItem! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 19:53:09'!
-assetAuctionItem: anObject
-	"Set the value of assetAuctionItem"
-	| enab |
-	
-	(assetAuctionItem _ anObject) ifNotNil: [
-		anObject isZero 
-			ifTrue: [
-				chant _ OrderedCollection with: ''.
-				enab _ false]
-			ifFalse: [
-				self openingFor: assetAuctionItem.
-				enab _ true].
-		self showChant.
-		self beginButton: enab.
-		self changed: #assetAuctionItem]! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 12:07:07'!
-assetAuctionList
-	"Answer a list for the asset auction window"
-	
-	^ player
-		ifNotNil: [player auctionable]
-		ifNil: [OrderedCollection new]! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/9/2017 17:53:58'!
-assetSold
-	"Record the sale; enable End button"
-	| seller purchase recipient |
-	
-	cancelButton disableButton.
-	endButton enableButton.
-	buyers removeAllMorphs.
-	chant addFirst: (String streamContents: [:str |
-		str
-			nextPutAll: 'SOLD!! to ';
-			nextPutAll: currentBidder;
-			nextPutAll: ' for $';
-			nextPutAll: self currentBid printStringWithCommas; newLine]).
-	self showChant.
-	seller _ model currentPlayer.
-	seller sellAsset: asset description for: currentBid.
-	currentBidder = self class bankName
-		ifTrue: [recipient _ currentBidder]
-		ifFalse: [
-			recipient _ model players detect: [:pl | pl identity = currentBidder] ifNone: [].
-			recipient tally: currentBid negated.
-			purchase _ recipient assets at: asset description.
-			purchase cost: purchase cost + currentBid.
-			purchase quantity: purchase quantity + 1.
-			(model availableOptions at: purchase description) owner: recipient].
-	model currentPlayer cash < 0 ifFalse: [
-		model updateHistory.
-		model endTurnCheck].
-	model updatePlayer! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 11:43:51'!
-beginAuction
-	"Show the bid increments and let the bidding begin"
-	
-	self 
-		soldEndButtons;
-		beat: #assetSold;
-		buyerButtons;
-		auctionList: self class bidIncrement;
-		assetAuctionItem: 1;
-		changed: #assetAuctionList.
-	heading contents: 'Bid Increment'.
-	begun _ true
-! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 18:09:43'!
-details
-	"Set the contents of the chant pane"
-	
-	self assetAuctionItem > 0
-		ifTrue: [
-			self openingFor: self assetAuctionItem.
-			beginButton enableButton]
-		ifFalse: [
-			begun ifFalse: [
-				chant _ ''.
-				self showChant.
-				beginButton disableButton]]! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:42:27'!
-offer: aName
-	"Record a bid by aName"
-	
-	assetAuctionItem > 0 
-		ifTrue: [
-			currentBid _ currentBid + (self class bidBump at: assetAuctionItem).
-			currentBidder _ aName.
-			chant addFirst: (String streamContents: [:str |
-				str
-					nextPut: $$;
-					nextPutAll: self currentBid printStringWithCommas;
-					nextPutAll: ' was bid.'; newLine]).
-			self showChant.
-			self going: 0.
-			buyers submorphsDo: [:ea | ea enableButton].
-			(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton]
-		ifFalse: [
-			buyers submorphsDo: [:ea | ea enableButton].
-			(buyers findDeepSubmorphThat: [:mm | mm label = currentBidder] ifAbsent: [^ self]) disableButton]! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:17:04'!
-openingFor: anItem
-	"Form the opening bid for anItem"
-	| listItem item opening xlation |
-	
-	{assetAuctionItem} print.
-	listItem _ self assetAuctionList at: anItem.
-	item _ (listItem findTokens: '()' keep: ($A to:$Z), ($a to: $z)) first.
-	xlation _ model class translate: item.
-	asset _ player assets at: xlation asSymbol ifAbsent: [self halt].
-	opening _ (asset class price * asset class lotQuantity) // 2.
-	self currentBid: opening.
-	currentBidder _ self class bankName.
-	chant _ OrderedCollection new.
-	chant addFirst: (String streamContents: [:string |
-		string
-			nextPutAll: 'The opening bid for ';
-			nextPutAll: item;
-			nextPutAll: ' by ';
-			nextPutAll: self class bankName;
-			nextPutAll: ' will be for ';
-			nextPut: $$;
-			nextPutAll: opening printStringWithCommas;
-			nextPutAll: ' (half the list price).'; newLine])! !
-
-!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
-auctionList: anObject
-	"Set the value of auctionList"
-	
-	auctionList _ anObject! !
-
-!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
-getList
-	"Update the list of assets"
-	
-	self assetAuctionItem: 0.
-	list updateList! !
-
-!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 10/1/2016 15:33:53'!
-buildMorphicWindow
-	"Lay out the window for auctioning an asset"
-	
-	buttonsArea _ (LayoutMorph newRow)
-		name: #buttons;
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-			
-	self layoutMorph
-		addMorph: buttonsArea;
-		addMorph: self setUpMidRow;
-		addMorph: (buyers _ self setUpBuyers)! !
-
-!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 9/15/2017 22:03:39'!
-setUpMidRow
-	"Answer the layout for the middle row of the Job Auction window"
-	| row leftPane headingArea |
-	
-	list _ (PluggableListMorph
-		model: self
-		listGetter: #assetAuctionList
-		indexGetter: #assetAuctionItem
-		indexSetter: #assetAuctionItem:
-		mainView: self
-		menuGetter: nil
-		keystrokeAction: nil)
-			name: #catalog;
-			layoutSpec: (LayoutSpec 
-				proportionalWidth: 1.0
-				proportionalHeight: 0.9
-				minorDirectionPadding: #center).
-
-	heading _ ((StringMorph contents: 'Assets') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' pointSize: 10)).
-	headingArea _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.1
-			minorDirectionPadding: #center);
-		name: 'heading area';
-		padding: #left.
-	headingArea addMorph: heading.
-
-	
-	leftPane _ (LayoutMorph newColumn)
-		name: 'left pane';
-		addMorph: headingArea;
-		addMorph: list.
-
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'chant'. 	"give the TextModelMorph a name which will appear in the halos"
-	textPane 
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 0.6
-			proportionalHeight: 1.0
-			minorDirectionPadding: #center).
-
-	row _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.7
-			minorDirectionPadding: #center).
-	row
-		name: 'mid row';
-		addMorph: leftPane proportionalWidth: 0.4;
-		addAdjusterAndMorph: textPane layoutSpec: (LayoutSpec useAll).
-		
-	^ row
-	
-
-! !
-
-!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 3/18/2017 20:18:17'!
-buyerButtons
-	"Set bidding buttons for the players"
-	| col |
-	
-	col _ OrderedCollection new.
-	model players do: [:ea |
-		col add: ((BidderButton label: ea identity action: #offer: state: true model: self)
-			morphExtent: 70@30;
-			color: ea color;
-			setBalloonText: 'bidder')].
-	buyers addAllMorphs: col reversed! !
-
-!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 9/20/2016 13:16:38'!
-startButtons
-	"Set the initial buttons for asset auction"
-	
-	buttonsArea
-		removeAllMorphs;
-		addMorph: self makeBeginButton;
-		addMorph: self makeCancelButton;
-		padding: #center
-! !
-
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:44'!
-closeBoxHit
-
-	model enableAll: {'Auction'}.
-	model moveButton enabled
-		ifFalse: [begun ifFalse: [model endTurnCheck]].
-	super closeBoxHit! !
-
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/9/2017 17:53:26'!
-endIt
-	
-	model enableAll: {'Auction'}.
-	model moveButton enabled
-		ifFalse: [begun ifFalse: [model endTurnCheck]].
-	self delete! !
-
-!AuctionAsset class methodsFor: 'data base' stamp: 'dhn 9/15/2017 20:38:56'!
-bankName
-	^ 'First Friendly Bank'! !
-
-!AuctionAsset class methodsFor: 'class initialization' stamp: 'dhn 9/16/2017 11:50:18'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel label: 'Asset Auction'.
-	win removeWindowMenu.
-			
-	aModel when: #itemChange send: #getList to: win.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
 ! !
 
 !DrawView methodsFor: 'termination' stamp: 'dhn 10/10/2017 10:28:46'!
