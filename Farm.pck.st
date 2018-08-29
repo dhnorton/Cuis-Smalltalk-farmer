@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 4:28:34 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 4:33:33 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 25!
+!provides: 'Farm' 1 26!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -3249,7 +3249,7 @@ showAssets
 				morphPosition: self windowPosition;
 				morphExtent: 300 @ 220]! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/16/2017 12:05:36'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 8/29/2018 15:45:20'!
 showAuctionAssets
 	"Show window for auctioning assets"
 	| pl win |
@@ -3260,7 +3260,7 @@ showAuctionAssets
 			win _ AuctionAsset openOn: model.
 			win openInWorld: pasteup.
 			win
-				player: pl;
+				seller: pl;
 				setWindowColor: pl color;
 				startButtons;
 				morphPosition: self windowPosition;
