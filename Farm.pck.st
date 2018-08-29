@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:21:50 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:23:52 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 14!
+!provides: 'Farm' 1 15!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -316,6 +316,16 @@ CattleOnLease subclass: #Toppenish
 Toppenish class
 	instanceVariableNames: ''!
 
+!classDefinition: #Farmer category: #'Farm-Model'!
+Gamer subclass: #Farmer
+	instanceVariableNames: 'offFarm options priorOptions garnish emergencies harvests markets spaceEffect harvesting'
+	classVariableNames: 'FarmerTest'
+	poolDictionaries: ''
+	category: 'Farm-Model'!
+!classDefinition: 'Farmer class' category: #'Farm-Model'!
+Farmer class
+	instanceVariableNames: ''!
+
 !classDefinition: #Field category: #'Farm-Model'!
 Object subclass: #Field
 	instanceVariableNames: 'heading description label'
@@ -344,16 +354,6 @@ ProtoObject subclass: #FarmSeason
 	category: 'Farm-Model'!
 !classDefinition: 'FarmSeason class' category: #'Farm-Model'!
 FarmSeason class
-	instanceVariableNames: ''!
-
-!classDefinition: #Farmer category: #'Farm-Model'!
-ProtoObject subclass: #Farmer
-	instanceVariableNames: 'offFarm options priorOptions garnish emergencies harvests markets spaceEffect harvesting'
-	classVariableNames: 'FarmerTest'
-	poolDictionaries: ''
-	category: 'Farm-Model'!
-!classDefinition: 'Farmer class' category: #'Farm-Model'!
-Farmer class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmAuctionList category: #'Farm-Graphics'!
@@ -492,15 +492,15 @@ The model for the Rattlesnake Ridge lease.!
 !Toppenish commentStamp: '<historical>' prior: 0!
 The model for the Toppenish Ridge lease.!
 
+!Farmer commentStamp: '<historical>' prior: 0!
+A player in the Farming Game.
+!
+
 !Field commentStamp: '<historical>' prior: 0!
 A JobSite describes the attributes of a space on the game board!
 
 !FarmSeason commentStamp: '<historical>' prior: 0!
 The model for a season of the year on the farm.!
-
-!Farmer commentStamp: '<historical>' prior: 0!
-A player in the Farming Game.
-!
 
 !FarmButton commentStamp: '<historical>' prior: 0!
 A button which can have its action selector changed.!
@@ -5516,210 +5516,6 @@ buy 50 pregnant cows to stock it
 at $500 each
 Total $', self optionCost printStringWithCommas! !
 
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 10/21/2014 20:11'!
-describe
-	"Answer a string which describes the field"
-	^ String new writeStream
-		nextPutAll: self heading;
-		nextPutAll: self description;
-		contents	! !
-
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:58:29'!
-describeMarket
-	"Answer a string containing the market name"
-	^ label, Character newLine	! !
-
-!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:26:00'!
-heading: string1 with: string2
-	"Set the heading to string1, newLine, string2"
-	| str |
-	
-	str := String new writeStream.
-	str nextPutAll: string1; newLine;
-		nextPutAll: string2.
-	self heading: str contents! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
-description
-	"Answer the description for the cell of this site"
-	^ description! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 8/29/2017 21:34:55'!
-description: anObject
-	"Set the description for the cell of this site"
-	| str |
-	
-	str _ String new writeStream.
-	str newLine; newLine; nextPutAll: anObject.
-	description _ str contents! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
-heading
-	"Answer the short heading describing this site"
-	^ heading! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
-heading: anObject
-	"Set the short heading describing this site"
-	heading := anObject! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:54:42'!
-label
-	"Answer the value of label"
-
-	^ label! !
-
-!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:55:38'!
-label: anObject
-	"Set the value of label"
-
-	label _ anObject! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:17'!
-assetLabel
-	^ ' Auction of ' , self mgr currentPlayer identity , '''s Assets'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 15:00'!
-assetPressed
-	self listAssets.
-	window model 
-		 text1: '';
-		 changed: #text1.
-	window setLabel: self assetLabel.
-	window model assetButton disableButton.
-	mgr currentPlayer options notEmpty
-		ifTrue: [window model optionButton enableButton]
-		ifFalse: [window model optionButton disableButton]! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/8/2014 20:52'!
-deleteAuction
-	mgr enableAll: {'Auction'}.
-	self restoreButtonState.
-	window delete! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/8/2014 19:33'!
-endAsset
-	mgr enableAll: {'Auction'}.
-	self deleteAuction.
-! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/10/2013 20:22'!
-initialize
-	super initialize.
-! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 14:59'!
-listAssets
-	window model collection: mgr currentPlayer auctionable;
-		 selectedItem: 0;
-		 changed: #list;
-		 showingAssets: true.
-	window model soldButton actionSelector: #soldAsset.
-	window model listHeading contents: 'ASSETS'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 12:10'!
-listOptions
-	| list |
-	mgr currentPlayer options notEmpty
-		ifTrue: [
-			window model soldButton actionSelector: #soldOption.
-			list := mgr currentPlayer options]
-		ifFalse: [list := OrderedCollection new.].
-	window model collection: list;
-		 selectedItem: 0;
-		 changed: #list;
-		 showingAssets: false.
-	window model listHeading contents: 'OPTIONS'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:18'!
-optionLabel
-	^ ' Auction of ' , self mgr currentPlayer identity , '''s Options'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 14:59'!
-optionPressed
-	self listOptions.
-	window model 
-		 text1: '';
-		 changed: #text1.
-	window setLabel: self optionLabel.
-	window model optionButton disableButton.
-	mgr currentPlayer assets notEmpty
-		ifTrue: [window model assetButton enableButton]
-		ifFalse: [window model assetButton disableButton]! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/12/2014 21:08'!
-optionsOrAssetsToSell
-	window model optionButton disableButton.
-	mgr currentPlayer options isEmpty
-		ifTrue: [window model assetButton disableButton.
-			mgr currentPlayer assets isEmpty
-				ifFalse: [self listAssets]]
-		ifFalse: [self listOptions.
-			window model assetButton enableButton].
-! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 14:41'!
-sellAssets
-	| xl xw |
-	xl := FarmAuctionList new.
-	xl chanter: self;
-		 player: self mgr currentPlayer.
-	xw := xl windowLabelled: self assetLabel for: self.
-	xl buttonsPane addAllMorphs: xl choiceButtons.
-	xl buttonsPane addAllMorphs: xl assetButtons.
-	xw setWindowColor: self mgr currentPlayer tokenColor.
-	xw openInWorld.
-	xw extent: 450 @ 280.
-	self mgr arena addMorph: xw.
-	xw center: self mgr arena center.
-	self window: xw.
-	self listAssets! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 15:02'!
-showAssetAuction
-	| xl xw |
-	xl := FarmAuctionList new.
-	xl chanter: self;
-		 player: self mgr currentPlayer.
-	xw := xl windowLabelled: self assetLabel for: self.
-	xl buttonsPane addAllMorphs: xl assetButtons.
-	xw setWindowColor: self mgr currentPlayer tokenColor.
-	xw openInWorld.
-	xw extent: 450 @ 280.
-	self mgr arena addMorph: xw.
-	xw center: self mgr arena center.
-	self window: xw.
-	self listAssets! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 15:08'!
-showOptionAuction
-	| xl xw |
-	xl := FarmAuctionList new.
-	xl chanter: self;
-		 player: self mgr currentPlayer.
-	xw := xl windowLabelled: self optionLabel for: self.
-	xl buttonsPane addAllMorphs: xl assetButtons.
-	xw setWindowColor: self mgr currentPlayer tokenColor.
-	xw openInWorld.
-	xw extent: 450 @ 280.
-	self mgr arena addMorph: xw.
-	xw center: self mgr arena center.
-	self window: xw.
-	self listOptions! !
-
-!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:03:23'!
-enabled
-	"Answer the value of enabled"
-
-	enabled ifNil: [enabled _ false].
-	^ enabled! !
-
-!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:04:15'!
-enabled: anObject
-	"Set the value of enabled"
-	
-	enabled _ anObject! !
-
 !Farmer methodsFor: 'accessing' stamp: 'dhn 12/14/2011 11:47'!
 addOption: anObject
 	anObject notNil ifTrue: [self options addFirst: anObject].
@@ -6657,6 +6453,210 @@ moveInterval
 !Farmer class methodsFor: 'as yet unclassified' stamp: 'dhn 9/22/2011 19:07'!
 test: aString
 	FarmerTest := aString.! !
+
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 10/21/2014 20:11'!
+describe
+	"Answer a string which describes the field"
+	^ String new writeStream
+		nextPutAll: self heading;
+		nextPutAll: self description;
+		contents	! !
+
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 18:58:29'!
+describeMarket
+	"Answer a string containing the market name"
+	^ label, Character newLine	! !
+
+!Field methodsFor: 'as yet unclassified' stamp: 'dhn 8/29/2017 21:26:00'!
+heading: string1 with: string2
+	"Set the heading to string1, newLine, string2"
+	| str |
+	
+	str := String new writeStream.
+	str nextPutAll: string1; newLine;
+		nextPutAll: string2.
+	self heading: str contents! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
+description
+	"Answer the description for the cell of this site"
+	^ description! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 8/29/2017 21:34:55'!
+description: anObject
+	"Set the description for the cell of this site"
+	| str |
+	
+	str _ String new writeStream.
+	str newLine; newLine; nextPutAll: anObject.
+	description _ str contents! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
+heading
+	"Answer the short heading describing this site"
+	^ heading! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 10/20/2014 18:43'!
+heading: anObject
+	"Set the short heading describing this site"
+	heading := anObject! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:54:42'!
+label
+	"Answer the value of label"
+
+	^ label! !
+
+!Field methodsFor: 'accessing' stamp: 'dhn 8/30/2017 18:55:38'!
+label: anObject
+	"Set the value of label"
+
+	label _ anObject! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:17'!
+assetLabel
+	^ ' Auction of ' , self mgr currentPlayer identity , '''s Assets'! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 15:00'!
+assetPressed
+	self listAssets.
+	window model 
+		 text1: '';
+		 changed: #text1.
+	window setLabel: self assetLabel.
+	window model assetButton disableButton.
+	mgr currentPlayer options notEmpty
+		ifTrue: [window model optionButton enableButton]
+		ifFalse: [window model optionButton disableButton]! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/8/2014 20:52'!
+deleteAuction
+	mgr enableAll: {'Auction'}.
+	self restoreButtonState.
+	window delete! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/8/2014 19:33'!
+endAsset
+	mgr enableAll: {'Auction'}.
+	self deleteAuction.
+! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/10/2013 20:22'!
+initialize
+	super initialize.
+! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 14:59'!
+listAssets
+	window model collection: mgr currentPlayer auctionable;
+		 selectedItem: 0;
+		 changed: #list;
+		 showingAssets: true.
+	window model soldButton actionSelector: #soldAsset.
+	window model listHeading contents: 'ASSETS'! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 12:10'!
+listOptions
+	| list |
+	mgr currentPlayer options notEmpty
+		ifTrue: [
+			window model soldButton actionSelector: #soldOption.
+			list := mgr currentPlayer options]
+		ifFalse: [list := OrderedCollection new.].
+	window model collection: list;
+		 selectedItem: 0;
+		 changed: #list;
+		 showingAssets: false.
+	window model listHeading contents: 'OPTIONS'! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:18'!
+optionLabel
+	^ ' Auction of ' , self mgr currentPlayer identity , '''s Options'! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 14:59'!
+optionPressed
+	self listOptions.
+	window model 
+		 text1: '';
+		 changed: #text1.
+	window setLabel: self optionLabel.
+	window model optionButton disableButton.
+	mgr currentPlayer assets notEmpty
+		ifTrue: [window model assetButton enableButton]
+		ifFalse: [window model assetButton disableButton]! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/12/2014 21:08'!
+optionsOrAssetsToSell
+	window model optionButton disableButton.
+	mgr currentPlayer options isEmpty
+		ifTrue: [window model assetButton disableButton.
+			mgr currentPlayer assets isEmpty
+				ifFalse: [self listAssets]]
+		ifFalse: [self listOptions.
+			window model assetButton enableButton].
+! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 14:41'!
+sellAssets
+	| xl xw |
+	xl := FarmAuctionList new.
+	xl chanter: self;
+		 player: self mgr currentPlayer.
+	xw := xl windowLabelled: self assetLabel for: self.
+	xl buttonsPane addAllMorphs: xl choiceButtons.
+	xl buttonsPane addAllMorphs: xl assetButtons.
+	xw setWindowColor: self mgr currentPlayer tokenColor.
+	xw openInWorld.
+	xw extent: 450 @ 280.
+	self mgr arena addMorph: xw.
+	xw center: self mgr arena center.
+	self window: xw.
+	self listAssets! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 15:02'!
+showAssetAuction
+	| xl xw |
+	xl := FarmAuctionList new.
+	xl chanter: self;
+		 player: self mgr currentPlayer.
+	xw := xl windowLabelled: self assetLabel for: self.
+	xl buttonsPane addAllMorphs: xl assetButtons.
+	xw setWindowColor: self mgr currentPlayer tokenColor.
+	xw openInWorld.
+	xw extent: 450 @ 280.
+	self mgr arena addMorph: xw.
+	xw center: self mgr arena center.
+	self window: xw.
+	self listAssets! !
+
+!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 15:08'!
+showOptionAuction
+	| xl xw |
+	xl := FarmAuctionList new.
+	xl chanter: self;
+		 player: self mgr currentPlayer.
+	xw := xl windowLabelled: self optionLabel for: self.
+	xl buttonsPane addAllMorphs: xl assetButtons.
+	xw setWindowColor: self mgr currentPlayer tokenColor.
+	xw openInWorld.
+	xw extent: 450 @ 280.
+	self mgr arena addMorph: xw.
+	xw center: self mgr arena center.
+	self window: xw.
+	self listOptions! !
+
+!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:03:23'!
+enabled
+	"Answer the value of enabled"
+
+	enabled ifNil: [enabled _ false].
+	^ enabled! !
+
+!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:04:15'!
+enabled: anObject
+	"Set the value of enabled"
+	
+	enabled _ anObject! !
 
 !FarmAuctionList methodsFor: 'as yet unclassified' stamp: 'dhn 12/14/2013 20:59'!
 assetButton
