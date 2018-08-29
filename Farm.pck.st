@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 9:49:30 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 9:56:53 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 21!
+!provides: 'Farm' 1 22!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -1153,11 +1153,11 @@ expenses
 
 	^ expenses! !
 
-!Farm methodsFor: 'fates' stamp: 'dhn 10/9/2017 17:02:41'!
+!Farm methodsFor: 'fates' stamp: 'dhn 8/29/2018 09:55:04'!
 drawFate
 	"Draw a farmer's fate card, account for it, and place it in the discard pile."
 	"Special case: inheritance from Uncle Bert"
-	| assoc tale response |
+	| assoc tale |
 	
 	assoc _ self drawCard: self fates discard: self drawnFates.
 	self triggerEvent: #itemChange.
