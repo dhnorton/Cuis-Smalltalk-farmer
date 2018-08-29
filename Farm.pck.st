@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 4:37:19 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 5:43:19 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 27!
+!provides: 'Farm' 1 28!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -3628,12 +3628,12 @@ buildMorphicWindow
 		addMorph: self setUpMidRow;
 		addMorph: (buyers _ self setUpBuyers)! !
 
-!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 8/28/2018 20:38:28'!
+!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 8/29/2018 17:40:07'!
 setUpMidRow
 	"Answer the layout for the middle row of the Job Auction window"
-	| listMorph row leftPane headingArea |
+	| row leftPane headingArea |
 	
-	listMorph _ (PluggableListMorph
+	list _ (PluggableListMorph
 		model: self
 		listGetter: #assetAuctionList
 		indexGetter: #assetAuctionItem
@@ -3663,7 +3663,7 @@ setUpMidRow
 	leftPane _ (LayoutMorph newColumn)
 		name: 'left pane';
 		addMorph: headingArea;
-		addMorph: listMorph.
+		addMorph: list.
 
 	textPane _ (TextModelMorph
 		withModel: (TextModel withText: '')) 	"note the different model specification"
