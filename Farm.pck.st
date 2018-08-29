@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 5:43:19 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 5:47:18 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 28!
+!provides: 'Farm' 1 29!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -344,16 +344,6 @@ Object subclass: #Field
 	category: 'Farm-Model'!
 !classDefinition: 'Field class' category: #'Farm-Model'!
 Field class
-	instanceVariableNames: ''!
-
-!classDefinition: #FarmAuctioneer category: #'Farm-Model'!
-ProtoObject subclass: #FarmAuctioneer
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Model'!
-!classDefinition: 'FarmAuctioneer class' category: #'Farm-Model'!
-FarmAuctioneer class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmAuctionList category: #'Farm-Graphics'!
@@ -6443,138 +6433,6 @@ label: anObject
 	"Set the value of label"
 
 	label _ anObject! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:17'!
-assetLabel
-	^ ' Auction of ' , self mgr currentPlayer identity , '''s Assets'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 15:00'!
-assetPressed
-	self listAssets.
-	window model 
-		 text1: '';
-		 changed: #text1.
-	window setLabel: self assetLabel.
-	window model assetButton disableButton.
-	mgr currentPlayer options notEmpty
-		ifTrue: [window model optionButton enableButton]
-		ifFalse: [window model optionButton disableButton]! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/8/2014 20:52'!
-deleteAuction
-	mgr enableAll: {'Auction'}.
-	self restoreButtonState.
-	window delete! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/8/2014 19:33'!
-endAsset
-	mgr enableAll: {'Auction'}.
-	self deleteAuction.
-! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/10/2013 20:22'!
-initialize
-	super initialize.
-! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 14:59'!
-listAssets
-	window model collection: mgr currentPlayer auctionable;
-		 selectedItem: 0;
-		 changed: #list;
-		 showingAssets: true.
-	window model soldButton actionSelector: #soldAsset.
-	window model listHeading contents: 'ASSETS'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/20/2014 12:10'!
-listOptions
-	| list |
-	mgr currentPlayer options notEmpty
-		ifTrue: [
-			window model soldButton actionSelector: #soldOption.
-			list := mgr currentPlayer options]
-		ifFalse: [list := OrderedCollection new.].
-	window model collection: list;
-		 selectedItem: 0;
-		 changed: #list;
-		 showingAssets: false.
-	window model listHeading contents: 'OPTIONS'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:18'!
-optionLabel
-	^ ' Auction of ' , self mgr currentPlayer identity , '''s Options'! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/15/2014 14:59'!
-optionPressed
-	self listOptions.
-	window model 
-		 text1: '';
-		 changed: #text1.
-	window setLabel: self optionLabel.
-	window model optionButton disableButton.
-	mgr currentPlayer assets notEmpty
-		ifTrue: [window model assetButton enableButton]
-		ifFalse: [window model assetButton disableButton]! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 1/12/2014 21:08'!
-optionsOrAssetsToSell
-	window model optionButton disableButton.
-	mgr currentPlayer options isEmpty
-		ifTrue: [window model assetButton disableButton.
-			mgr currentPlayer assets isEmpty
-				ifFalse: [self listAssets]]
-		ifFalse: [self listOptions.
-			window model assetButton enableButton].
-! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 14:41'!
-sellAssets
-	| xl xw |
-	xl := FarmAuctionList new.
-	xl chanter: self;
-		 player: self mgr currentPlayer.
-	xw := xl windowLabelled: self assetLabel for: self.
-	xl buttonsPane addAllMorphs: xl choiceButtons.
-	xl buttonsPane addAllMorphs: xl assetButtons.
-	xw setWindowColor: self mgr currentPlayer tokenColor.
-	xw openInWorld.
-	xw extent: 450 @ 280.
-	self mgr arena addMorph: xw.
-	xw center: self mgr arena center.
-	self window: xw.
-	self listAssets! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 15:02'!
-showAssetAuction
-	| xl xw |
-	xl := FarmAuctionList new.
-	xl chanter: self;
-		 player: self mgr currentPlayer.
-	xw := xl windowLabelled: self assetLabel for: self.
-	xl buttonsPane addAllMorphs: xl assetButtons.
-	xw setWindowColor: self mgr currentPlayer tokenColor.
-	xw openInWorld.
-	xw extent: 450 @ 280.
-	self mgr arena addMorph: xw.
-	xw center: self mgr arena center.
-	self window: xw.
-	self listAssets! !
-
-!FarmAuctioneer methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2014 15:08'!
-showOptionAuction
-	| xl xw |
-	xl := FarmAuctionList new.
-	xl chanter: self;
-		 player: self mgr currentPlayer.
-	xw := xl windowLabelled: self optionLabel for: self.
-	xl buttonsPane addAllMorphs: xl assetButtons.
-	xw setWindowColor: self mgr currentPlayer tokenColor.
-	xw openInWorld.
-	xw extent: 450 @ 280.
-	self mgr arena addMorph: xw.
-	xw center: self mgr arena center.
-	self window: xw.
-	self listOptions! !
 
 !FarmAuctionList methodsFor: 'as yet unclassified' stamp: 'dhn 12/14/2013 20:59'!
 assetButton
