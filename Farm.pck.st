@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:27:50 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 8:31:30 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 16!
+!provides: 'Farm' 1 17!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -336,6 +336,16 @@ Gamer subclass: #Farmer
 Farmer class
 	instanceVariableNames: ''!
 
+!classDefinition: #FarmSeason category: #'Farm-Model'!
+Season subclass: #FarmSeason
+	instanceVariableNames: 'enabled'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Model'!
+!classDefinition: 'FarmSeason class' category: #'Farm-Model'!
+FarmSeason class
+	instanceVariableNames: ''!
+
 !classDefinition: #Field category: #'Farm-Model'!
 Object subclass: #Field
 	instanceVariableNames: 'heading description label'
@@ -354,16 +364,6 @@ ProtoObject subclass: #FarmAuctioneer
 	category: 'Farm-Model'!
 !classDefinition: 'FarmAuctioneer class' category: #'Farm-Model'!
 FarmAuctioneer class
-	instanceVariableNames: ''!
-
-!classDefinition: #FarmSeason category: #'Farm-Model'!
-ProtoObject subclass: #FarmSeason
-	instanceVariableNames: 'enabled'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Model'!
-!classDefinition: 'FarmSeason class' category: #'Farm-Model'!
-FarmSeason class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmAuctionList category: #'Farm-Graphics'!
@@ -499,11 +499,11 @@ The model for the Toppenish Ridge lease.!
 A player in the Farming Game.
 !
 
-!Field commentStamp: '<historical>' prior: 0!
-A JobSite describes the attributes of a space on the game board!
-
 !FarmSeason commentStamp: '<historical>' prior: 0!
 The model for a season of the year on the farm.!
+
+!Field commentStamp: '<historical>' prior: 0!
+A JobSite describes the attributes of a space on the game board!
 
 !Farm methodsFor: 'initialize-release' stamp: 'dhn 10/27/2014 20:26'!
 addTestPlayer: aString
@@ -6496,6 +6496,19 @@ moveInterval
 test: aString
 	FarmerTest := aString.! !
 
+!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:03:23'!
+enabled
+	"Answer the value of enabled"
+
+	enabled ifNil: [enabled _ false].
+	^ enabled! !
+
+!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:04:15'!
+enabled: anObject
+	"Set the value of enabled"
+	
+	enabled _ anObject! !
+
 !Field methodsFor: 'as yet unclassified' stamp: 'dhn 10/21/2014 20:11'!
 describe
 	"Answer a string which describes the field"
@@ -6686,19 +6699,6 @@ showOptionAuction
 	xw center: self mgr arena center.
 	self window: xw.
 	self listOptions! !
-
-!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:03:23'!
-enabled
-	"Answer the value of enabled"
-
-	enabled ifNil: [enabled _ false].
-	^ enabled! !
-
-!FarmSeason methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:04:15'!
-enabled: anObject
-	"Set the value of enabled"
-	
-	enabled _ anObject! !
 
 !FarmAuctionList methodsFor: 'as yet unclassified' stamp: 'dhn 12/14/2013 20:59'!
 assetButton
