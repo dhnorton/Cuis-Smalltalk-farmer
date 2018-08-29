@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 10:00:11 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 10:05:47 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 23!
+!provides: 'Farm' 1 24!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -3588,7 +3588,7 @@ offer: aName
 			buyers submorphsDo: [:ea | ea enableButton].
 			(buyers findDeepSubmorphThat: [:mm | mm label = currentBidder] ifAbsent: [^ self]) disableButton]! !
 
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:17:04'!
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/29/2018 10:02:55'!
 openingFor: anItem
 	"Form the opening bid for anItem"
 	| listItem item opening xlation |
@@ -3597,7 +3597,7 @@ openingFor: anItem
 	listItem _ self assetAuctionList at: anItem.
 	item _ (listItem findTokens: '()' keep: ($A to:$Z), ($a to: $z)) first.
 	xlation _ model class translate: item.
-	asset _ player assets at: xlation asSymbol ifAbsent: [self halt].
+	asset _ seller assets at: xlation asSymbol ifAbsent: [self halt].
 	opening _ (asset class price * asset class lotQuantity) // 2.
 	self currentBid: opening.
 	currentBidder _ self class bankName.
