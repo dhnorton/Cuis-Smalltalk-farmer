@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 27 March 2019 at 10:35:52 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 28 March 2019 at 11:20:28 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 32!
+!provides: 'Farm' 1 33!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -399,6 +399,9 @@ The model for a crop asset.!
 
 !Fruit commentStamp: '<historical>' prior: 0!
 The model for fruit.!
+
+!Apples commentStamp: '<historical>' prior: 0!
+The model for apple fruit.!
 
 !Cherries commentStamp: '<historical>' prior: 0!
 The model for cherry fruit.!
