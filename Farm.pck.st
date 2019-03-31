@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 28 March 2019 at 11:20:28 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 31 March 2019 at 12:09:13 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 33!
+!provides: 'Farm' 1 34!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -3794,7 +3794,7 @@ endIt
 	
 	self delete! !
 
-!AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
+!AllView methodsFor: 'initialization' stamp: 'dhn 3/31/2019 12:01:18'!
 buildMorphicWindow
 	"Lay out the window for player status"
 	
@@ -3812,7 +3812,7 @@ buildMorphicWindow
 	textPane _ (TextModelMorph
 		withModel: (TextModel withText: '')) 	"note the different model specification"
 			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
+			name: 'player''s list'. 	"give the TextModelMorph a name which will appear in the halos"
 	textPane 
 		layoutSpec: (LayoutSpec 
 			proportionalWidth: 1.0
