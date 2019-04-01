@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 1 April 2019 at 12:56:09 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 1 April 2019 at 12:59:31 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 35!
+!provides: 'Farm' 1 36!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -1631,12 +1631,12 @@ space39
 		ifFalse: [currentPlayer missedCattleHarvest].
 	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 4/1/2019 12:27:18'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/1/2019 12:59:23'!
 space4
 	"Jan week 3"
 	self disableAll: {'Move'}.
 	currentPlayer ifCows: 500 negated.
-	self triggerEvent: #itemChange.
+	self triggerEvent: #itemChange.  "let the effect of the above be seen separate from salary"
 	currentPlayer passedGo
 		ifTrue: [currentPlayer salary].
 	self endTurnCheck.
