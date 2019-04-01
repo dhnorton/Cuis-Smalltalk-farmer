@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 31 March 2019 at 12:09:13 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 1 April 2019 at 12:56:09 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 34!
+!provides: 'Farm' 1 35!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -1631,11 +1631,11 @@ space39
 		ifFalse: [currentPlayer missedCattleHarvest].
 	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:47:10'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/1/2019 12:27:18'!
 space4
 	"Jan week 3"
 	self disableAll: {'Move'}.
-	currentPlayer ifCows: 500.
+	currentPlayer ifCows: 500 negated.
 	self triggerEvent: #itemChange.
 	currentPlayer passedGo
 		ifTrue: [currentPlayer salary].
@@ -3560,19 +3560,6 @@ openingFor: anItem
 			nextPutAll: opening printStringWithCommas;
 			nextPutAll: ' (half the list price).'; newLine])! !
 
-!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
-auctionList: anObject
-	"Set the value of auctionList"
-	
-	auctionList _ anObject! !
-
-!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
-getList
-	"Update the list of assets"
-	
-	self assetAuctionItem: 0.
-	list updateList! !
-
 !AuctionAsset methodsFor: 'initialization' stamp: 'dhn 10/1/2016 15:33:53'!
 buildMorphicWindow
 	"Lay out the window for auctioning an asset"
@@ -3691,9 +3678,18 @@ endIt
 		ifFalse: [begun ifFalse: [model endTurnCheck]].
 	self delete! !
 
-!AuctionAsset class methodsFor: 'data base' stamp: 'dhn 9/15/2017 20:38:56'!
-bankName
-	^ 'First Friendly Bank'! !
+!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
+auctionList: anObject
+	"Set the value of auctionList"
+	
+	auctionList _ anObject! !
+
+!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
+getList
+	"Update the list of assets"
+	
+	self assetAuctionItem: 0.
+	list updateList! !
 
 !AuctionAsset class methodsFor: 'class initialization' stamp: 'dhn 9/16/2017 11:50:18'!
 openOn: aModel
@@ -3708,6 +3704,10 @@ openOn: aModel
 	
 	^ win
 ! !
+
+!AuctionAsset class methodsFor: 'data base' stamp: 'dhn 9/15/2017 20:38:56'!
+bankName
+	^ 'First Friendly Bank'! !
 
 !FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 aboutToBeGrabbedBy: aHand
