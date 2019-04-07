@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 1 April 2019 at 12:59:31 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 7 April 2019 at 7:05:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 36!
+!provides: 'Farm' 1 37!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -356,12 +356,12 @@ The game piece for a farmer - a player in the Farming Game.!
 !FarmButton commentStamp: '<historical>' prior: 0!
 A button which can have its action selector changed.!
 
-!FarmingGame commentStamp: '<historical>' prior: 0!
+!FarmingGame commentStamp: 'dhn 4/7/2019 18:31:44' prior: 0!
 Manage the visual effects of the Farming Game.
 
 Start the game from the New morph... window or in a workspace do:
 
-	FarmingGame start.
+FarmingGame start.
 
 http://farmgame.com/product/woo-single-2/
 
@@ -2696,40 +2696,6 @@ buildMorphicWindow
 	model when: #showHistory send: #showHistory to: self.
 	model when: #showAuctionAssets send: #showAuctionAssets to: self.
 	model when: #showAuctionOptions send: #showAuctionOptions to: self.
-! !
-
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
-getPlayers
-	"Get the names of two to six players"
-	| x y cnt clrs |
-
-	model disableAll: {'Players'. 'Tour'}.
-	clrs _ Token colors shuffled.
-	cnt _ 0.
-	x _ FillInTheBlankMorph request: 'First player''s name?' initialAnswer: ''.
-	x 
-		ifEmpty: [
-			model enableAll: {'Players'. 'Tour'}.
-			^ nil]
-		ifNotEmpty: [
-			cnt _ cnt + 1.
-			model setupPlayer: x color: (clrs at: cnt)].
-	
-	[cnt < 6] whileTrue: [
-		y _ FillInTheBlankMorph request: 'Next player''s name?' initialAnswer: ''.
-		y
-			ifEmpty: [
-				cnt > 1 
-					ifTrue: [self startGame]
-					ifFalse: [
-						model players: OrderedCollection new.
-						model enableAll: {'Players'. 'Tour'}].
-				^ nil]
-			ifNotEmpty: [
-				cnt _ cnt + 1.
-				model setupPlayer: y color: (clrs at: cnt)]].
-		
-	self startGame
 ! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:28:09'!
