@@ -1,5 +1,5 @@
 # WIP-farmer
-Simulation of the Farming Game, a Euro-style game for 2 to 6 players, which is similar to Monopoly. Players start with 10 acres of hay, 10 acres of grain, $5,000 cash, $5,000 of debt, and a $50,000 line of credit. As they move around the board, players try to succeed at harvesting crops, acquire more acres, diversify, and be the first to amass $250,000 in net assets (default).
+Simulation of the Farming Game, a Euro-style game for 2 to 6 players, which is similar to Monopoly. Players start with 10 acres of hay, 10 acres of grain, $5,000 cash, $5,000 of debt, and a $50,000 line of credit. As they move around the board, players try to succeed at harvesting crops, acquiring more acres, diversifying, and being the first to amass $250,000 in net assets (default).
 
 http://farmgame.com/product/woo-single-2/
 
