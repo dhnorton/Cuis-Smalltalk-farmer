@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 7 April 2019 at 7:05:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 8 April 2019 at 4:34:00 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 37!
+!provides: 'Farm' 1 38!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -2709,11 +2709,11 @@ layoutSubmorphs
     super layoutSubmorphs.
     self board morphExtent: self board owner morphExtent! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 9/2/2017 20:33:23'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 4/8/2019 16:06:18'!
 makeAddPlayerButton
 	"Answer the 'Players' button"
 
-	^ (FarmButton label: 'Players' action: #getPlayers state: true model: self)
+	^ (GameButtonMorph label: 'Players' action: #getPlayers state: true model: self)
 		layoutSpec: self class buttonSize;
 		setBalloonText: 'Use this button to enter names of two to six players;
 entering an empty name or cancel will start the game'! !
