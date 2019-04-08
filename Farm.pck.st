@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 5:54:05 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 7 April 2019 at 7:05:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 31!
+!provides: 'Farm' 1 37!
 !requires: 'Game' 1 13 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -356,12 +356,12 @@ The game piece for a farmer - a player in the Farming Game.!
 !FarmButton commentStamp: '<historical>' prior: 0!
 A button which can have its action selector changed.!
 
-!FarmingGame commentStamp: '<historical>' prior: 0!
+!FarmingGame commentStamp: 'dhn 4/7/2019 18:31:44' prior: 0!
 Manage the visual effects of the Farming Game.
 
 Start the game from the New morph... window or in a workspace do:
 
-	FarmingGame start.
+FarmingGame start.
 
 http://farmgame.com/product/woo-single-2/
 
@@ -399,6 +399,9 @@ The model for a crop asset.!
 
 !Fruit commentStamp: '<historical>' prior: 0!
 The model for fruit.!
+
+!Apples commentStamp: '<historical>' prior: 0!
+The model for apple fruit.!
 
 !Cherries commentStamp: '<historical>' prior: 0!
 The model for cherry fruit.!
@@ -1628,12 +1631,12 @@ space39
 		ifFalse: [currentPlayer missedCattleHarvest].
 	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:47:10'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/1/2019 12:59:23'!
 space4
 	"Jan week 3"
 	self disableAll: {'Move'}.
-	currentPlayer ifCows: 500.
-	self triggerEvent: #itemChange.
+	currentPlayer ifCows: 500 negated.
+	self triggerEvent: #itemChange.  "let the effect of the above be seen separate from salary"
 	currentPlayer passedGo
 		ifTrue: [currentPlayer salary].
 	self endTurnCheck.
@@ -2695,40 +2698,6 @@ buildMorphicWindow
 	model when: #showAuctionOptions send: #showAuctionOptions to: self.
 ! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:27:11'!
-getPlayers
-	"Get the names of two to six players"
-	| x y cnt clrs |
-
-	model disableAll: {'Players'. 'Tour'}.
-	clrs _ Token colors shuffled.
-	cnt _ 0.
-	x _ FillInTheBlankMorph request: 'First player''s name?' initialAnswer: ''.
-	x 
-		ifEmpty: [
-			model enableAll: {'Players'. 'Tour'}.
-			^ nil]
-		ifNotEmpty: [
-			cnt _ cnt + 1.
-			model setupPlayer: x color: (clrs at: cnt)].
-	
-	[cnt < 6] whileTrue: [
-		y _ FillInTheBlankMorph request: 'Next player''s name?' initialAnswer: ''.
-		y
-			ifEmpty: [
-				cnt > 1 
-					ifTrue: [self startGame]
-					ifFalse: [
-						model players: OrderedCollection new.
-						model enableAll: {'Players'. 'Tour'}].
-				^ nil]
-			ifNotEmpty: [
-				cnt _ cnt + 1.
-				model setupPlayer: y color: (clrs at: cnt)]].
-		
-	self startGame
-! !
-
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:28:09'!
 initialize
 
@@ -3046,7 +3015,7 @@ checkEnd
 
 	model endTurnCheck! !
 
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 9/9/2017 16:29:41'!
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 3/27/2019 22:30:57'!
 displayNumbers
 	"Display cash, debt, and goal progress"
 	| pl c d net otherLead pluralForm others |
@@ -3054,7 +3023,7 @@ displayNumbers
 	(pl _ model currentPlayer) ifNotNil: [
 		c _ '$', pl cash truncated printStringWithCommas.
 		d _ '$', pl debt negated asInteger printStringWithCommas.
-		net _ (pl netAssets / model goal * 100 roundDownTo: 0.1) asString.
+		net _ (pl netAssets / model goal * 100) printStringFractionDigits: 1.
 		numbersArea submorphs first 
 			contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
 			color: pl color.
@@ -3099,7 +3068,7 @@ doTour
 				self model cellsAt: resp asNumber]]].
 	model enableAll: {'Players'. 'Tour'}! !
 
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 15:04:10'!
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 3/27/2019 22:15:56'!
 titleChange: aPlayer
 	"Change the title, showing player data in color"
 	"Display cash, debt, and goal progress"
@@ -3110,7 +3079,7 @@ titleChange: aPlayer
 	
 	c _ '$', model currentPlayer cash truncated printStringWithCommas.
 	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
-	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
+	net _ (model currentPlayer netAssets / model goal * 100) printStringFractionDigits: 1.
 	numbersArea submorphs first 
 		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
 		color: model currentPlayer color.
@@ -3557,19 +3526,6 @@ openingFor: anItem
 			nextPutAll: opening printStringWithCommas;
 			nextPutAll: ' (half the list price).'; newLine])! !
 
-!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
-auctionList: anObject
-	"Set the value of auctionList"
-	
-	auctionList _ anObject! !
-
-!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
-getList
-	"Update the list of assets"
-	
-	self assetAuctionItem: 0.
-	list updateList! !
-
 !AuctionAsset methodsFor: 'initialization' stamp: 'dhn 10/1/2016 15:33:53'!
 buildMorphicWindow
 	"Lay out the window for auctioning an asset"
@@ -3688,9 +3644,18 @@ endIt
 		ifFalse: [begun ifFalse: [model endTurnCheck]].
 	self delete! !
 
-!AuctionAsset class methodsFor: 'data base' stamp: 'dhn 9/15/2017 20:38:56'!
-bankName
-	^ 'First Friendly Bank'! !
+!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:42:08'!
+auctionList: anObject
+	"Set the value of auctionList"
+	
+	auctionList _ anObject! !
+
+!AuctionAsset methodsFor: 'accessing' stamp: 'dhn 9/16/2017 11:07:04'!
+getList
+	"Update the list of assets"
+	
+	self assetAuctionItem: 0.
+	list updateList! !
 
 !AuctionAsset class methodsFor: 'class initialization' stamp: 'dhn 9/16/2017 11:50:18'!
 openOn: aModel
@@ -3705,6 +3670,10 @@ openOn: aModel
 	
 	^ win
 ! !
+
+!AuctionAsset class methodsFor: 'data base' stamp: 'dhn 9/15/2017 20:38:56'!
+bankName
+	^ 'First Friendly Bank'! !
 
 !FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 aboutToBeGrabbedBy: aHand
@@ -3791,7 +3760,7 @@ endIt
 	
 	self delete! !
 
-!AllView methodsFor: 'initialization' stamp: 'dhn 9/15/2017 16:08:04'!
+!AllView methodsFor: 'initialization' stamp: 'dhn 3/31/2019 12:01:18'!
 buildMorphicWindow
 	"Lay out the window for player status"
 	
@@ -3809,7 +3778,7 @@ buildMorphicWindow
 	textPane _ (TextModelMorph
 		withModel: (TextModel withText: '')) 	"note the different model specification"
 			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'option description'. 	"give the TextModelMorph a name which will appear in the halos"
+			name: 'player''s list'. 	"give the TextModelMorph a name which will appear in the halos"
 	textPane 
 		layoutSpec: (LayoutSpec 
 			proportionalWidth: 1.0
