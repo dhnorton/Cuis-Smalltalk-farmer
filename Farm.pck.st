@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 10 April 2019 at 10:38:48 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 10 April 2019 at 12:39:07 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 42!
+!provides: 'Farm' 1 43!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -2610,6 +2610,11 @@ initialize
 		addMorph: self makeDoubledArea.
 
 	self addMorphFront: labelArea! !
+
+!FarmToken methodsFor: 'initialization' stamp: 'dhn 4/10/2019 12:25:49'!
+layoutSubmorphs
+
+	labelArea morphExtent: self morphExtent! !
 
 !FarmToken methodsFor: 'initialization' stamp: 'dhn 8/31/2017 15:13:17'!
 makeDoubledArea
