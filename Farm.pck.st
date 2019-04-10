@@ -1,6 +1,7 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 10 April 2019 at 10:34:12 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 10 April 2019 at 10:38:48 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 41!
+!provides: 'Farm' 1 42!
+!requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
 
