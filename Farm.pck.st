@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 10 April 2019 at 12:39:07 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 10 April 2019 at 10:16:16 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 43!
+!provides: 'Farm' 1 44!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -2551,15 +2551,13 @@ moonMove
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/5/2017 21:58:48'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 4/10/2019 21:51:23'!
 moved
 	"Perform the results of the move"
-	| pl |
 	
-	pl _ self who.
-	doubled contents: who doubledString.
+	doubled contents: model currentPlayer doubledString.
 	model doSpace.
-	pl harvestEnabled ifFalse: [model updateHistory]! !
+	model currentPlayer harvestEnabled ifFalse: [model updateHistory]! !
 
 !FarmToken methodsFor: 'operations' stamp: 'dhn 9/2/2017 19:44:24'!
 position: aCell
@@ -2570,7 +2568,7 @@ position: aCell
 	horiz _ (model cells at: aCell) morphPosition x.
 	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/14/2017 19:04:41'!
+!FarmToken methodsFor: 'operations' stamp: 'dhn 4/10/2019 21:56:09'!
 springMove
 	"Animate relocation to Spring Planting when player lands on space 8"
 	| oldPos posns limit i final |
@@ -2578,7 +2576,7 @@ springMove
 	final _ 15.
 	oldPos _ model currentPlayer oldPosition.
 	self arrowRight.
-	posns _ (Interval from: oldPos to: final - who roll by: 1) asArray.
+	posns _ (Interval from: oldPos to: final - model currentPlayer roll by: 1) asArray.
 	limit _ posns size.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :unused |
@@ -3320,11 +3318,11 @@ showYourself
 				morphPosition: self windowPosition;
 				morphExtent: 300 @ 280]! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/7/2017 12:10:45'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 4/10/2019 21:53:38'!
 windowPosition
 	"Answer the position for a window"
 	
-	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
+	^ seasonsArea morphPosition + (model windowPosition: 50@-300)! !
 
 !FarmingGame class methodsFor: 'as yet unclassified' stamp: 'dhn 11/3/2014 12:39'!
 boardColor
