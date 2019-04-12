@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 12 April 2019 at 3:34:46 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 12 April 2019 at 7:05:37 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 47!
+!provides: 'Farm' 1 48!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -1263,17 +1263,20 @@ paymentChoices
 	^ list
 ! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:51:28'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/12/2019 15:55:15'!
 space1
 	"Christmas Vacation"
 	
 	self disableAll: {'Move'}.
 	self triggerEvent: #itemChange.
-	GamePopUp inform: 'You will receive a bonus of $1,000.' title: 'Christmas Bonus'.
-	currentPlayer tally: 1000.
-	currentPlayer offFarm: 1000 + self currentPlayer offFarm.
+	GamePopUp 
+		inform: 'You will receive a bonus of $1,000 in addition
+to your salary of $5,000.' 
+		title: 'Christmas Bonus'.
+	currentPlayer tally: 6000.
+	currentPlayer offFarm: 6000 + self currentPlayer offFarm.
+	currentPlayer history add: currentPlayer netAssets.
 	self triggerEvent: #itemChange.
-	currentPlayer salary.
 	self endTurnCheck! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:51:19'!
