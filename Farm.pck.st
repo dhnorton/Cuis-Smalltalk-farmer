@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 12 April 2019 at 11:12:14 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 12 April 2019 at 3:34:46 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 46!
+!provides: 'Farm' 1 47!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -955,12 +955,13 @@ doJul3
 		ifTrue: [GamePopUp inform: 'You will advance to Harvest Moon.' title: 'Harvest Moon'.
 			token moonMove]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:53:04'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 4/12/2019 15:32:46'!
 doSep1
 	"Move the player to November Week 3 after his landing on September Week 1."
 	
 	(self disabledAll: {'Harvest'. 'Expense'})
 		ifTrue: [GamePopUp inform: 'You will advance to 3rd week in November.' title: '3rd week in November'.
+			self flag: #dhn. "where is #advanceTo: ?"
 			currentPlayer advanceTo: 46;
 				 position: 46.
 			currentPlayer tally: 1000.
@@ -1028,10 +1029,11 @@ harvestJul3
 
 	self harvestThen: #doJul3! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/25/2017 17:33:35'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 4/12/2019 15:29:24'!
 harvestSep1
 	"Harvest in September Week 1 and then travel."
 	self halt.
+	self flag: #dhn.  "it ain't happening"
 	self harvest;
 	 doSep1! !
 
@@ -1562,7 +1564,7 @@ space34
 	currentPlayer bumpWheat: 50 negated.
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/6/2017 16:41:03'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/12/2019 15:27:51'!
 space35
 	"Sep week 1"
 	
@@ -1570,6 +1572,7 @@ space35
 	self enableHarvestButtons.
 	(currentPlayer assets at: #Hay)
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
+	self flag: #dhn. "player not moving when tractor is owned"	
 	currentPlayer ifTractor
 		ifTrue: [
 			self setActionSelectorFor: #Harvest to: {self class harvestSep1}.
