@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 10 April 2019 at 10:16:16 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 12 April 2019 at 11:02:51 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 44!
+!provides: 'Farm' 1 45!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -886,7 +886,7 @@ queryWin: aBool
 		aBool ifTrue: [self wonButtonsState]
 		ifFalse: [self endTurnCheck]! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 8/30/2017 17:29:05'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 4/12/2019 11:01:25'!
 removeFromGame
 	"Remove the current player from the game."
 	| old |
@@ -904,7 +904,7 @@ limit and is out of the game'
 			playerIndex _ playerIndex - 1.
 			self 
 				nextPlayer; 
-				triggerEvent: #setupToken: with: currentPlayer;
+				triggerEvent: #prepareToken: with: currentPlayer;
 				enableAll: {'Move'}].
 "	players
 		do: [:each | (arena submorphs
@@ -2958,9 +2958,9 @@ playButtonSet
 		addMorph: (model moveButton: self makeMoveButton);
 		addMorph: self makeQuitGameButton! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:36:41'!
-setupToken: aPlayer
-	"Place the player's token on the board"
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 4/12/2019 11:01:09'!
+prepareToken: aPlayer
+	"Set ivars of the player's token"
 	| w h |
 	
 	w _ owner morphExtent x * 0.13.
@@ -2972,7 +2972,7 @@ setupToken: aPlayer
 		morphExtent: w@h;
 		morphPosition: owner morphExtent * (0.006@0.72).
 	pasteup addMorph: model token.
-	^ model token who: aPlayer! !
+	^ model token! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/30/2017 20:41:28'!
 showSeasons: associations 
