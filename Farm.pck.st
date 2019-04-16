@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 12 April 2019 at 7:05:37 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 15 April 2019 at 9:07:27 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 48!
+!provides: 'Farm' 1 49!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -936,7 +936,7 @@ wonButtonsState
 	self enableAll: {'End Turn'}.
 ! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/9/2017 17:23:20'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 4/15/2019 18:35:12'!
 doAug1
 	"Move the player to February Week 4 after his landing on August  Week 1."
 
@@ -944,7 +944,8 @@ doAug1
 	(self disabledAll: {'Harvest'. 'Expense'})
 		ifTrue: [
 			GamePopUp inform: 'You will advance to 4th week in February.' title: 'Farming like a Pro'.
-			token feb4MoveFrom: currentPlayer position]! !
+			currentPlayer passedGo: true.
+			token slideRight: currentPlayer position to: 9]! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 9/5/2017 12:58:51'!
 doJul3
@@ -974,12 +975,6 @@ doSep1
 			self setActionSelectorFor: #Harvest to: {self class harvestNormal}.
 			self setActionSelectorFor: #Expense to: {self class expenseNormal}.
 			self updatePlayer]! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/1/2017 13:43:33'!
-doSpace
-	"Do what the space says"
-	
-	currentPlayer spaceEffect: self whatSpaceSays! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:17'!
 expenseAug1
@@ -1299,14 +1294,14 @@ space11
 	self triggerEvent: #itemChange.
 	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/3/2017 13:58:45'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/15/2019 15:39:41'!
 space12
 	"Mar week 3"
 	
 	self disableAll: {'Move'}.
 	GamePopUp inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
 	self triggerEvent: #itemChange.
-	token jan2MoveFrom: currentPlayer position! !
+	token slideLeft: currentPlayer position to: 3! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:51:01'!
 space13
@@ -1486,21 +1481,21 @@ space28
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:49:35'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/15/2019 20:45:53'!
 space29
 	"Jul week 3"
-	
+self halt.
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer harvestEnabled
 		ifTrue: [
 			(currentPlayer assets at: #Hay)
 				factor: ((currentPlayer assets at: #Hay) factor max: 1).
-			self setActionSelectorFor: #Harvest to: {self class harvestJul3. self class harvestNormal}.
-			self setActionSelectorFor: #Expense to: {self class expenseJul3. self class harvestNormal}.
 			self enableAll: {'Harvest'. 'Expense'}]
-		ifFalse: [
-			self endTurnCheck.
-			self doJul3]! !
+		ifFalse: [self endTurnCheck].
+	endFlag _ false.
+	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [
+		GamePopUp inform: 'You will advance to Harvest Moon.' title: 'Harvest Moon'.
+		token slideRight: currentPlayer position to: 37]! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:18:52'!
 space3
@@ -1523,16 +1518,13 @@ space30
 	currentPlayer bumpWheat: 50.
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:49:23'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/15/2019 21:03:57'!
 space31
 	"Aug week 1"
-	
+self halt.	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer harvestEnabled
-		ifTrue: [
-			self setActionSelectorFor: #Harvest to: {self class harvestAug1. self class harvestNormal}.
-			self setActionSelectorFor: #Expense to: {self class expenseAug1. self class expenseNormal}.
-			self enableAll: {'Harvest'. 'Expense'}]
+		ifTrue: [self enableAll: {'Harvest'. 'Expense'}]
 		ifFalse: [
 			self endTurnCheck.
 			self doAug1]! !
@@ -1567,19 +1559,16 @@ space34
 	currentPlayer bumpWheat: 50 negated.
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 4/12/2019 15:27:51'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/15/2019 21:05:30'!
 space35
 	"Sep week 1"
-	
+	self halt.
 	self disableAll: {'Move'. 'Fate'}.
 	self enableHarvestButtons.
 	(currentPlayer assets at: #Hay)
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
-	self flag: #dhn. "player not moving when tractor is owned"	
 	currentPlayer ifTractor
-		ifTrue: [
-			self setActionSelectorFor: #Harvest to: {self class harvestSep1}.
-			self setActionSelectorFor: #Expense to: {self class expenseSep1}]! !
+		ifTrue: [token slideRight: currentPlayer position to: 46]! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:52:28'!
 space36
@@ -1815,20 +1804,22 @@ space7
 	self triggerEvent: #itemChange.
 	self enableAll: {'Fate'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 17:35:09'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/15/2019 16:10:04'!
 space8
 	"Feb week 3"
 	
 	self disableAll: {'Move'}.
-	token springMove! !
+	GamePopUp inform: 'You will now go to Spring Planting.' title: 'Spring Ahead'.
+	self triggerEvent: #itemChange.
+	token slideRight: currentPlayer position to: 15! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:44:47'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/15/2019 18:06:50'!
 space9
 	"Feb week 4"
 	
 	self disableAll: {'Move'}.
-	currentPlayer
-		addOption: (self drawOptionQuietly: false).
+	currentPlayer addOption: (self drawOptionQuietly: false).
+	currentPlayer passedGo ifTrue: [currentPlayer salary].
 	self triggerEvent: #itemChange.
 	self endTurnCheck! !
 
@@ -1837,12 +1828,6 @@ spaces
 	"Answer the value of spaces"
 	
 	^ spaces! !
-
-!Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 09:04:36'!
-whatSpaceSays
-	"Perform the method associated with the space where the player is"
-
-	^ self perform: ((spaces atWrap: self currentPlayer position) routine)! !
 
 !Farm methodsFor: 'auctioning' stamp: 'dhn 4/10/2019 10:22:18'!
 assetAuctionItem
@@ -2444,78 +2429,6 @@ doubled
 
 	^ doubled! !
 
-!FarmToken methodsFor: 'operations' stamp: 'dhn 9/10/2017 14:37:41'!
-feb4MoveFrom: aPosition
-	"Animate relocation of self when player moves ahead to Feb 4 from aPosition"
-	| oldPos newPos index n posns limit i final |
-	
-	final _ 9.
-	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
-	oldPos _ index atWrap: aPosition.
-	model positionBoardTo: oldPos.
-	self position: 1.
-	newPos _ final + 1.
-	posns _ OrderedCollection new.
-	n _ oldPos.
-	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
-	posns _ posns asArray.
-	model positionBoardTo: posns first.
-	
-	self arrowRight.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer 
-					position: final;
-					years: 1 + model currentPlayer years;
-					salary.
-				model
-					setActionSelectorFor: #Harvest to: {model class harvestNormal};
-					setActionSelectorFor: #Expense to: {model class expenseNormal};
-					doSpace.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 10/10/2017 11:38:27'!
-jan2MoveFrom: aPosition
-	"Animate relocation of self when player must go BACK to Jan. 2 from aPosition"
-	| oldPos newPos index n posns limit i final |
-	
-	final _ 3.
-	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
-	oldPos _ index atWrap: aPosition - 6.
-	model positionBoardTo: oldPos.
-	self position: 7.
-	newPos _ index atWrap: final - 7.
-	posns _ OrderedCollection new.
-	n _ oldPos.
-	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n - 1].
-	posns _ posns asArray.
-	model positionBoardTo: posns first.
-	
-	self arrowLeft.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer position: final.
-				model doSpace.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
-
 !FarmToken methodsFor: 'operations' stamp: 'dhn 10/9/2017 17:43:57'!
 moonMove
 	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
@@ -2572,30 +2485,6 @@ position: aCell
 	self morphPosition: self posAdjust.
 	horiz _ (model cells at: aCell) morphPosition x.
 	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 4/10/2019 21:56:09'!
-springMove
-	"Animate relocation to Spring Planting when player lands on space 8"
-	| oldPos posns limit i final |
-	
-	final _ 15.
-	oldPos _ model currentPlayer oldPosition.
-	self arrowRight.
-	posns _ (Interval from: oldPos to: final - model currentPlayer roll by: 1) asArray.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer position: final.
-				model space15.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
 
 !FarmToken methodsFor: 'initialization' stamp: 'dhn 9/2/2017 11:18:41'!
 initialize
@@ -2697,7 +2586,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2018 16:10:12'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 4/15/2019 12:25:32'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2724,6 +2613,7 @@ buildMorphicWindow
 	model when: #showHistory send: #showHistory to: self.
 	model when: #showAuctionAssets send: #showAuctionAssets to: self.
 	model when: #showAuctionOptions send: #showAuctionOptions to: self.
+	model when: #endOfMove send: #possiblyHarvest to: self.
 ! !
 
 !FarmingGame methodsFor: 'initialization' stamp: 'dhn 8/29/2017 20:28:09'!
@@ -3095,6 +2985,12 @@ doTour
 				self showSeasons: (model parseSeasonsAt: resp asNumber).
 				self model cellsAt: resp asNumber]]].
 	model enableAll: {'Players'. 'Tour'}! !
+
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 4/15/2019 15:05:01'!
+possiblyHarvest
+	"Enable the 'Harvest' button if conditions are right"
+	
+	model doSpace! !
 
 !FarmingGame methodsFor: 'operating' stamp: 'dhn 3/27/2019 22:15:56'!
 titleChange: aPlayer
@@ -5480,12 +5376,12 @@ emergencyLoan
 	mgr triggerEvent: #itemChange.
 	^ (loan + 1000) negated! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 9/19/2017 16:07:54'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 4/15/2019 17:07:52'!
 goBackToJan2
 	"Move the token back to Jan 2"
 	
 	GamePopUp inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
-	self mgr token jan2MoveFrom: position! !
+	self mgr token slideLeft: self mgr currentPlayer position to: 3! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 10/10/2017 11:38:40'!
 goDirectly: aPosition 
