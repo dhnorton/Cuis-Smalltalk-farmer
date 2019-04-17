@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 17 April 2019 at 2:51:09 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 17 April 2019 at 5:55:55 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 51!
+!provides: 'Farm' 1 52!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -1004,13 +1004,14 @@ franchiseEffect: aRoll
 	self triggerEvent: #itemChange.
 ! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/10/2017 12:18:30'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 4/17/2019 14:54:46'!
 harvest
 	"Harvest and account for the result."
 
 	currentPlayer harvest: (self class harvestSeason at: currentPlayer position).
 	self
-		disableAll: {'Harvest'}! !
+		disableAll: {'Harvest'};
+		endTurnCheck! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 10/27/2014 21:28'!
 harvestAug1
@@ -2254,23 +2255,22 @@ COLLECT $2,000 from each player who has none.'.
 RECEIVE a 50% bonus in your Livestock Harvest check each of the next two years.'.
 	}.! !
 
-!Farm class methodsFor: 'database' stamp: 'dhn 9/7/2017 18:16:44'!
+!Farm class methodsFor: 'database' stamp: 'dhn 4/17/2019 17:51:49'!
 harvestSeason
 	"Answer an ordered collection of harvest seasons in order of their board positions."
-	|temp|
-	
-	temp _ OrderedCollection new.
-	1 to: 19 do: [:a | temp addLast: #WINTER].
-	20 to: 23 do: [:a | temp addLast: #Hay].
-	24 to: 26 do: [:a | temp addLast: #Cherries].
-	27 to: 29 do: [:a | temp addLast: #Hay].
-	30 to: 34 do: [:a | temp addLast: #Wheat].
-	35 to: 36 do: [:a | temp addLast: #Hay].
-	37 to: 40 do: [:a | temp addLast: #Livestock].
-	41 to: 42 do: [:a | temp addLast: #Hay].
-	43 to: 46 do: [:a | temp addLast: #Apples].
-	47 to: 49 do: [:a | temp addLast: #Corn].
-	^temp! !
+
+	^ OrderedCollection new 
+		 add: #WINTER withOccurrences: 19;	"1 to 19"
+		 add: #Hay withOccurrences: 4;		"20 to 23"
+		 add: #Cherries withOccurrences: 3;	"24 to 26"
+		 add: #Hay withOccurrences: 3;		"27 to 29"
+		 add: #Wheat withOccurrences: 5;		"30 to 34"
+		 add: #Hay withOccurrences: 2;		"35 to 36"
+		 add: #Livestock withOccurrences: 4;	"37 to 40"
+		 add: #Hay withOccurrences: 2;		"41 to 42"
+		 add: #Apples withOccurrences: 4;	"43 to 46"
+		 add: #Corn withOccurrences: 3;		"47 to 49"
+		 yourself! !
 
 !Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 15:52:22'!
 optionsDesc
@@ -2604,7 +2604,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 4/15/2019 12:25:32'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 4/17/2019 17:36:25'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2620,7 +2620,6 @@ buildMorphicWindow
 	model when: #quitGame send: #delete to: self.
 	model when: #itemChange send: #displayNumbers to: self.
 	model when: #titleChange send: #titleChange: to: self with: #player.
-	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
 	model when: #showToken send: #showToken to: self.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
 	model when: #showDraw send: #showDraw: to: self with: #option.
