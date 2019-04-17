@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 17 April 2019 at 12:33:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 17 April 2019 at 2:51:09 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 50!
+!provides: 'Farm' 1 51!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -936,7 +936,7 @@ wonButtonsState
 	self enableAll: {'End Turn'}.
 ! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 4/17/2019 12:28:39'!
+!Farm methodsFor: 'harvesting' stamp: 'dhn 4/17/2019 13:02:44'!
 doAug1
 	"Move the player to February Week 4 after his landing on August  Week 1."
 
@@ -945,7 +945,7 @@ doAug1
 		ifTrue: [
 			GamePopUp inform: 'You will advance to 4th week in February.' title: 'Farming like a Pro'.
 			currentPlayer passedGo: true.
-			token slideRight: currentPlayer position to: (Farm class specialSpaces at: #feb4)]! !
+			token slideRight: currentPlayer position to: (Farm specialSpaces at: #feb4)]! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 9/5/2017 12:58:51'!
 doJul3
@@ -1300,14 +1300,14 @@ space11
 	self triggerEvent: #itemChange.
 	self endTurnCheck! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 4/17/2019 12:26:55'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/17/2019 13:02:56'!
 space12
 	"Mar week 3"
 	
 	self disableAll: {'Move'}.
 	GamePopUp inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
 	self triggerEvent: #itemChange.
-	token slideLeft: currentPlayer position to: (Farm class specialSpaces at: #jan2)! !
+	token slideLeft: currentPlayer position to: (Farm specialSpaces at: #jan2)! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 10/9/2017 17:51:01'!
 space13
@@ -1487,7 +1487,7 @@ space28
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 4/17/2019 12:29:22'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/17/2019 13:03:08'!
 space29
 	"Jul week 3"
 self halt.
@@ -1501,7 +1501,7 @@ self halt.
 	endFlag _ false.
 	(self disabledAll: {'Harvest'. 'Fate'. 'Expense'}) ifTrue: [
 		GamePopUp inform: 'You will advance to Harvest Moon.' title: 'Harvest Moon'.
-		token slideRight: currentPlayer position to: (Farm class specialSpaces at: #moon)]! !
+		token slideRight: currentPlayer position to: (Farm specialSpaces at: #moon)]! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/1/2017 12:18:52'!
 space3
@@ -1565,7 +1565,7 @@ space34
 	currentPlayer bumpWheat: 50 negated.
 	self enableHarvestButtons! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 4/17/2019 12:30:12'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/17/2019 13:03:19'!
 space35
 	"Sep week 1"
 	self halt.
@@ -1574,7 +1574,7 @@ space35
 	(currentPlayer assets at: #Hay)
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	currentPlayer ifTractor
-		ifTrue: [token slideRight: currentPlayer position to: (Farm class specialSpaces at: #nov3)]! !
+		ifTrue: [token slideRight: currentPlayer position to: (Farm specialSpaces at: #nov3)]! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 9/9/2017 19:52:28'!
 space36
@@ -1810,14 +1810,14 @@ space7
 	self triggerEvent: #itemChange.
 	self enableAll: {'Fate'}! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 4/17/2019 12:30:43'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/17/2019 13:02:04'!
 space8
 	"Feb week 3"
 	
 	self disableAll: {'Move'}.
 	GamePopUp inform: 'You will now go to Spring Planting.' title: 'Spring Ahead'.
 	self triggerEvent: #itemChange.
-	token slideRight: currentPlayer position to: (Farm class specialSpaces at: #spring)! !
+	token slideRight: currentPlayer position to: (Farm specialSpaces at: #spring)! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 4/15/2019 18:06:50'!
 space9
@@ -5394,12 +5394,12 @@ emergencyLoan
 	mgr triggerEvent: #itemChange.
 	^ (loan + 1000) negated! !
 
-!Farmer methodsFor: 'space-related' stamp: 'dhn 4/17/2019 12:26:25'!
+!Farmer methodsFor: 'space-related' stamp: 'dhn 4/17/2019 13:03:39'!
 goBackToJan2
 	"Move the token back to Jan 2"
 	
 	GamePopUp inform: 'You will now go back to January Week 2.' title: 'January Week 2'.
-	self mgr token slideLeft: self mgr currentPlayer position to: (Farm class specialSpaces at: #jan2)! !
+	self mgr token slideLeft: self mgr currentPlayer position to: (Farm specialSpaces at: #jan2)! !
 
 !Farmer methodsFor: 'space-related' stamp: 'dhn 10/10/2017 11:38:40'!
 goDirectly: aPosition 
