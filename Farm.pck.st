@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 2:49:06 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 4:23:21 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 58!
+!provides: 'Farm' 1 59!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -948,15 +948,6 @@ doAug1
 			currentPlayer passedGo: true.
 			token slideRight: currentPlayer position to: (Farm specialSpaces at: #feb4)]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/5/2017 12:58:51'!
-doJul3
-	"Move the player to Harvest Moon after his landing on July Week 3."
-	
-	self disableAll: {'End Turn'}.
-	(self disabledAll: {'Harvest'. 'Expense'})
-		ifTrue: [GamePopUp inform: 'You will advance to Harvest Moon.' title: 'Harvest Moon'.
-			token moonMove]! !
-
 !Farm methodsFor: 'harvesting' stamp: 'dhn 4/12/2019 15:32:46'!
 doSep1
 	"Move the player to November Week 3 after his landing on September Week 1."
@@ -981,11 +972,6 @@ doSep1
 expenseAug1
 	self payExpense;
 	doAug1! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:18'!
-expenseJul3
-	self payExpense;
-	doJul3! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:18'!
 expenseSep1
@@ -1018,12 +1004,6 @@ harvestAug1
 	"Harvest in August Week 1 and then travel."
 	self harvest;
 	doAug1! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 18:34:56'!
-harvestJul3
-	"Harvest in July Week 3 and then travel."
-
-	self harvestThen: #doJul3! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 4/12/2019 15:29:24'!
 harvestSep1
@@ -2349,11 +2329,6 @@ harvestAug1
 	"Answer the actionSelector for the Harvest button when on Aug wk 1."
 	^#harvestAug1! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:10'!
-harvestJul3
-	"Answer the actionSelector for the Harvest button when on Jul wk 3."
-	^#harvestJul3! !
-
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:40'!
 harvestNormal
 	"Answer the normal actionSelector for the Harvest button."
@@ -2440,46 +2415,6 @@ doubled
 	"Answer the value of doubled"
 
 	^ doubled! !
-
-!FarmToken methodsFor: 'operations' stamp: 'dhn 10/9/2017 17:43:57'!
-moonMove
-	"Animate relocation to Harvest Moon when player lands on space 29 and do the harvest"
-	| oldPos newPos index n posns limit i final |
-	
-	final _ 37.
-	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
-	oldPos _ model currentPlayer oldPosition.
-	model positionBoardTo: oldPos.
-	self position: 1.
-	newPos _ final + 1.
-	posns _ OrderedCollection new.
-	n _ oldPos.
-	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
-	posns _ posns asArray.
-	model positionBoardTo: posns first.
-	
-	self arrowRight.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				arrow delete.
-				model currentPlayer position: final.
-				model
-					setActionSelectorFor: #Harvest to: {model class harvestNormal};
-					setActionSelectorFor: #Expense to: {model class expenseNormal}.
-				model currentPlayer ifCows
-					ifTrue: [model currentPlayer harvestEnabled
-							ifTrue: [model enableAll: {'Harvest'. 'Expense'}]]
-					ifFalse: [model endTurnCheck].
-				model doSpace.
-				self doubled contents: model currentPlayer doubledString]].
-	self startSteppingStepTime: 500! !
 
 !FarmToken methodsFor: 'operations' stamp: 'dhn 4/10/2019 21:51:23'!
 moved
