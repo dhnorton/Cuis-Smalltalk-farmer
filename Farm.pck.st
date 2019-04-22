@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 4:37:47 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 6:42:41 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 63!
+!provides: 'Farm' 1 64!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -1126,20 +1126,6 @@ attemptHarvest
 		ifTrue: [self enableAll: {'Harvest'. 'Expense'}]
 		ifFalse: [self triggerEvent: #clicked]! !
 
-!Farm methodsFor: 'operating' stamp: 'dhn 10/9/2017 17:52:41'!
-enableHarvestButtons
-	"Enable buttons according to the state of the player"
-	
-	currentPlayer harvestEnabled
-				ifTrue: [
-					currentPlayer garnish
-						ifTrue: [
-							currentPlayer harvested.
-							self endTurnCheck]
-						ifFalse: [self enableAll: {'Harvest'. 'Expense'}]]
-				ifFalse: [self endTurnCheck]
-! !
-
 !Farm methodsFor: 'operating' stamp: 'dhn 4/22/2019 13:38:10'!
 endTurnCheck
 	"Enable the End Turn button if certain conditions are met"
@@ -1158,19 +1144,6 @@ rightTo: aSymbol
 	"Slide to the position defined by aSymbol"
 	
 	token slideRight: currentPlayer position to: (Farm specialSpaces at: aSymbol)! !
-
-!Farm methodsFor: 'operating' stamp: 'dhn 9/6/2017 16:21:42'!
-setActionSelectorFor: aName to: aCollection
-	"Set the old target for the button named aName. Set deferred method if present."
-	| col btn |
-	
-	col _ aCollection asOrderedCollection.
-	btn _ (self buttonsNamed: {aName}) first.
-	btn oldTarget: col removeFirst.
-	btn deferred: (
-		col  
-			ifNotEmpty: [col first]
-			ifEmpty: [nil])! !
 
 !Farm methodsFor: 'operating' stamp: 'dhn 4/17/2019 11:57:49'!
 symbolFor: aNumber
@@ -1351,13 +1324,14 @@ space20
 	self triggerEvent: #itemChange.
 	self attemptHarvest! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 4/22/2019 13:52:51'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/22/2019 18:01:04'!
 space21
 	"May week 4"
 	
 	self disableAll: {'Move'. 'Fate'}.
 	currentPlayer addOption: (self drawOptionQuietly: false).
-	self triggerEvent: #itemChange! !
+	self triggerEvent: #itemChange.
+	self attemptHarvest! !
 
 !Farm methodsFor: 'space-related' stamp: 'dhn 4/18/2019 12:33:48'!
 space22
@@ -1421,7 +1395,7 @@ space27
 		factor: ((currentPlayer assets at: #Hay) factor max: 1).
 	self attemptHarvest! !
 
-!Farm methodsFor: 'space-related' stamp: 'dhn 4/18/2019 13:43:16'!
+!Farm methodsFor: 'space-related' stamp: 'dhn 4/22/2019 18:42:20'!
 space28
 	"Jul week 2"
 	
@@ -2239,16 +2213,6 @@ defaultGoal
 	
 	^ 250000! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:52'!
-expenseNormal
-	"Answer the normal actionSelector for the Expense button."
-	^#payExpense! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:40'!
-harvestNormal
-	"Answer the normal actionSelector for the Harvest button."
-	^#harvest! !
-
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/17/2017 14:29:55'!
 translate: aName
 	"Answer a name suited for auctioning or buying, translated from aName"
@@ -2784,7 +2748,7 @@ startGame
 		nextPlayer.
 	model initialButtonState! !
 
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 4/19/2019 17:07:27'!
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 4/22/2019 18:36:51'!
 attemptEnd
 	"Try to enable the End Turn button"
 	| next |
@@ -2797,7 +2761,9 @@ attemptEnd
 					"no secondary move"
 					model currentPlayer position = (Farm specialSpaces at: #jan2)
 						ifTrue: [model doSpace]
-						ifFalse: [model enableAll: {'End Turn'}]]
+						ifFalse: [
+							model optionDrawn
+								ifFalse: [model enableAll: {'End Turn'}]]]
 				ifNotNil: [
 					"a secondary move is required"
 					model perform: next first with: next second]]! !
