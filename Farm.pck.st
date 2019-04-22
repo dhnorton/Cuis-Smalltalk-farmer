@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 4:34:05 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 4:37:47 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 62!
+!provides: 'Farm' 1 63!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -2239,20 +2239,10 @@ defaultGoal
 	
 	^ 250000! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:36'!
-expenseJul3
-	"Answer the actionSelector for the Expense button when on Jul wk 3."
-	^#expenseJul3! !
-
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:52'!
 expenseNormal
 	"Answer the normal actionSelector for the Expense button."
 	^#payExpense! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:13:10'!
-expenseSep1
-	"Answer the actionSelector for the Expense button when on Sep wk 1."
-	^#expenseSep1! !
 
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:40'!
 harvestNormal
