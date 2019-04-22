@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 4:23:21 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 4:27:40 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 59!
+!provides: 'Farm' 1 60!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -948,35 +948,10 @@ doAug1
 			currentPlayer passedGo: true.
 			token slideRight: currentPlayer position to: (Farm specialSpaces at: #feb4)]! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 4/12/2019 15:32:46'!
-doSep1
-	"Move the player to November Week 3 after his landing on September Week 1."
-	
-	(self disabledAll: {'Harvest'. 'Expense'})
-		ifTrue: [GamePopUp inform: 'You will advance to 3rd week in November.' title: '3rd week in November'.
-			self flag: #dhn. "where is #advanceTo: ?"
-			currentPlayer advanceTo: 46;
-				 position: 46.
-			currentPlayer tally: 1000.
-			currentPlayer ifFruit
-				ifTrue: [self enableHarvestButtons]
-				ifFalse: [| a |
-					a := currentPlayer assets at: #Apples.
-					a missed: a missed + 1.
-					self endTurnCheck].
-			self setActionSelectorFor: #Harvest to: {self class harvestNormal}.
-			self setActionSelectorFor: #Expense to: {self class expenseNormal}.
-			self updatePlayer]! !
-
 !Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:17'!
 expenseAug1
 	self payExpense;
 	doAug1! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:18'!
-expenseSep1
-	self payExpense;
-	doSep1! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 13:19:24'!
 franchiseEffect: aRoll
@@ -1004,14 +979,6 @@ harvestAug1
 	"Harvest in August Week 1 and then travel."
 	self harvest;
 	doAug1! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 4/12/2019 15:29:24'!
-harvestSep1
-	"Harvest in September Week 1 and then travel."
-	self halt.
-	self flag: #dhn.  "it ain't happening"
-	self harvest;
-	 doSep1! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 10/10/2017 12:39:12'!
 harvestThen: aSymbol
