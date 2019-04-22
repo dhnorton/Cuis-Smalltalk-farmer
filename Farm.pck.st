@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 4:30:07 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 4:34:05 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 61!
+!provides: 'Farm' 1 62!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -957,16 +957,6 @@ harvest
 	currentPlayer harvest: (self class harvestSeason at: currentPlayer position).
 	self disableAll: {'Harvest'}.
 	self triggerEvent: #clicked! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/10/2017 12:39:12'!
-harvestThen: aSymbol
-	"Harvest and account for the result."
-	
-	currentPlayer 
-		harvest: (self class harvestSeason at: currentPlayer position)
-		then: aSymbol.
-	self
-		disableAll: {'Harvest'}! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 4/18/2019 15:31:29'!
 payExpense
@@ -2268,11 +2258,6 @@ expenseSep1
 harvestNormal
 	"Answer the normal actionSelector for the Harvest button."
 	^#harvest! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:17:02'!
-harvestSep1
-	"Answer the actionSelector for the Harvest button when on Sep wk 1."
-	^#harvestSep1! !
 
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/17/2017 14:29:55'!
 translate: aName
