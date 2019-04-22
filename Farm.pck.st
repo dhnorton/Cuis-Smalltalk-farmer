@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 4:27:40 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 4:30:07 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 60!
+!provides: 'Farm' 1 61!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -937,22 +937,6 @@ wonButtonsState
 	self enableAll: {'End Turn'}.
 ! !
 
-!Farm methodsFor: 'harvesting' stamp: 'dhn 4/17/2019 13:02:44'!
-doAug1
-	"Move the player to February Week 4 after his landing on August  Week 1."
-
-	self disableAll: {'End Turn'}.
-	(self disabledAll: {'Harvest'. 'Expense'})
-		ifTrue: [
-			GamePopUp inform: 'You will advance to 4th week in February.' title: 'Farming like a Pro'.
-			currentPlayer passedGo: true.
-			token slideRight: currentPlayer position to: (Farm specialSpaces at: #feb4)]! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 7/12/2013 18:17'!
-expenseAug1
-	self payExpense;
-	doAug1! !
-
 !Farm methodsFor: 'harvesting' stamp: 'dhn 9/20/2017 13:19:24'!
 franchiseEffect: aRoll
 	"Account for a harvest of aRoll quality"
@@ -973,12 +957,6 @@ harvest
 	currentPlayer harvest: (self class harvestSeason at: currentPlayer position).
 	self disableAll: {'Harvest'}.
 	self triggerEvent: #clicked! !
-
-!Farm methodsFor: 'harvesting' stamp: 'dhn 10/27/2014 21:28'!
-harvestAug1
-	"Harvest in August Week 1 and then travel."
-	self harvest;
-	doAug1! !
 
 !Farm methodsFor: 'harvesting' stamp: 'dhn 10/10/2017 12:39:12'!
 harvestThen: aSymbol
@@ -2271,11 +2249,6 @@ defaultGoal
 	
 	^ 250000! !
 
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:19'!
-expenseAug1
-	"Answer the actionSelector for the Expense button when on Aug wk 1."
-	^#expenseAug1! !
-
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:12:36'!
 expenseJul3
 	"Answer the actionSelector for the Expense button when on Jul wk 3."
@@ -2290,11 +2263,6 @@ expenseNormal
 expenseSep1
 	"Answer the actionSelector for the Expense button when on Sep wk 1."
 	^#expenseSep1! !
-
-!Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:13:27'!
-harvestAug1
-	"Answer the actionSelector for the Harvest button when on Aug wk 1."
-	^#harvestAug1! !
 
 !Farm class methodsFor: 'operation' stamp: 'dhn 9/7/2017 18:14:40'!
 harvestNormal
