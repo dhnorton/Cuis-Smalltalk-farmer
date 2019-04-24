@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 22 April 2019 at 6:42:41 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 23 April 2019 at 9:02:14 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 64!
+!provides: 'Farm' 1 65!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -38,7 +38,7 @@ FarmButton class
 
 !classDefinition: #FarmingGame category: #'Farm-Graphics'!
 GameBoard subclass: #FarmingGame
-	instanceVariableNames: 'seasons namesCache numbersArea othersArea seasonsArea'
+	instanceVariableNames: 'seasons numbersArea othersArea seasonsArea'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
@@ -2897,18 +2897,6 @@ tourAt: anInterval
 describe
 
 	^ ''! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
-namesCache
-	"Answer the value of namesCache"
-
-	^ namesCache! !
-
-!FarmingGame methodsFor: 'accessing' stamp: 'dhn 3/22/2012 10:36'!
-namesCache: anObject
-	"Set the value of namesCache"
-
-	namesCache := anObject! !
 
 !FarmingGame methodsFor: 'accessing' stamp: 'dhn 9/4/2011 16:53'!
 seasons
