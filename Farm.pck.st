@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 23 April 2019 at 9:02:14 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 24 April 2019 at 9:25:15 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 65!
+!provides: 'Farm' 1 66!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -44,6 +44,16 @@ GameBoard subclass: #FarmingGame
 	category: 'Farm-Graphics'!
 !classDefinition: 'FarmingGame class' category: #'Farm-Graphics'!
 FarmingGame class
+	instanceVariableNames: ''!
+
+!classDefinition: #AssetSale category: #'Farm-Graphics'!
+AuctionAsset subclass: #AssetSale
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'AssetSale class' category: #'Farm-Graphics'!
+AssetSale class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmingView category: #'Farm-Graphics'!
@@ -356,6 +366,9 @@ FarmingGame start.
 http://farmgame.com/product/woo-single-2/
 
 !
+
+!AssetSale commentStamp: '<historical>' prior: 0!
+A window which makes it possible for farmers to raise cash by selling assets.!
 
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
@@ -1044,11 +1057,11 @@ fates
 
 	^ fates! !
 
-!Farm methodsFor: 'accessing' stamp: 'dhn 4/10/2019 10:25:45'!
+!Farm methodsFor: 'accessing' stamp: 'dhn 4/24/2019 18:24:49'!
 assetAuctionList
 	"Answer a list for the asset auction window"
 	
-	^ auctionList! !
+	^ currentPlayer auctionable! !
 
 !Farm methodsFor: 'accessing' stamp: 'dhn 4/10/2019 10:19:05'!
 auctionList
@@ -1769,6 +1782,12 @@ assetOption
 			at: #Cascade put: #Cascade;
 			at: #Toppenish put: #Toppenish;
 			yourself! !
+
+!Farm class methodsFor: 'database' stamp: 'dhn 4/24/2019 12:54:25'!
+bankName
+	"Answer the name of the bank"
+	
+	^ 'First Friendly Bank'! !
 
 !Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 15:50:14'!
 describeSpaces
@@ -2934,7 +2953,7 @@ showAssets
 				morphPosition: self windowPosition;
 				morphExtent: 300 @ 220]! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 8/29/2018 15:45:20'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 4/24/2019 18:40:50'!
 showAuctionAssets
 	"Show window for auctioning assets"
 	| pl win |
@@ -2942,7 +2961,7 @@ showAuctionAssets
 	pl _ model currentPlayer.
 	pl assets notEmpty
 		ifTrue: [
-			win _ AuctionAsset openOn: model.
+			win _ AssetSale openOn: model.
 			win openInWorld: pasteup.
 			win
 				seller: pl;
@@ -3159,6 +3178,60 @@ how
 	"
 	FarmingGame start.
 	"! !
+
+!AssetSale methodsFor: 'operation' stamp: 'dhn 4/24/2019 18:47:51'!
+assetSold
+	"Record the sale; enable End button"
+	| purchase recipient |
+	
+	cancelButton disableButton.
+	endButton enableButton.
+	buyers removeAllMorphs.
+	chant addFirst: (String streamContents: [:str |
+		str
+			nextPutAll: 'SOLD!! to ';
+			nextPutAll: currentBidder;
+			nextPutAll: ' for $';
+			nextPutAll: self currentBid printStringWithCommas; newLine]).
+	self showChant.
+	model currentPlayer sellAsset: asset listName for: currentBid.
+	currentBidder = model class bankName
+		ifTrue: [recipient _ currentBidder]
+		ifFalse: [
+			recipient _ model players detect: [:pl | pl identity = currentBidder] ifNone: [].
+			recipient tally: currentBid negated.
+			purchase _ recipient assets at: asset listName.
+			purchase cost: purchase cost + currentBid.
+			purchase quantity: purchase quantity + 1.
+			(model availableOptions at: purchase listName) holder: recipient].
+	model currentPlayer cash < 0 ifFalse: [
+		model updateHistory.
+		model enableAll: {'End Turn'}].
+	model updatePlayer! !
+
+!AssetSale methodsFor: 'operation' stamp: 'dhn 4/24/2019 18:53:50'!
+openingFor: anItem
+	"Form the opening bid for anItem"
+	| listItem item opening |
+	
+	listItem _ model assetAuctionList at: anItem.
+	item _ (listItem findTokens: '()' keep: ($A to:$Z), ($a to: $z)) first.
+	asset _ model currentPlayer assets at: item asSymbol ifAbsent: [^ 'No such asset named ', item].
+	opening _ asset class price * asset class lotQuantity // 2.
+	self currentBid: opening.
+	currentBidder _ model class bankName.
+	chant _ OrderedCollection new.
+	chant addFirst: (String streamContents: [:string |
+		string
+			nextPutAll: 'The opening bid for ';
+			nextPutAll: item;
+			nextPutAll: ' by ';
+			nextPutAll: model class bankName;
+			nextPutAll: ' will be for ';
+			nextPut: $$;
+			nextPutAll: opening printStringWithCommas;
+			nextPutAll: ' (half the list price).'; newLine]).
+	self showChant! !
 
 !FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 aboutToBeGrabbedBy: aHand
