@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3696] on 24 April 2019 at 9:25:15 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 28 April 2019 at 1:33:44 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 66!
+!provides: 'Farm' 1 68!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -46,14 +46,14 @@ GameBoard subclass: #FarmingGame
 FarmingGame class
 	instanceVariableNames: ''!
 
-!classDefinition: #AssetSale category: #'Farm-Graphics'!
-AuctionAsset subclass: #AssetSale
+!classDefinition: #SellAsset category: #'Farm-Graphics'!
+AuctionAsset subclass: #SellAsset
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
-!classDefinition: 'AssetSale class' category: #'Farm-Graphics'!
-AssetSale class
+!classDefinition: 'SellAsset class' category: #'Farm-Graphics'!
+SellAsset class
 	instanceVariableNames: ''!
 
 !classDefinition: #FarmingView category: #'Farm-Graphics'!
@@ -367,7 +367,7 @@ http://farmgame.com/product/woo-single-2/
 
 !
 
-!AssetSale commentStamp: '<historical>' prior: 0!
+!SellAsset commentStamp: '<historical>' prior: 0!
 A window which makes it possible for farmers to raise cash by selling assets.!
 
 !FarmingView commentStamp: '<historical>' prior: 0!
@@ -2953,7 +2953,7 @@ showAssets
 				morphPosition: self windowPosition;
 				morphExtent: 300 @ 220]! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 4/24/2019 18:40:50'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 4/28/2019 10:39:29'!
 showAuctionAssets
 	"Show window for auctioning assets"
 	| pl win |
@@ -2961,7 +2961,7 @@ showAuctionAssets
 	pl _ model currentPlayer.
 	pl assets notEmpty
 		ifTrue: [
-			win _ AssetSale openOn: model.
+			win _ SellAsset openOn: model.
 			win openInWorld: pasteup.
 			win
 				seller: pl;
@@ -3179,7 +3179,7 @@ how
 	FarmingGame start.
 	"! !
 
-!AssetSale methodsFor: 'operation' stamp: 'dhn 4/24/2019 18:47:51'!
+!SellAsset methodsFor: 'operation' stamp: 'dhn 4/27/2019 20:33:56'!
 assetSold
 	"Record the sale; enable End button"
 	| purchase recipient |
@@ -3194,13 +3194,13 @@ assetSold
 			nextPutAll: ' for $';
 			nextPutAll: self currentBid printStringWithCommas; newLine]).
 	self showChant.
-	model currentPlayer sellAsset: asset listName for: currentBid.
+	model currentPlayer sellAsset: asset description for: currentBid.
 	currentBidder = model class bankName
 		ifTrue: [recipient _ currentBidder]
 		ifFalse: [
 			recipient _ model players detect: [:pl | pl identity = currentBidder] ifNone: [].
 			recipient tally: currentBid negated.
-			purchase _ recipient assets at: asset listName.
+			purchase _ recipient assets at: asset description.
 			purchase cost: purchase cost + currentBid.
 			purchase quantity: purchase quantity + 1.
 			(model availableOptions at: purchase listName) holder: recipient].
@@ -3209,7 +3209,7 @@ assetSold
 		model enableAll: {'End Turn'}].
 	model updatePlayer! !
 
-!AssetSale methodsFor: 'operation' stamp: 'dhn 4/24/2019 18:53:50'!
+!SellAsset methodsFor: 'operation' stamp: 'dhn 4/24/2019 18:53:50'!
 openingFor: anItem
 	"Form the opening bid for anItem"
 	| listItem item opening |
@@ -3232,6 +3232,14 @@ openingFor: anItem
 			nextPutAll: opening printStringWithCommas;
 			nextPutAll: ' (half the list price).'; newLine]).
 	self showChant! !
+
+!SellAsset methodsFor: 'operation' stamp: 'dhn 4/27/2019 20:13:42'!
+update: aSymbol
+	super update: aSymbol.
+	aSymbol == #assetItem
+		ifTrue: [{'#assetItem'} print].
+	aSymbol == #assetAuctionList
+		ifTrue: [{'#assetAuctionList'} print].! !
 
 !FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 aboutToBeGrabbedBy: aHand
@@ -5747,14 +5755,13 @@ harvesting
 
 	^ harvesting! !
 
-!Farmer methodsFor: 'income-related' stamp: 'dhn 9/26/2017 12:04:18'!
+!Farmer methodsFor: 'income-related' stamp: 'dhn 4/27/2019 20:38:18'!
 sellAsset: aString for: aNumber
 	"Record the sale of the asset named aString at aNumber price"
 	| lot subs |
 
 	self tally: aNumber.
 	subs _ (assets at: aString) class subclasses.
-	self halt.
 	subs isEmpty
 		ifTrue: [
 			lot _ assets at: aString.
