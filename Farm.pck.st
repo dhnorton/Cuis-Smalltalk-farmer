@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 28 April 2019 at 1:33:44 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 1 May 2019 at 12:02:21 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 68!
+!provides: 'Farm' 1 69!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -809,13 +809,13 @@ disabledAll: aCollection
 	(self buttonsNamed: aCollection) do: [:ea | ans _ ans and: ea enabled not].
 	^ ans! !
 
-!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 20:20:04'!
+!Farm methodsFor: 'as yet unclassified' stamp: 'dhn 5/1/2019 11:55:44'!
 doAuction
 	"Display the Auction button menu."
 	| ans |
 	
-	ans := (SelectionMenu fromArray:
-	#(	('Sell Your Assets'	            showAuctionAssets)
+	ans _ (SelectionMenu fromArray:
+	#(	('Sell Your Assets'	            showAssetAuction)
 		('Sell Your Options'	            showAuctionOptions)
 		)) startUpWithCaption: 'Start an Auction'.
 		
@@ -2426,7 +2426,7 @@ enableButton
 		self enabled: true.
 		self color: GameButtonMorph enabledColor]! !
 
-!FarmingGame methodsFor: 'initialization' stamp: 'dhn 4/18/2019 10:53:01'!
+!FarmingGame methodsFor: 'initialization' stamp: 'dhn 5/1/2019 12:00:19'!
 buildMorphicWindow
 
 	pasteup _ PasteUpMorph new
@@ -2450,7 +2450,7 @@ buildMorphicWindow
 	model when: #showYourself send: #showYourself to: self.
 	model when: #showEverybody send: #showEverybody to: self.
 	model when: #showHistory send: #showHistory to: self.
-	model when: #showAuctionAssets send: #showAuctionAssets to: self.
+	model when: #showAssetAuction send: #showAssetAuction to: self.
 	model when: #showAuctionOptions send: #showAuctionOptions to: self.
 	model when: #endOfMove send: #possiblyHarvest to: self.
 	model when: #clicked send: #attemptEnd to: self.
@@ -2934,6 +2934,26 @@ quitGame
 
 	(self confirm: 'Are you sure you want to quit ', FarmingGame asString, '?')
 		ifTrue: [model quitGame]! !
+
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 5/1/2019 11:41:32'!
+showAssetAuction
+	"Open an asset auction window"
+	| pl win purpose |
+	
+	model disableAll: {'Auction'. 'End Turn'}.
+	model auctionList: model currentPlayer auctionable.
+	pl _ model currentPlayer.
+	purpose _ pl identity, '''s Assets'.
+	win _ SellAsset openOn: model.			
+	win buyers color: Color lightBrown.
+	win openInWorld: pasteup.
+	win 
+		setLabel: 'Auction of ', purpose;
+		color: (Color r: 0.986 g: 0.986 b: 0.986);
+		setWindowColor: pl color;
+		startButtons;
+		morphPosition: self windowPosition;
+		morphExtent: 450@300! !
 
 !FarmingGame methodsFor: 'windows' stamp: 'dhn 9/13/2017 10:48:39'!
 showAssets
