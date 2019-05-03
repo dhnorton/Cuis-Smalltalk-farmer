@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 1 May 2019 at 12:02:21 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 1 May 2019 at 5:53:37 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 69!
+!provides: 'Farm' 1 70!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -3229,14 +3229,15 @@ assetSold
 		model enableAll: {'End Turn'}].
 	model updatePlayer! !
 
-!SellAsset methodsFor: 'operation' stamp: 'dhn 4/24/2019 18:53:50'!
+!SellAsset methodsFor: 'operation' stamp: 'dhn 5/1/2019 17:53:23'!
 openingFor: anItem
 	"Form the opening bid for anItem"
 	| listItem item opening |
-	
+
 	listItem _ model assetAuctionList at: anItem.
 	item _ (listItem findTokens: '()' keep: ($A to:$Z), ($a to: $z)) first.
-	asset _ model currentPlayer assets at: item asSymbol ifAbsent: [^ 'No such asset named ', item].
+	asset _ model currentPlayer assets at: (Farm anotherNameFor: item)
+		ifAbsent: [^ 'No such asset named ', item].
 	opening _ asset class price * asset class lotQuantity // 2.
 	self currentBid: opening.
 	currentBidder _ model class bankName.
