@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 1 May 2019 at 5:53:37 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 3 May 2019 at 6:27:10 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 70!
+!provides: 'Farm' 1 71!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -1751,7 +1751,7 @@ assetList
 	"Answer the list of assets in order suitable for auction."
 	^ #('Hay' 'Grain' 'Fruit' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
 
-!Farm class methodsFor: 'database' stamp: 'dhn 9/17/2017 20:32:25'!
+!Farm class methodsFor: 'database' stamp: 'dhn 5/3/2019 16:54:43'!
 assetOption
 	"Answer the relationship between asset and option names"
 
@@ -1768,6 +1768,8 @@ assetOption
 			at: #Rattlesnake put: #Rattlesnake;
 			at: #Cascade put: #Cascade;
 			at: #Toppenish put: #Toppenish;
+			at: #Grain put: #Grain;
+			at: #Fruit put: #Fruit;
 			yourself! !
 
 !Farm class methodsFor: 'database' stamp: 'dhn 4/24/2019 12:54:25'!
@@ -2978,13 +2980,13 @@ showAuctionAssets
 				morphExtent: 300 @ 220.
 			model triggerEvent: #itemChange]! !
 
-!FarmingGame methodsFor: 'windows' stamp: 'dhn 9/17/2017 20:33:22'!
+!FarmingGame methodsFor: 'windows' stamp: 'dhn 5/3/2019 14:05:54'!
 showAuctionOptions
 	"Show window for auctioning options"
 	| pl |
 
 	pl _ model currentPlayer.
-	pl options do: [:ea | {(pl assets at: (Farm anotherNameFor: ea)) forOptionAuction} print]! !
+	pl options do: [:ea | {(pl assets at: (Farm alternativeTo: ea)) forOptionAuction} print]! !
 
 !FarmingGame methodsFor: 'windows' stamp: 'dhn 10/9/2017 15:36:33'!
 showDraw: anObject
@@ -3186,44 +3188,14 @@ how
 	FarmingGame start.
 	"! !
 
-!SellAsset methodsFor: 'operation' stamp: 'dhn 4/27/2019 20:33:56'!
-assetSold
-	"Record the sale; enable End button"
-	| purchase recipient |
-	
-	cancelButton disableButton.
-	endButton enableButton.
-	buyers removeAllMorphs.
-	chant addFirst: (String streamContents: [:str |
-		str
-			nextPutAll: 'SOLD!! to ';
-			nextPutAll: currentBidder;
-			nextPutAll: ' for $';
-			nextPutAll: self currentBid printStringWithCommas; newLine]).
-	self showChant.
-	model currentPlayer sellAsset: asset description for: currentBid.
-	currentBidder = model class bankName
-		ifTrue: [recipient _ currentBidder]
-		ifFalse: [
-			recipient _ model players detect: [:pl | pl identity = currentBidder] ifNone: [].
-			recipient tally: currentBid negated.
-			purchase _ recipient assets at: asset description.
-			purchase cost: purchase cost + currentBid.
-			purchase quantity: purchase quantity + 1.
-			(model availableOptions at: purchase listName) holder: recipient].
-	model currentPlayer cash < 0 ifFalse: [
-		model updateHistory.
-		model enableAll: {'End Turn'}].
-	model updatePlayer! !
-
-!SellAsset methodsFor: 'operation' stamp: 'dhn 5/1/2019 17:53:23'!
+!SellAsset methodsFor: 'operation' stamp: 'dhn 5/3/2019 16:55:37'!
 openingFor: anItem
 	"Form the opening bid for anItem"
 	| listItem item opening |
 
 	listItem _ model assetAuctionList at: anItem.
 	item _ (listItem findTokens: '()' keep: ($A to:$Z), ($a to: $z)) first.
-	asset _ model currentPlayer assets at: (Farm anotherNameFor: item)
+	asset _ model currentPlayer assets at: (Farm assetOption at: item)
 		ifAbsent: [^ 'No such asset named ', item].
 	opening _ asset class price * asset class lotQuantity // 2.
 	self currentBid: opening.
@@ -4207,6 +4179,12 @@ initialize
 	super initialize.
 ! !
 
+!Fruit methodsFor: 'operating' stamp: 'dhn 5/3/2019 17:22:22'!
+listName
+	"Answer the string used to identify the sender in lists"
+	
+	^ 'Fruit'! !
+
 !Fruit class methodsFor: 'as yet unclassified' stamp: 'dhn 9/24/2011 21:49'!
 at: aRoll for: aQuantity
 	"Answer the yield as if looking it up in a table."
@@ -4256,6 +4234,12 @@ last
 initialize
 	super initialize.
 ! !
+
+!Grain methodsFor: 'operating' stamp: 'dhn 5/3/2019 17:21:55'!
+listName
+	"Answer the string used to identify the sender in lists"
+	
+	^ 'Grain'! !
 
 !Grain class methodsFor: 'operating' stamp: 'dhn 9/8/2017 16:43:48'!
 at: aRoll for: aQuantity
@@ -4316,14 +4300,20 @@ initialize
 	description := 'Wheat'
 ! !
 
-!Hay methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2014 10:37'!
-assetValue
-	^self class price * self quantity! !
-
 !Hay methodsFor: 'initialize-release' stamp: 'dhn 1/18/2014 11:58'!
 initialize
 	super initialize.
 	description := 'Hay'! !
+
+!Hay methodsFor: 'operating' stamp: 'dhn 9/15/2014 10:37'!
+assetValue
+	^self class price * self quantity! !
+
+!Hay methodsFor: 'operating' stamp: 'dhn 5/3/2019 17:21:27'!
+listName
+	"Answer the string used to identify the sender in lists"
+	
+	^ 'Hay'! !
 
 !Hay class methodsFor: 'as yet unclassified' stamp: 'dhn 9/24/2011 21:48'!
 at: aRoll for: aQuantity
@@ -4432,6 +4422,12 @@ initialize
 	super initialize.
 	description := 'Harvester'! !
 
+!Harvester methodsFor: 'operating' stamp: 'dhn 5/3/2019 17:20:40'!
+listName
+	"Answer the string used to identify the sender in lists"
+	
+	^ 'Harvester'! !
+
 !Harvester class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 12:27:44'!
 optionText
 	^ 'EQUIPMENT SALE
@@ -4442,6 +4438,12 @@ Total $', self optionCost printStringWithCommas! !
 initialize
 	super initialize.
 	description := 'Tractor'! !
+
+!Tractor methodsFor: 'operating' stamp: 'dhn 5/3/2019 17:20:16'!
+listName
+	"Answer the string used to identify the sender in lists"
+	
+	^ 'Tractor'! !
 
 !Tractor class methodsFor: 'as yet unclassified' stamp: 'dhn 9/1/2017 13:40:39'!
 optionText
@@ -4596,6 +4598,12 @@ assetValue
 	
 	^ self class price * self quantity! !
 
+!CattleOnFarm methodsFor: 'operating' stamp: 'dhn 5/3/2019 17:19:47'!
+listName
+	"Answer the string used to identify the sender in lists"
+	
+	^ 'CattleOnFarm'! !
+
 !CattleOnFarm methodsFor: 'operating' stamp: 'dhn 9/15/2017 11:43:57'!
 units
 	"Answer the value of units"
@@ -4643,10 +4651,16 @@ price
 	"Per head"
 	^ 1000! !
 
-!Ahtanum methodsFor: 'as yet unclassified' stamp: 'dhn 1/23/2014 15:30'!
+!Ahtanum methodsFor: 'initialize-release' stamp: 'dhn 1/23/2014 15:30'!
 initialize
 	super initialize.
 	description := 'Ahtanum', where! !
+
+!Ahtanum methodsFor: 'operating' stamp: 'dhn 5/3/2019 17:16:29'!
+listName
+	"Answer the string used to identify the sender in lists"
+	
+	^ 'Ahtanum'! !
 
 !Ahtanum class methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 13:08'!
 auctionQuantity
@@ -4665,7 +4679,13 @@ buy 20 pregnant cows to stock it
 at $500 each
 Total $', self optionCost printStringWithCommas! !
 
-!Cascade methodsFor: 'as yet unclassified' stamp: 'dhn 9/15/2017 12:46:45'!
+!Cascade methodsFor: 'operating' stamp: 'dhn 5/3/2019 17:17:08'!
+listName
+	"Answer the string used to identify the sender in lists"
+	
+	^ 'Cascade'! !
+
+!Cascade methodsFor: 'initialize-release' stamp: 'dhn 9/15/2017 12:46:45'!
 initialize
 
 	super initialize.
@@ -4688,7 +4708,13 @@ buy 40 pregnant cows to stock it
 at $500 each
 Total $', self optionCost printStringWithCommas! !
 
-!Rattlesnake methodsFor: 'as yet unclassified' stamp: 'dhn 1/23/2014 15:31'!
+!Rattlesnake methodsFor: 'operating' stamp: 'dhn 5/3/2019 17:18:11'!
+listName
+	"Answer the string used to identify the sender in lists"
+	
+	^ 'Rattlesnake'! !
+
+!Rattlesnake methodsFor: 'initialize-release' stamp: 'dhn 1/23/2014 15:31'!
 initialize
 	super initialize.
 	description := 'Rattlesnake', where! !
@@ -4710,10 +4736,16 @@ buy 30 pregnant cows to stock it
 at $500 each
 Total $', self optionCost printStringWithCommas! !
 
-!Toppenish methodsFor: 'as yet unclassified' stamp: 'dhn 1/23/2014 15:31'!
+!Toppenish methodsFor: 'initialize-release' stamp: 'dhn 1/23/2014 15:31'!
 initialize
 	super initialize.
 	description := 'Toppenish', where! !
+
+!Toppenish methodsFor: 'operating' stamp: 'dhn 5/3/2019 17:19:03'!
+listName
+	"Answer the string used to identify the sender in lists"
+	
+	^ 'Toppenish'! !
 
 !Toppenish class methodsFor: 'as yet unclassified' stamp: 'dhn 1/14/2014 13:11'!
 auctionQuantity
