@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 3 May 2019 at 6:27:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 3 May 2019 at 8:31:55 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 71!
+!provides: 'Farm' 1 72!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -1044,11 +1044,11 @@ fates
 
 	^ fates! !
 
-!Farm methodsFor: 'accessing' stamp: 'dhn 4/24/2019 18:24:49'!
+!Farm methodsFor: 'accessing' stamp: 'dhn 5/3/2019 19:57:20'!
 assetAuctionList
 	"Answer a list for the asset auction window"
 	
-	^ currentPlayer auctionable! !
+	^ auctionList! !
 
 !Farm methodsFor: 'accessing' stamp: 'dhn 4/10/2019 10:19:05'!
 auctionList
@@ -3213,13 +3213,11 @@ openingFor: anItem
 			nextPutAll: ' (half the list price).'; newLine]).
 	self showChant! !
 
-!SellAsset methodsFor: 'operation' stamp: 'dhn 4/27/2019 20:13:42'!
+!SellAsset methodsFor: 'operation' stamp: 'dhn 5/3/2019 20:11:15'!
 update: aSymbol
 	super update: aSymbol.
-	aSymbol == #assetItem
-		ifTrue: [{'#assetItem'} print].
 	aSymbol == #assetAuctionList
-		ifTrue: [{'#assetAuctionList'} print].! !
+		ifTrue: [self halt].! !
 
 !FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 aboutToBeGrabbedBy: aHand
