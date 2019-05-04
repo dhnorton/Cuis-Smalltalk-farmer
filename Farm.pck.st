@@ -96,14 +96,14 @@ FarmingView subclass: #DrawView
 DrawView class
 	instanceVariableNames: ''!
 
-!classDefinition: #OptionsView category: #'Farm-Graphics'!
+!classDefinition: #ExerciseOptions category: #'Farm-Graphics'!
 FarmingView subclass: #OptionsView
 	instanceVariableNames: 'textPane cancelButton buyButton buttonArea player list optionsItem optionsReport'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Graphics'!
-!classDefinition: 'OptionsView class' category: #'Farm-Graphics'!
-OptionsView class
+!classDefinition: 'ExerciseOptions class' category: #'Farm-Graphics'!
+ExerciseOptions class
 	instanceVariableNames: ''!
 
 !classDefinition: #YouView category: #'Farm-Graphics'!
@@ -372,7 +372,7 @@ A FarmingGame view which shows the status of a player's assets.!
 !DrawView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the option which was drawn.!
 
-!OptionsView commentStamp: 'dhn 8/26/2016 16:48:51' prior: 0!
+!ExerciseOptions commentStamp: 'dhn 8/26/2016 16:48:51' prior: 0!
 A FarmingGame view which makes it possible for farmers to exercise options.!
 
 !YouView commentStamp: '<historical>' prior: 0!
@@ -3050,7 +3050,7 @@ showOpts
 	pl _ model currentPlayer.
 	pl priorOptions notEmpty
 		ifTrue: [
-			win _ OptionsView openOn: model.
+			win _ ExerciseOptions openOn: model.
 			win openInWorld: pasteup.
 			win
 				setLabel: (pl identity, '''s Shopping');
@@ -3632,74 +3632,7 @@ openOn: aModel
 	^ win
 ! !
 
-!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/13/2017 14:18:31'!
-buildMorphicWindow
-	"Lay out the window for purchases"
-	| rightPane |
-	
-	self layoutMorph beRow.
-	list _ (PluggableListMorph
-		model: self
-		listGetter: #optionsList
-		indexGetter: #optionsItem
-		indexSetter: #optionsItem:
-		mainView: self
-		menuGetter: nil
-		keystrokeAction: nil)
-			name: #catalog.
-			
-	buttonArea _ (LayoutMorph newRow)
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center).
-	buttonArea
-		name: #buttons;
-		padding: #center.
-
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'item description'. 	"give the TextModelMorph a name which will appear in the halos"
-	textPane 
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.85
-			minorDirectionPadding: #center).
-
-	rightPane _ LayoutMorph newColumn.
-	rightPane
-		name: 'right pane';
-		addMorph: buttonArea;
-		addMorph: textPane.
-	
-	self layoutMorph
-		addMorph: list proportionalWidth: 0.35;
-		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
-! !
-
-!OptionsView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 10:20:02'!
-startButtons
-	"Set the buttons for buying assets"
-	
-	buyButton _ GameButtonMorph label: 'Buy' action: #buy state: false model: self.
-	buyButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Make the purchase.'.
-		
-	cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self.
-	cancelButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Forget about shopping for now.'.
-
-	buttonArea
-		removeAllMorphs;
-		addMorph: buyButton;
-		addMorph: cancelButton;
-		padding: #center.
-! !
-
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 15:12:22'!
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/14/2017 15:12:22'!
 buy
 	"Purchase an asset"
 	| key method amt |
@@ -3732,7 +3665,7 @@ buy
 			"update the text pane"
 			self details]! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:22:04'!
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:22:04'!
 buyButton: aBool
 	"Change buy button state according to aBool"
 	
@@ -3742,7 +3675,7 @@ buyButton: aBool
 				ifFalse: [buyButton enableButton]]
 		ifFalse: [buyButton disableButton]! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:26:01'!
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:26:01'!
 details
 	"Set the content of the text pane"
 	
@@ -3751,52 +3684,39 @@ details
 			ifEmpty: ['']
 			ifNotEmpty: [self optionsReport])! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/14/2017 09:41:12'!
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/14/2017 09:41:12'!
 getList
 	"Update the list of options"
 	
 	self optionsItem: 0.
 	list updateList! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:15:42'!
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:15:42'!
 list
 	"Answer the value of list"
 	
 	^ list! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:16:32'!
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:16:32'!
 list: aCollection
 	"Set the value of list"
 	
 	list _ aCollection! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
 player: anObject
 	"Set the value of player"
 	
 	player _ anObject! !
 
-!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:25'!
-closeBoxHit
-
-	model enableAll: {'Purchase'}.
-	super closeBoxHit! !
-
-!OptionsView methodsFor: 'termination' stamp: 'dhn 9/13/2017 16:00:41'!
-endIt
-	"Close the receiver"
-	
-	model enableAll: {'Purchase'}.
-	self delete! !
-
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:13:20'!
+!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:13:20'!
 optionsItem
 	"Answer the value of optionsItem"
 
 	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
 	^ optionsItem! !
 
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/14/2017 12:00:01'!
+!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/14/2017 12:00:01'!
 optionsItem: anObject
 	"Set the value of optionsItem and optionsReport"
 	| key option enab |
@@ -3817,7 +3737,7 @@ optionsItem: anObject
 	textPane model actualContents: optionsReport.
 	self changed: #optionsItem 	"makes deselection of the list happen"! !
 
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/14/2017 13:29:18'!
+!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/14/2017 13:29:18'!
 optionsList
 	"Answer the shopping list for a player"
 	
@@ -3825,13 +3745,13 @@ optionsList
 		ifNotNil: [player priorOptions]
 		ifNil: [OrderedCollection new])! !
 
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:21:40'!
+!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:21:40'!
 optionsList: aList
 	"Set the shopping list for a player"
 	
 	player options: aList! !
 
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:16:50'!
+!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:16:50'!
 optionsReport
 	"Answer the report on the selected option"
 
@@ -3839,13 +3759,13 @@ optionsReport
 		ifTrue: [self optionsReport: (model class translate: (self optionsList at: optionsItem))]
 		ifFalse: ['']! !
 
-!OptionsView methodsFor: 'operation' stamp: 'dhn 9/17/2017 21:42:41'!
+!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/17/2017 21:42:41'!
 optionsReport: anAsset
 	"Show the status of anAsset for shopping purposes"
 	
 	^ player optionDescription: (model class anotherNameFor: anAsset)! !
 
-!OptionsView class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:33'!
+!ExerciseOptions class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:33'!
 openOn: aModel
 	"Answer an instance of this class on aModel"
 	| win |
@@ -3859,7 +3779,7 @@ openOn: aModel
 	^ win
 ! !
 
-!OptionsView class methodsFor: 'database' stamp: 'dhn 9/13/2017 16:05:53'!
+!ExerciseOptions class methodsFor: 'database' stamp: 'dhn 9/13/2017 16:05:53'!
 optionMethod
 	"Answer a dictionary of methods which account for the execution of options."
 	
@@ -3876,7 +3796,7 @@ optionMethod
 		at: #Toppenish put: #toppenish:;
 		yourself! !
 
-!OptionsView class methodsFor: 'database' stamp: 'dhn 9/13/2017 14:15:14'!
+!ExerciseOptions class methodsFor: 'database' stamp: 'dhn 9/13/2017 14:15:14'!
 optionsDesc
 	"Answer a dictionary of things that farmers can purchase."
 	
