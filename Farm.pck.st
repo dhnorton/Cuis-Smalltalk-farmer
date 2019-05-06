@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3727] on 6 May 2019 at 10:45:04 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3727] on 6 May 2019 at 11:25:30 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 75!
+!provides: 'Farm' 1 76!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -3269,7 +3269,7 @@ update: aSymbol
 	aSymbol == #assetAuctionList
 		ifTrue: [self halt].! !
 
-!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 5/5/2019 11:14:40'!
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 5/6/2019 11:09:46'!
 buy
 	"Purchase an asset"
 	| key method amt |
@@ -3285,7 +3285,7 @@ buy
 			"remove option from player"
 			player options: (model optionsList remove: key; yourself).
 			player priorOptions: player options copy.
-			model triggerEvent: #itemChange.
+			model optionsItem: 0.
 	
 			"put the option in the 'discard pile' "
 			model exercisedOptions add: key.
@@ -3311,11 +3311,11 @@ detailsX
 			ifEmpty: ['']
 			ifNotEmpty: [model optionsReport])! !
 
-!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/14/2017 09:41:12'!
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 5/6/2019 10:49:24'!
 getList
 	"Update the list of options"
 	
-	self optionsItem: 0.
+	model optionsItem: 0.
 	list updateList! !
 
 !ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:15:42'!
