@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3727] on 6 May 2019 at 11:25:30 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3727] on 6 May 2019 at 11:55:05 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 76!
+!provides: 'Farm' 1 77!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -2833,17 +2833,17 @@ checkEnd
 	model optionDrawn: false.
 	model endTurnCheck! !
 
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 3/27/2019 22:30:57'!
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 5/6/2019 11:41:41'!
 displayNumbers
 	"Display cash, debt, and goal progress"
-	| pl c d net otherLead pluralForm others |
+	| pl c d n otherLead pluralForm others |
 	
 	(pl _ model currentPlayer) ifNotNil: [
 		c _ '$', pl cash truncated printStringWithCommas.
 		d _ '$', pl debt negated asInteger printStringWithCommas.
-		net _ (pl netAssets / model goal * 100) printStringFractionDigits: 1.
+		n _ '$', pl netAssets asInteger printStringWithCommas.
 		numbersArea submorphs first 
-			contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+			contents: 'Cash: ', c, ' Debt: ', d, ' Net Assets: ',  n;
 			color: pl color.
 		pluralForm _ model players size = 2
 			ifTrue: ['Player''s']
@@ -2896,44 +2896,13 @@ possiblyHarvest
 		
 	model doSpace! !
 
-!FarmingGame methodsFor: 'operating' stamp: 'dhn 3/27/2019 22:15:56'!
+!FarmingGame methodsFor: 'operating' stamp: 'dhn 5/6/2019 11:52:05'!
 titleChange: aPlayer
 	"Change the title, showing player data in color"
-	"Display cash, debt, and goal progress"
-	| c d net otherLead pluralForm others |
 	
 	gameTitle contents: aPlayer identity , '''s turn.'.
 	gameTitle color: aPlayer color.
-	
-	c _ '$', model currentPlayer cash truncated printStringWithCommas.
-	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
-	net _ (model currentPlayer netAssets / model goal * 100) printStringFractionDigits: 1.
-	numbersArea submorphs first 
-		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
-		color: model currentPlayer color.
-	pluralForm _ model players size = 2
-		ifTrue: ['Player''s']
-		ifFalse: ['Players'''].
-	otherLead _ (StringMorph contents: (String streamContents: [:string |
-		string
-			nextPutAll: 'Other ';
-			nextPutAll: pluralForm;
-			nextPutAll: ' Cash: '])).
-	otherLead
-		emphasis: AbstractFont boldCode;
-		color: Color lightBrown;
-		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
-	othersArea 
-		removeAllMorphs;
-		addMorph: otherLead.
-	others _ model players select: [:a | a ~= model currentPlayer].
-	others do: [:ea | | x |
-		x _ ' $', ea cash truncated printStringWithCommas.
-		othersArea addMorph: ((StringMorph contents: x) 
-			emphasis: AbstractFont boldCode;
-			color: ea color;
-			setBalloonText: 'cash held by ', ea identity;
-			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
+	self displayNumbers! !
 
 !FarmingGame methodsFor: 'operating' stamp: 'dhn 8/31/2017 12:42:19'!
 tourAt: anInterval 
