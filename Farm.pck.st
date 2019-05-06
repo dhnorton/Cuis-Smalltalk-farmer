@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3727] on 6 May 2019 at 11:55:05 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3727] on 6 May 2019 at 5:44:11 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 77!
+!provides: 'Farm' 1 78!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -3207,15 +3207,14 @@ how
 	FarmingGame start.
 	"! !
 
-!SellAsset methodsFor: 'operation' stamp: 'dhn 5/3/2019 16:55:37'!
+!SellAsset methodsFor: 'operation' stamp: 'dhn 5/6/2019 17:43:03'!
 openingFor: anItem
 	"Form the opening bid for anItem"
 	| listItem item opening |
 
 	listItem _ model assetAuctionList at: anItem.
 	item _ (listItem findTokens: '()' keep: ($A to:$Z), ($a to: $z)) first.
-	asset _ model currentPlayer assets at: (Farm assetOption at: item)
-		ifAbsent: [^ 'No such asset named ', item].
+	asset _ model currentPlayer assets at: (Farm assetOption keyAtValue: item ifAbsent: []).
 	opening _ asset class price * asset class lotQuantity // 2.
 	self currentBid: opening.
 	currentBidder _ model class bankName.
@@ -3232,11 +3231,13 @@ openingFor: anItem
 			nextPutAll: ' (half the list price).'; newLine]).
 	self showChant! !
 
-!SellAsset methodsFor: 'operation' stamp: 'dhn 5/3/2019 20:11:15'!
+!SellAsset methodsFor: 'operation' stamp: 'dhn 5/6/2019 17:41:40'!
 update: aSymbol
+
 	super update: aSymbol.
-	aSymbol == #assetAuctionList
-		ifTrue: [self halt].! !
+	{aSymbol} print.
+	aSymbol == #assetAuctionItem
+		ifTrue: [].! !
 
 !ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 5/6/2019 11:09:46'!
 buy
