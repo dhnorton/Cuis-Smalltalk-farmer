@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 3 May 2019 at 8:31:55 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 5 May 2019 at 10:19:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 72!
+!provides: 'Farm' 1 74!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -8,7 +8,7 @@ SystemOrganization addCategory: #'Farm-Graphics'!
 
 !classDefinition: #Farm category: #'Farm-Model'!
 Game subclass: #Farm
-	instanceVariableNames: 'availableOptions exercisedOptions optionDrawn fates drawnFates expenses drawnExpenses leases plotWindow moveButton latestPlayer windowCount assetAuctionItem auctionList'
+	instanceVariableNames: 'availableOptions exercisedOptions optionDrawn fates drawnFates expenses drawnExpenses leases plotWindow moveButton latestPlayer windowCount assetAuctionItem auctionList optionsItem optionsReport'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Farm-Model'!
@@ -56,6 +56,16 @@ AuctionAsset subclass: #SellAsset
 SellAsset class
 	instanceVariableNames: ''!
 
+!classDefinition: #ExerciseOptions category: #'Farm-Graphics'!
+OptionsView subclass: #ExerciseOptions
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Farm-Graphics'!
+!classDefinition: 'ExerciseOptions class' category: #'Farm-Graphics'!
+ExerciseOptions class
+	instanceVariableNames: ''!
+
 !classDefinition: #FarmingView category: #'Farm-Graphics'!
 SystemWindow subclass: #FarmingView
 	instanceVariableNames: ''
@@ -94,16 +104,6 @@ FarmingView subclass: #DrawView
 	category: 'Farm-Graphics'!
 !classDefinition: 'DrawView class' category: #'Farm-Graphics'!
 DrawView class
-	instanceVariableNames: ''!
-
-!classDefinition: #ExerciseOptions category: #'Farm-Graphics'!
-FarmingView subclass: #OptionsView
-	instanceVariableNames: 'textPane cancelButton buyButton buttonArea player list optionsItem optionsReport'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Farm-Graphics'!
-!classDefinition: 'ExerciseOptions class' category: #'Farm-Graphics'!
-ExerciseOptions class
 	instanceVariableNames: ''!
 
 !classDefinition: #YouView category: #'Farm-Graphics'!
@@ -360,6 +360,9 @@ http://farmgame.com/product/woo-single-2/
 !SellAsset commentStamp: '<historical>' prior: 0!
 A window which makes it possible for farmers to raise cash by selling assets.!
 
+!ExerciseOptions commentStamp: 'dhn 8/26/2016 16:48:51' prior: 0!
+A FarmingGame view which makes it possible for farmers to exercise options.!
+
 !FarmingView commentStamp: '<historical>' prior: 0!
 Abstract class for FarmingGame views!
 
@@ -371,9 +374,6 @@ A FarmingGame view which shows the status of a player's assets.!
 
 !DrawView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the option which was drawn.!
-
-!ExerciseOptions commentStamp: 'dhn 8/26/2016 16:48:51' prior: 0!
-A FarmingGame view which makes it possible for farmers to exercise options.!
 
 !YouView commentStamp: '<historical>' prior: 0!
 A FarmingGame view which shows the current player's status.!
@@ -706,6 +706,56 @@ livestock: quantity
 		for: #CattleOnFarm
 		amount: CattleOnFarm auctionQuantity.
 	^ quantity! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 5/5/2019 10:42:00'!
+optionsItem
+	"Answer the value of optionsItem"
+
+	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ optionsItem! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 5/5/2019 11:05:07'!
+optionsItem: anObject
+	"Set the value of optionsItem and optionsReport"
+	| key option enab |
+	
+	(optionsItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [
+			key _ self optionsList at: anObject.
+			option _ self class optionsDesc at: key.
+			optionsReport _ self optionsReport: key.
+			option singleOwner not
+				ifTrue: [enab _ true]
+				ifFalse: [enab _ option owner isNil]]
+		ifFalse: [
+			optionsReport _ ''.
+			enab _ false]].
+	self triggerEvent: #itemChange.
+	self triggerEvent: #buyButton: with: enab.
+	self changed: #optionsItem 	"makes deselection of the list happen"! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 5/5/2019 10:17:36'!
+optionsList
+	"Answer the shopping list for a player"
+	
+	^ (currentPlayer 
+		ifNotNil: [currentPlayer priorOptions]
+		ifNil: [OrderedCollection new])! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 5/5/2019 10:25:09'!
+optionsReport
+
+	optionsItem > 0
+		ifTrue: [^ self optionsReport: (self optionsList at: optionsItem)]
+		ifFalse: [^ '']
+! !
+
+!Farm methodsFor: 'options-buying' stamp: 'dhn 5/5/2019 10:59:16'!
+optionsReport: anOption
+	"Show the status of anOption for shopping purposes"
+	
+	^ currentPlayer optionDescription: (self class anotherNameFor: anOption)! !
 
 !Farm methodsFor: 'options-buying' stamp: 'dhn 10/27/2014 21:40'!
 pay: down borrow: balance for: aSymbol amount: qty
@@ -3219,6 +3269,128 @@ update: aSymbol
 	aSymbol == #assetAuctionList
 		ifTrue: [self halt].! !
 
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 5/5/2019 11:14:40'!
+buy
+	"Purchase an asset"
+	| key method amt |
+	
+	(model seasonAt: player position) enabled
+		ifTrue: [self buyButton: false] 		"can buy only in Winter"
+		ifFalse: [
+			key _ model optionsList at: model optionsItem.
+			method _ self class optionMethod at: key.
+			amt _ (Smalltalk classNamed: key) lotQuantity.
+			model perform: method withArguments: {amt}.
+	
+			"remove option from player"
+			player options: (model optionsList remove: key; yourself).
+			player priorOptions: player options copy.
+			model triggerEvent: #itemChange.
+	
+			"put the option in the 'discard pile' "
+			model exercisedOptions add: key.
+	
+			"remove option from the shopping window list"
+			list updateList.
+	
+			"de-select the list in the shopping window"
+			model optionsItem: 0.
+	
+			"disable the 'Buy' button"
+			self buyButton: false.
+	
+			"update the text pane"
+			self details]! !
+
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 5/5/2019 20:34:53'!
+detailsX
+	"Set the content of the text pane"
+	
+	textPane model actualContents: 
+		(player priorOptions
+			ifEmpty: ['']
+			ifNotEmpty: [model optionsReport])! !
+
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/14/2017 09:41:12'!
+getList
+	"Update the list of options"
+	
+	self optionsItem: 0.
+	list updateList! !
+
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:15:42'!
+list
+	"Answer the value of list"
+	
+	^ list! !
+
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:16:32'!
+list: aCollection
+	"Set the value of list"
+	
+	list _ aCollection! !
+
+!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
+player: anObject
+	"Set the value of player"
+	
+	player _ anObject! !
+
+!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:21:40'!
+optionsList: aList
+	"Set the shopping list for a player"
+	
+	player options: aList! !
+
+!ExerciseOptions class methodsFor: 'class initialization' stamp: 'dhn 5/5/2019 12:03:25'!
+openOn: aModel
+	"Answer an instance of this class on aModel"
+	| win |
+
+	win _ self open: aModel.
+	win removeWindowMenu.
+			
+	aModel when: #itemChange send: #details to: win.
+	aModel when: #optionDrawn send: #getList to: win.
+	aModel when: #deleteOpenWindows send: #endIt to: win.
+	
+	^ win
+! !
+
+!ExerciseOptions class methodsFor: 'database' stamp: 'dhn 9/13/2017 16:05:53'!
+optionMethod
+	"Answer a dictionary of methods which account for the execution of options."
+	
+	^ Dictionary new
+		at: #Tractor put: #tractor:;
+		at: #Harvester put: #harvester:;
+		at: #Fruit put: #fruit:;
+		at: #Grain put: #grain:;
+		at: #Hay put: #hay:;
+		at: #Livestock put: #livestock:;
+		at: #Ahtanum put: #ahtanum:;
+		at: #Rattlesnake put: #rattlesnake:;
+		at: #Cascade put: #cascade:;
+		at: #Toppenish put: #toppenish:;
+		yourself! !
+
+!ExerciseOptions class methodsFor: 'database' stamp: 'dhn 9/13/2017 14:15:14'!
+optionsDesc
+	"Answer a dictionary of things that farmers can purchase."
+	
+	^ Dictionary new
+		at: #Tractor put: Tractor new;
+		at: #Harvester put: Harvester new;
+		at: #Fruit put: Fruit new;
+		at: #Grain put: Grain new;
+		at: #Hay put: Hay new;
+		at: #Livestock put: Livestock new;
+		at: #Ahtanum put: Ahtanum new;
+		at: #Rattlesnake put: Rattlesnake new;
+		at: #Cascade put: Cascade new;
+		at: #Toppenish put: Toppenish new;
+		yourself! !
+
 !FarmingView methodsFor: 'dropping/grabbing' stamp: 'dhn 9/7/2017 12:18:32'!
 aboutToBeGrabbedBy: aHand
 	"The receiver is being grabbed by a hand.
@@ -3631,187 +3803,6 @@ openOn: aModel
 	
 	^ win
 ! !
-
-!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/14/2017 15:12:22'!
-buy
-	"Purchase an asset"
-	| key method amt |
-	
-	(model seasonAt: player position) enabled
-		ifTrue: [self buyButton: false] 		"can buy only in Winter"
-		ifFalse: [
-			key _ self optionsList at: self optionsItem.
-			method _ self class optionMethod at: key.
-			amt _ (Smalltalk classNamed: key) lotQuantity.
-			model perform: method withArguments: {amt}.
-	
-			"remove option from player"
-			player options: (self optionsList remove: key; yourself).
-			player priorOptions: player options copy.
-			model triggerEvent: #itemChange.
-	
-			"put the option in the 'discard pile' "
-			model exercisedOptions add: key.
-	
-			"remove option from the shopping window list"
-			list updateList.
-	
-			"de-select the list in the shopping window"
-			self optionsItem: 0.
-	
-			"disable the 'Buy' button"
-			self buyButton: false.
-	
-			"update the text pane"
-			self details]! !
-
-!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/10/2017 15:22:04'!
-buyButton: aBool
-	"Change buy button state according to aBool"
-	
-	aBool
-		ifTrue: [
-			(model seasonAt: model currentPlayer position) enabled
-				ifFalse: [buyButton enableButton]]
-		ifFalse: [buyButton disableButton]! !
-
-!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/14/2017 13:26:01'!
-details
-	"Set the content of the text pane"
-	
-	textPane model actualContents: 
-		(player priorOptions
-			ifEmpty: ['']
-			ifNotEmpty: [self optionsReport])! !
-
-!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/14/2017 09:41:12'!
-getList
-	"Update the list of options"
-	
-	self optionsItem: 0.
-	list updateList! !
-
-!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:15:42'!
-list
-	"Answer the value of list"
-	
-	^ list! !
-
-!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/8/2017 20:16:32'!
-list: aCollection
-	"Set the value of list"
-	
-	list _ aCollection! !
-
-!ExerciseOptions methodsFor: 'accessing' stamp: 'dhn 9/13/2017 17:06:23'!
-player: anObject
-	"Set the value of player"
-	
-	player _ anObject! !
-
-!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:13:20'!
-optionsItem
-	"Answer the value of optionsItem"
-
-	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ optionsItem! !
-
-!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/14/2017 12:00:01'!
-optionsItem: anObject
-	"Set the value of optionsItem and optionsReport"
-	| key option enab |
-	
-	(optionsItem _ anObject) ifNotNil: [
-	anObject ~= 0
-		ifTrue: [
-			key _ self optionsList at: anObject.
-			option _ self class optionsDesc at: key.
-			optionsReport _ self optionsReport: key.
-			option singleOwner not
-				ifTrue: [enab _ true]
-				ifFalse: [enab _ option owner isNil]]
-		ifFalse: [
-			optionsReport _ ''.
-			enab _ false].
-		self buyButton: enab].
-	textPane model actualContents: optionsReport.
-	self changed: #optionsItem 	"makes deselection of the list happen"! !
-
-!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/14/2017 13:29:18'!
-optionsList
-	"Answer the shopping list for a player"
-	
-	^ (player 
-		ifNotNil: [player priorOptions]
-		ifNil: [OrderedCollection new])! !
-
-!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/13/2017 14:21:40'!
-optionsList: aList
-	"Set the shopping list for a player"
-	
-	player options: aList! !
-
-!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/16/2017 20:16:50'!
-optionsReport
-	"Answer the report on the selected option"
-
-	^ optionsItem > 0
-		ifTrue: [self optionsReport: (model class translate: (self optionsList at: optionsItem))]
-		ifFalse: ['']! !
-
-!ExerciseOptions methodsFor: 'operation' stamp: 'dhn 9/17/2017 21:42:41'!
-optionsReport: anAsset
-	"Show the status of anAsset for shopping purposes"
-	
-	^ player optionDescription: (model class anotherNameFor: anAsset)! !
-
-!ExerciseOptions class methodsFor: 'class initialization' stamp: 'dhn 9/14/2017 12:00:33'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel.
-	win removeWindowMenu.
-			
-	aModel when: #optionDrawn send: #getList to: win.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
-! !
-
-!ExerciseOptions class methodsFor: 'database' stamp: 'dhn 9/13/2017 16:05:53'!
-optionMethod
-	"Answer a dictionary of methods which account for the execution of options."
-	
-	^ Dictionary new
-		at: #Tractor put: #tractor:;
-		at: #Harvester put: #harvester:;
-		at: #Fruit put: #fruit:;
-		at: #Grain put: #grain:;
-		at: #Hay put: #hay:;
-		at: #Livestock put: #livestock:;
-		at: #Ahtanum put: #ahtanum:;
-		at: #Rattlesnake put: #rattlesnake:;
-		at: #Cascade put: #cascade:;
-		at: #Toppenish put: #toppenish:;
-		yourself! !
-
-!ExerciseOptions class methodsFor: 'database' stamp: 'dhn 9/13/2017 14:15:14'!
-optionsDesc
-	"Answer a dictionary of things that farmers can purchase."
-	
-	^ Dictionary new
-		at: #Tractor put: Tractor new;
-		at: #Harvester put: Harvester new;
-		at: #Fruit put: Fruit new;
-		at: #Grain put: Grain new;
-		at: #Hay put: Hay new;
-		at: #Livestock put: Livestock new;
-		at: #Ahtanum put: Ahtanum new;
-		at: #Rattlesnake put: Rattlesnake new;
-		at: #Cascade put: Cascade new;
-		at: #Toppenish put: Toppenish new;
-		yourself! !
 
 !YouView methodsFor: 'termination' stamp: 'dhn 9/15/2017 14:44:00'!
 ack
