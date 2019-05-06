@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3717] on 5 May 2019 at 10:19:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3727] on 6 May 2019 at 10:45:04 am'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 74!
+!provides: 'Farm' 1 75!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -743,10 +743,10 @@ optionsList
 		ifNotNil: [currentPlayer priorOptions]
 		ifNil: [OrderedCollection new])! !
 
-!Farm methodsFor: 'options-buying' stamp: 'dhn 5/5/2019 10:25:09'!
+!Farm methodsFor: 'options-buying' stamp: 'dhn 5/6/2019 10:28:17'!
 optionsReport
 
-	optionsItem > 0
+	self optionsItem > 0
 		ifTrue: [^ self optionsReport: (self optionsList at: optionsItem)]
 		ifFalse: [^ '']
 ! !
