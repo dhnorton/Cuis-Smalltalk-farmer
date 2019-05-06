@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3727] on 6 May 2019 at 5:44:11 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3727] on 6 May 2019 at 6:53:10 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Farm' 1 78!
+!provides: 'Farm' 1 79!
 !requires: 'Game' 1 27 nil!
 SystemOrganization addCategory: #'Farm-Model'!
 SystemOrganization addCategory: #'Farm-Graphics'!
@@ -1801,7 +1801,7 @@ assetList
 	"Answer the list of assets in order suitable for auction."
 	^ #('Hay' 'Grain' 'Fruit' 'CattleOnFarm' 'Ahtanum' 'Rattlesnake' 'Cascade' 'Toppenish' 'Tractor' 'Harvester')! !
 
-!Farm class methodsFor: 'database' stamp: 'dhn 5/3/2019 16:54:43'!
+!Farm class methodsFor: 'database' stamp: 'dhn 5/6/2019 18:35:35'!
 assetOption
 	"Answer the relationship between asset and option names"
 
@@ -1818,8 +1818,6 @@ assetOption
 			at: #Rattlesnake put: #Rattlesnake;
 			at: #Cascade put: #Cascade;
 			at: #Toppenish put: #Toppenish;
-			at: #Grain put: #Grain;
-			at: #Fruit put: #Fruit;
 			yourself! !
 
 !Farm class methodsFor: 'database' stamp: 'dhn 4/24/2019 12:54:25'!
@@ -1827,6 +1825,24 @@ bankName
 	"Answer the name of the bank"
 	
 	^ 'First Friendly Bank'! !
+
+!Farm class methodsFor: 'database' stamp: 'dhn 5/6/2019 18:26:55'!
+catalogName
+	"Answer the relationship between auction names and asset names.
+	This is needed to e.g. look up prices when the item is hammered down"
+
+		^ Dictionary new
+			at: #Hay put: #Hay;
+			at: #Tractor put: #Tractor;
+			at: #Harvester put: #Harvester;
+			at: #Grain put: #Wheat;
+			at: #Fruit put: #Cherries;
+			at: #CattleOnFarm put: #CattleOnFarm;
+			at: #Ahtanum put: #Ahtanum;
+			at: #Rattlesnake put: #Rattlesnake;
+			at: #Cascade put: #Cascade;
+			at: #Toppenish put: #Toppenish;
+			yourself! !
 
 !Farm class methodsFor: 'database' stamp: 'dhn 9/8/2017 15:50:14'!
 describeSpaces
@@ -3207,14 +3223,14 @@ how
 	FarmingGame start.
 	"! !
 
-!SellAsset methodsFor: 'operation' stamp: 'dhn 5/6/2019 17:43:03'!
+!SellAsset methodsFor: 'operation' stamp: 'dhn 5/6/2019 18:52:18'!
 openingFor: anItem
 	"Form the opening bid for anItem"
 	| listItem item opening |
 
 	listItem _ model assetAuctionList at: anItem.
 	item _ (listItem findTokens: '()' keep: ($A to:$Z), ($a to: $z)) first.
-	asset _ model currentPlayer assets at: (Farm assetOption keyAtValue: item ifAbsent: []).
+	asset _ model currentPlayer assets at: (Farm catalogName at: item).
 	opening _ asset class price * asset class lotQuantity // 2.
 	self currentBid: opening.
 	currentBidder _ model class bankName.
@@ -3231,11 +3247,10 @@ openingFor: anItem
 			nextPutAll: ' (half the list price).'; newLine]).
 	self showChant! !
 
-!SellAsset methodsFor: 'operation' stamp: 'dhn 5/6/2019 17:41:40'!
+!SellAsset methodsFor: 'operation' stamp: 'dhn 5/6/2019 18:11:27'!
 update: aSymbol
 
 	super update: aSymbol.
-	{aSymbol} print.
 	aSymbol == #assetAuctionItem
 		ifTrue: [].! !
 
